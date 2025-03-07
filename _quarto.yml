@@ -1,0 +1,36 @@
+project:
+  type: website
+  
+website:
+  title: "ISSS608-VAA-GroupProject"
+  image: "images/thunder_city_unsplash"
+  #favicon: images/favicon/favicon-96x96.png
+  navbar: 
+    #logo: images/Logo_VAA.png
+    title: false
+    right:
+      - text: "Overview"
+        href: Overview/Overview.html
+      - text: "Shiny App"
+        menu:
+          - text: "ShinyApp"
+            #href: ShinyApp/Take-Home_Ex1.html
+          - text: "User Guide"
+            href: ShinyApp/User_Guide.html
+      - text: "Team"
+        menu:
+          - text: "Project Proporsal"
+            href: Team/Project_Proposal.html
+          - text: "Meeting Records"
+            href: Team/Meeting_Records.html
+          - text: "Acknowledgement"
+            href: Team/Project_Proposal.html
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-location: right
+
+editor: visual

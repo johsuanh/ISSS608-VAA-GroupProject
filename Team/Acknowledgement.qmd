@@ -1,0 +1,6 @@
+---
+title: "Acknowledgement"
+format: html
+---
+
+![](images/thunder_city_unsplash.jpg)
