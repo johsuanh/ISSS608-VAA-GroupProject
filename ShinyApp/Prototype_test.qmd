@@ -1,0 +1,206 @@
+---
+title: "Prototype Testing"
+format: html
+---
+
+```{r}
+pacman::p_load(sf, tmap, tidyverse,readxl)
+```
+
+```{r}
+mpsz <- st_read(dsn = "data/geospatial", 
+                layer = "MP14_PLNG_AREA_WEB_PL")
+```
+
+```{r}
+age <- read_csv("data/ResidentPopulationbyPlanningAreaSubzoneofResidenceAgeGroupandFloorAreaofResidenceCensusofPopulation2020.csv")
+
+income <- read_excel("data/ResidentHouseholdsbyPlanningAreaofResidenceandMonthlyHouseholdIncomefromWorkCensusOfPopulation2020.xlsx",sheet = "sheet1",range="A11:U43")
+
+```
+
+```{r}
+age <- age %>%
+  filter(grepl("Total", Number, ignore.case = TRUE)) %>%  
+  select(1:21) %>%
+  replace(. == "-", NA) %>%
+  mutate(across(2:21, as.numeric)) %>%
+  mutate(Aged = rowSums(select(., 16:21), na.rm = TRUE)) %>%
+  mutate(PA = sub(" - Total.*", "", Number))%>%
+  select(c("PA","Aged","Total1_Total"))%>%
+  mutate(`Aged%` = round(Aged/Total1_Total*100,0),
+         PA = toupper(PA))
+  
+
+```
+
+```{r}
+age <- left_join(mpsz,age,by = c("PLN_AREA_N" = "PA"))
+```
+
+```{r}
+income <- income %>%
+  mutate(across(2:21, as.numeric))
+income_proportion <- income %>%
+  mutate(across(3:21, ~ round(. / income[[2]] * 100, 2))) %>%
+  mutate(`LowerIncome%`=rowSums(select(.,3:6), na.rm = TRUE))
+low_income <- income_proportion %>%
+  select(c(`Planning Area of Residence`,`LowerIncome%`))%>%
+  mutate(`Planning Area of Residence` = toupper(`Planning Area of Residence`))
+  
+
+
+```
+
+```{r}
+low_income <- left_join(mpsz,low_income,by = c("PLN_AREA_N" = "Planning Area of Residence"))
+```
+
+```{r}
+
+
+# Ensure both layers have the same CRS
+low_income <- st_transform(low_income, st_crs(age))
+
+# Set the tmap mode to view (interactive)
+tmap_mode("view")
+
+# Create the map with multiple layers
+tm_shape(age) +
+  tm_fill(col = "Aged%", 
+          palette = "Blues", 
+          title = "Aged Population(%)",
+          alpha = 0.9,
+          style = "quantile") +
+  tm_borders(col = "white", lwd = 0.5, alpha = 0.5) +
+tm_shape(low_income) + 
+  tm_fill(col = "LowerIncome%", 
+          palette = "YlOrRd", 
+          title = "IncomeBelow:3000(%)", 
+          style = "quantile",
+          n = 5,
+          alpha = 0.6) +
+  tm_borders(col = "darkgrey", lwd = 0.5, alpha = 0.5) +
+tm_basemap(server = "CartoDB.Positron") +
+tm_layout(title = "Aged and Low-Income Population Across Singapore", 
+          legend.outside = TRUE,
+          legend.outside.position = "right")
+
+
+```
+
+```{r}
+pacman::p_load(ggdist,ggridges,lubridate,knitr)
+```
+
+```{r}
+station<-read_csv("data/Changi&MarinaBarrage.csv")
+station <- station %>%
+  select(1:13) %>%
+  mutate(
+    across(5:13, as.numeric),  # Convert only numeric columns
+    date = make_date(year, month, day),
+    station = as.factor(station)
+  )
+
+```
+
+```{r}
+ggplot(station, 
+       aes(x = mean_temperature_c, y = station, fill = station)) +
+  geom_density_ridges(
+    scale = 2, 
+    rel_min_height = 0.01, 
+    alpha = 0.5
+  ) +
+  labs(title = "Distribution of Temperature Across Stations",
+       x = "Mean Temperature (°C)", 
+       y = "Station") +
+  theme(
+    panel.background = element_rect(fill = "#f3f1e9"),
+    plot.background = element_rect(fill = "#f3f1e9", color = NA),
+    legend.position = "none",
+    plot.title = element_text(face = "bold")
+  )
+
+```
+
+```{r}
+ggplot(station, 
+       aes(x = station,y = mean_temperature_c)) +
+  stat_halfeye(
+               alpha = 0.5,
+               adjust = 0.5,
+               justification = -0.1,
+               .width = 0,
+               fill = "#8AA4FF")+
+  geom_boxplot(width = 0.10,
+               outlier.shape = NA,
+               color="grey50")+
+  labs(title ="Distribution of Mean Temperature Across Stations",
+       x = "", y="Mean Temperature")+
+  coord_flip() +
+  theme(panel.background = element_rect(fill = "#ffffff"),
+        plot.background = element_rect(fill = "#ffffff",color = NA),
+        legend.position = 'none',
+        plot.title = element_text(face = "bold",size=13,hjust=0.5))
+
+```
+
+```{r}
+
+quartile_station_table <- station %>%
+  group_by(station) %>%
+  summarize(
+    Min    = round(min(mean_temperature_c, na.rm = TRUE),2),
+    Q1     = round(quantile(mean_temperature_c, probs = 0.25, na.rm = TRUE),2),
+    Median = round(median(mean_temperature_c, na.rm = TRUE),2),
+    Mean   = round(mean(mean_temperature_c, na.rm = TRUE),2),
+    Q3     = round(quantile(mean_temperature_c, probs = 0.75, na.rm = TRUE),2),
+    Q4     = round(quantile(mean_temperature_c, probs = 1, na.rm = TRUE),2),
+    Max    = round(max(mean_temperature_c, na.rm = TRUE),2)
+  )
+
+kable(quartile_station_table)
+
+
+```
+
+```{r}
+library(plotly)
+library(ggplot2)
+library(dplyr)
+
+# Change to "all" to display all stations
+selected_station <- c("Changi", "Marina Barrage")  
+
+# Filter the data accordingly
+station_data <- if ("all" %in% selected_station) {
+  station
+} else {
+  station %>% filter(station %in% selected_station)
+}
+
+# Create the plot using the filtered data
+p <- ggplot(data = station_data, 
+            aes(x = mean_temperature_c,
+                y = daily_rainfall_total_mm, 
+                color = station)) +
+  geom_point(size = 1, alpha = 0.7) +  
+  coord_cartesian(ylim = c(0, 150))+
+  theme_minimal() +
+  labs(x = "Mean Temperature (°C)", y = "Daily Total Rainfall (mm)") +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white"),
+    axis.title = element_text(size = 10, hjust = 0.5),
+    axis.text = element_text(size = 8),
+    legend.position = "top",
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5)
+  )
+
+
+ggplotly(p)
+
+
+```

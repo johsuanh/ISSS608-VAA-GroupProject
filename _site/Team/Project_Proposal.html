@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="dcterms.date" content="2024-03-08">
 
-<title>Project_Proposal – ISSS608-VAA-GroupProject</title>
+<title>Project Proposal: Wheather or Not – Predicting the Unpredictable – ISSS608-VAA-GroupProject</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -30,6 +31,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../images/favicon/favicon-96x96.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -66,9 +68,15 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<link href="../site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="../site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="../site_libs/visjs-7.4.9/vis-timeline-graph2d.min.css" rel="stylesheet">
+<script src="../site_libs/visjs-7.4.9/vis-timeline-graph2d.min.js"></script>
+<link href="../site_libs/timeline-0.4/timevis.css" rel="stylesheet">
+<script src="../site_libs/timevis-binding-2.1.0/timevis.js"></script>
+<script src="../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 
 
-<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="nav-fixed">
@@ -77,6 +85,11 @@ ul.task-list li input[type="checkbox"] {
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../images/favicon/web-app-manifest-512x512.png" alt="" class="navbar-logo">
+    </a>
+  </div>
             <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
@@ -137,15 +150,32 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#motivation" id="toc-motivation" class="nav-link active" data-scroll-target="#motivation">1 Motivation</a></li>
+  <li><a href="#objective" id="toc-objective" class="nav-link" data-scroll-target="#objective">⁠2 Objective</a></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">3 Data</a></li>
+  <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">4 Methodology</a>
+  <ul class="collapse">
+  <li><a href="#exploratory-data-analysis-eda" id="toc-exploratory-data-analysis-eda" class="nav-link" data-scroll-target="#exploratory-data-analysis-eda">4.1 Exploratory Data Analysis (EDA)</a></li>
+  <li><a href="#confirmatory-data-analysis-cda" id="toc-confirmatory-data-analysis-cda" class="nav-link" data-scroll-target="#confirmatory-data-analysis-cda">4.2 Confirmatory Data Analysis (CDA)</a></li>
+  <li><a href="#forecasting" id="toc-forecasting" class="nav-link" data-scroll-target="#forecasting">4.3 Forecasting</a></li>
+  </ul></li>
+  <li><a href="#r-packages" id="toc-r-packages" class="nav-link" data-scroll-target="#r-packages">5 R Packages</a></li>
+  <li><a href="#dashboard-prototype" id="toc-dashboard-prototype" class="nav-link" data-scroll-target="#dashboard-prototype">6 Dashboard Prototype</a></li>
+  <li><a href="#project-schedule" id="toc-project-schedule" class="nav-link" data-scroll-target="#project-schedule">7 Project Schedule</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Project_Proposal</h1>
+<h1 class="title">Project Proposal: Wheather or Not – Predicting the Unpredictable</h1>
 </div>
 
 
@@ -153,7 +183,19 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-title-meta">
 
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 8, 2024</p>
+    </div>
+  </div>
   
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">March 10, 2025</p>
+    </div>
+  </div>
     
   </div>
   
@@ -162,8 +204,209 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="motivation" class="level1">
+<h1>1 Motivation</h1>
+<p>Climate change is a critical global issue, and Singapore is no exception. As a tropical country, Singapore experiences consistently hot and humid weather. However, climate change has intensified extreme weather events, leading to higher temperatures, floods, and even droughts. These changes disproportionately affect low-income and elderly residents who may struggle to afford air conditioning or improve their living conditions.</p>
+<p>To address this, our team will use open-source weather data to analyze temperature and rainfall patterns across Singapore. By collecting data from four weather stations in the East, Central, West, and North regions, we aim to create visualizations and forecasts that provide a comprehensive understanding of local weather trends.</p>
+</section>
+<section id="objective" class="level1">
+<h1>⁠2 Objective</h1>
+<p>The objectives of this proposal are to:</p>
+<ul>
+<li><p>Develop a Shiny App with interactive visualizations to help users better understand Singapore’s weather patterns.</p></li>
+<li><p>Analyze and compare weather variations across four stations, with a focus on areas where lower-income and elderly residents are concentrated, to generate meaningful insights.</p></li>
+</ul>
+</section>
+<section id="data" class="level1">
+<h1>3 Data</h1>
+<p>The&nbsp;<a href="https://www.weather.gov.sg/climate-historical-daily/">historical weather data</a>&nbsp;from Meteorological Service Singapore will be used for analysis. We will retrieve data from four weather stations: Changi, Marina Barrage, Ang Mo Kio, and Jurong. These weather stations have complete data available since January 2014. Therefore, all datasets will be retrieved from January 2014 to January 2025.&nbsp;</p>
+<p>We will also incorporate 2020 census data from&nbsp;data.gov.sg&nbsp;on&nbsp;<a href="https://data.gov.sg/datasets?query=Planning+area+income+2020&amp;page=1&amp;formats=CSV&amp;resultId=d_2d6793de474551149c438ba349a108fd">monthly household income levels</a>&nbsp;and&nbsp;<a href="https://data.gov.sg/datasets?query=age+area&amp;page=1&amp;formats=CSV&amp;resultId=d_9e035622439b5d25a63d7ea0699c9451">age group distributions by planning area</a>&nbsp;as additional layers of map for our analysis and visualization.<strong>⁠</strong>&nbsp;</p>
+</section>
+<section id="methodology" class="level1">
+<h1>4 Methodology</h1>
+<p>There will be three main components in our Shiny App:&nbsp;</p>
+<section id="exploratory-data-analysis-eda" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis-eda">4.1 Exploratory Data Analysis (EDA)</h2>
+<p>By visualizing data with interactive Shiny App, users can analyze patterns and discover relationships between time-series, rainfall, temperature and geography.&nbsp;</p>
+<p>Below are the visualization methods we will use for our EDA:&nbsp;</p>
+<section id="bivariate-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="bivariate-analysis"><strong>Bivariate Analysis</strong></h4>
+<ul>
+<li><strong>Half Eye graph + box plot:</strong> visualize rainfall or temperature data by combining density plot and box plot and by station.</li>
+</ul>
+</section>
+<section id="multivariate-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="multivariate-analysis"><strong>Multivariate Analysis</strong> &nbsp;</h4>
+<ul>
+<li><strong>Scatter Plot</strong> : compare rainfall with temperature and colored by station or region.</li>
+</ul>
+</section>
+<section id="time-series-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="time-series-analysis"><strong>Time Series Analysis</strong> &nbsp;</h4>
+<ul>
+<li><strong>Line chart of time-series data:</strong> visualize rainfall or temperature by station overtimes&nbsp;</li>
+</ul>
+</section>
+<section id="geospatial-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="geospatial-analysis"><strong>Geospatial Analysis</strong></h4>
+<ul>
+<li><strong>Choropleth Maps:</strong> use the tmap package to plot weather data across stations, faceted by year, and create additional layers with census data. This will allow users to compare and explore areas with high temperatures and high proportions of low-income or elderly residents to assess the social impact of extreme weather conditions.</li>
+</ul>
+</section>
+</section>
+<section id="confirmatory-data-analysis-cda" class="level2">
+<h2 class="anchored" data-anchor-id="confirmatory-data-analysis-cda">4.2 Confirmatory Data Analysis (CDA)</h2>
+<p>After EDA, apply the following&nbsp;statistical tests&nbsp;to confirm whether&nbsp;mean rainfall or temperature differs across regions or seasons:&nbsp;</p>
+<section id="normality-test" class="level4">
+<h4 class="anchored" data-anchor-id="normality-test"><strong>Normality Test</strong></h4>
+<ul>
+<li><strong>Shapiro-Wilk Test</strong> : check if the data follows a normal distribution, which will affect which statistical parameters to use in the analysis&nbsp;</li>
+</ul>
+</section>
+<section id="parametric-tests-comparing-multiple-groups" class="level4">
+<h4 class="anchored" data-anchor-id="parametric-tests-comparing-multiple-groups"><strong>Parametric Tests (comparing multiple groups)</strong></h4>
+<ul>
+<li><strong>One-way ANOVA test:</strong> Comparing mean rainfall or temperature across stations&nbsp;</li>
+<li><strong>Two-way ANOVA test:</strong> Comparing mean rainfall or temperature across both station and month&nbsp;</li>
+</ul>
+</section>
+<section id="non-parametric-tests-comparing-multiple-groups" class="level4">
+<h4 class="anchored" data-anchor-id="non-parametric-tests-comparing-multiple-groups"><strong>Non-Parametric Tests (comparing multiple groups)</strong>&nbsp;</h4>
+<ul>
+<li><strong>Kruskal-Wallis Test:</strong> Comparing median rainfall or temperature across stations or both station and month&nbsp;</li>
+</ul>
+</section>
+</section>
+<section id="forecasting" class="level2">
+<h2 class="anchored" data-anchor-id="forecasting">4.3 Forecasting</h2>
+<section id="plots" class="level4">
+<h4 class="anchored" data-anchor-id="plots"><strong>Plots</strong></h4>
+<ul>
+<li><strong>ACF &amp; PCF plots :</strong> help users understand the autocorrelation in time series data and identify which lags might be useful for forecasting model.&nbsp;</li>
+<li><strong>STL&nbsp;plots:</strong> help decompose the time series into its&nbsp;seasonal,&nbsp;trend, and&nbsp;remainder&nbsp;components, providing insight into the structure of the data.&nbsp;</li>
+</ul>
+</section>
+<section id="forecasting-models" class="level4">
+<h4 class="anchored" data-anchor-id="forecasting-models"><strong>Forecasting Models</strong></h4>
+<ul>
+<li><strong>ARIMA Models:</strong> &nbsp;
+<ul>
+<li><strong>Auto ARIMA:</strong> when there is a mix of trend and seasonal patterns with autocorrelation, user can use auto ARIMA, which automatically selects the best parameters (AR, I, MA) based on the data&nbsp;</li>
+<li><strong>STL ARIMA:</strong> when&nbsp;there are complex seasonality&nbsp;or&nbsp;non-linear trends&nbsp;in the data, user can choose this model&nbsp;</li>
+</ul></li>
+<li><strong>ETS Models:</strong> &nbsp;
+<ul>
+<li><strong>Auto ETS:</strong> user can choose this model if the data shows&nbsp;clear,&nbsp;stable trends&nbsp;or&nbsp;seasonal patterns&nbsp;with little noise &nbsp;</li>
+</ul></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="r-packages" class="level1">
+<h1>5 R Packages</h1>
+<p>The R packages we will be using for the project include:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://www.tidyverse.org/">tidyverse</a></td>
+<td>For data manipulation</td>
+</tr>
+<tr class="even">
+<td><a href="https://rstudio.github.io/DT/">DT</a></td>
+<td>For interactive data tables</td>
+</tr>
+<tr class="odd">
+<td><a href="https://yihui.org/knitr/">knitr</a></td>
+<td>For dynamic report generation with R</td>
+</tr>
+<tr class="even">
+<td><a href="https://indrajeetpatil.github.io/ggstatsplot/">ggstatplot</a></td>
+<td>To visual correlation matrix and plots with statistical tests</td>
+</tr>
+<tr class="odd">
+<td><a href="https://plotly.com/r/">plotly</a></td>
+<td>For interactive, publication-quality plots</td>
+</tr>
+<tr class="even">
+<td><a href="https://davidgohel.github.io/ggiraph/">ggiraph</a></td>
+<td>For dynamic, interactive ggplot2 graphs.</td>
+</tr>
+<tr class="odd">
+<td><a href="https://scales.r-lib.org/">scales</a></td>
+<td>For data labels and annotations for ggplot2</td>
+</tr>
+<tr class="even">
+<td><a href="https://patchwork.data-imaginist.com/">patchwork</a></td>
+<td>For preparing composite figure created using ggplot2.</td>
+</tr>
+<tr class="odd">
+<td><a href="https://mjskay.github.io/ggdist/">ggdist</a></td>
+<td>For visualisations of distributions and uncertainty.</td>
+</tr>
+<tr class="even">
+<td><a href="https://wilkelab.org/ggtext/">ggtext</a></td>
+<td>Providing simple Markdown and HTML rendering&nbsp;for ggplot2</td>
+</tr>
+<tr class="odd">
+<td><a href="https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html">ggridges</a></td>
+<td>For ridgeline plots that create the impression of a mountain range. They can be useful for visualising changes in distributions over time or space.</td>
+</tr>
+<tr class="even">
+<td><a href="http://talgalili.github.io/heatmaply/">heatmaply</a></td>
+<td>For building interactive cluster heatmap.</td>
+</tr>
+<tr class="odd">
+<td><a href="https://lubridate.tidyverse.org">lubridate</a></td>
+<td>For handling date-time data</td>
+</tr>
+<tr class="even">
+<td><a href="https://tsibble.tidyverts.org">tsibble</a></td>
+<td>For tidy temporal data with wrangling tools</td>
+</tr>
+<tr class="odd">
+<td><a href="https://feasts.tidyverts.org">feasts</a></td>
+<td>For analysing tidy time series data with decomposition methods (STL), statistical summaries and graphics functions(cycle plot)</td>
+</tr>
+<tr class="even">
+<td><a href="https://fable.tidyverts.org">fable</a></td>
+<td>Forecasting models for tidy time series data</td>
+</tr>
+<tr class="odd">
+<td><a href="https://r-tmap.github.io/tmap/reference/index.html">tmap</a></td>
+<td>For drawing thematic maps</td>
+</tr>
+<tr class="even">
+<td><a href="https://r-spatial.github.io/sf/">sf</a></td>
+<td>Providing a standardized way to encode and analyze spatial vector data</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="dashboard-prototype" class="level1">
+<h1>6 Dashboard Prototype</h1>
+</section>
+<section id="project-schedule" class="level1">
+<h1>7 Project Schedule</h1>
+<div class="cell">
+<div class="cell-output-display">
+<div class="timevis html-widget html-fill-item" id="htmlwidget-c6aca800ff6d00239404" style="width:100%;height:464px;">
+<div class="btn-group zoom-menu">
+<button type="button" class="btn btn-default btn-lg zoom-in" title="Zoom in">+</button>
+<button type="button" class="btn btn-default btn-lg zoom-out" title="Zoom out">-</button>
+</div>
+</div>
+<script type="application/json" data-for="htmlwidget-c6aca800ff6d00239404">{"x":{"items":[{"id":"1","content":"Explore Idea","start":"3/1/25","end":"3/3/25"},{"id":"2","content":"Finalize Topic","start":"3/3/25"},{"id":"3","content":"Setup GitHub and Netlify","start":"3/7/25"},{"id":"4","content":"Project Proposal","start":"3/7/25","end":"3/9/25"},{"id":"5","content":"Data Preparation & Exploration ","start":"3/8/25","end":"3/10/25"},{"id":"6","content":"Website Design and Shiny App ","start":"3/11/25","end":"3/26/25"},{"id":"7","content":"User Guide","start":"3/26/25","end":"3/29/25"},{"id":"8","content":"Poster","start":"3/26/25","end":"3/29/25"},{"id":"9","content":"Final Meeting","start":"3/27/25"},{"id":"10","content":"Final Submission","start":"4/6/25"}],"groups":null,"showZoom":true,"zoomFactor":0.5,"fit":true,"options":[],"height":null,"timezone":null,"api":[]},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

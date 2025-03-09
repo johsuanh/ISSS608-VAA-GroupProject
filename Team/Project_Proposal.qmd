@@ -1,5 +1,129 @@
 ---
-title: "Project_Proposal"
-format: html
+title: "Project Proposal: Wheather or Not – Predicting the Unpredictable"
+date: 2024-03-08
+date-modified: "last-modified"
+execute:
+  echo: true
+  eval: true
+  warning: false
+  freeze: true
 ---
 
+# 1 Motivation
+
+Climate change is a critical global issue, and Singapore is no exception. As a tropical country, Singapore experiences consistently hot and humid weather. However, climate change has intensified extreme weather events, leading to higher temperatures, floods, and even droughts. These changes disproportionately affect low-income and elderly residents who may struggle to afford air conditioning or improve their living conditions.
+
+To address this, our team will use open-source weather data to analyze temperature and rainfall patterns across Singapore. By collecting data from four weather stations in the East, Central, West, and North regions, we aim to create visualizations and forecasts that provide a comprehensive understanding of local weather trends.
+
+# ⁠2 Objective
+
+The objectives of this proposal are to:
+
+-   Develop a Shiny App with interactive visualizations to help users better understand Singapore's weather patterns.
+
+-   Analyze and compare weather variations across four stations, with a focus on areas where lower-income and elderly residents are concentrated, to generate meaningful insights.
+
+# 3 Data
+
+The [historical weather data](https://www.weather.gov.sg/climate-historical-daily/) from Meteorological Service Singapore will be used for analysis. We will retrieve data from four weather stations: Changi, Marina Barrage, Ang Mo Kio, and Jurong. These weather stations have complete data available since January 2014. Therefore, all datasets will be retrieved from January 2014 to January 2025. 
+
+We will also incorporate 2020 census data from data.gov.sg on [monthly household income levels](https://data.gov.sg/datasets?query=Planning+area+income+2020&page=1&formats=CSV&resultId=d_2d6793de474551149c438ba349a108fd) and [age group distributions by planning area](https://data.gov.sg/datasets?query=age+area&page=1&formats=CSV&resultId=d_9e035622439b5d25a63d7ea0699c9451) as additional layers of map for our analysis and visualization.**⁠** 
+
+# 4 Methodology
+
+There will be three main components in our Shiny App: 
+
+## 4.1 Exploratory Data Analysis (EDA)
+
+By visualizing data with interactive Shiny App, users can analyze patterns and discover relationships between time-series, rainfall, temperature and geography. 
+
+Below are the visualization methods we will use for our EDA: 
+
+#### **Bivariate Analysis** 
+
+-   **Half Eye graph + box plot:** visualize rainfall or temperature data by combining density plot and box plot and by station.
+
+#### **Multivariate Analysis**  
+
+-   **Scatter Plot** : compare rainfall with temperature and colored by station or region.
+
+#### **Time Series Analysis**  
+
+-   **Line chart of time-series data:** visualize rainfall or temperature by station overtimes 
+
+#### **Geospatial Analysis**
+
+-   **Choropleth Maps:** use the tmap package to plot weather data across stations, faceted by year, and create additional layers with census data. This will allow users to compare and explore areas with high temperatures and high proportions of low-income or elderly residents to assess the social impact of extreme weather conditions.
+
+## 4.2 Confirmatory Data Analysis (CDA)
+
+After EDA, apply the following statistical tests to confirm whether mean rainfall or temperature differs across regions or seasons: 
+
+#### **Normality Test**
+
+-   **Shapiro-Wilk Test** : check if the data follows a normal distribution, which will affect which statistical parameters to use in the analysis 
+
+#### **Parametric Tests (comparing multiple groups)**
+
+-   **One-way ANOVA test:** Comparing mean rainfall or temperature across stations 
+-   **Two-way ANOVA test:** Comparing mean rainfall or temperature across both station and month 
+
+#### **Non-Parametric Tests (comparing multiple groups)** 
+
+-   **Kruskal-Wallis Test:** Comparing median rainfall or temperature across stations or both station and month 
+
+## 4.3 Forecasting
+
+#### **Plots**
+
+-   **ACF & PCF plots :** help users understand the autocorrelation in time series data and identify which lags might be useful for forecasting model. 
+-   **STL plots:** help decompose the time series into its seasonal, trend, and remainder components, providing insight into the structure of the data. 
+
+#### **Forecasting Models**
+
+-   **ARIMA Models:**  
+    -   **Auto ARIMA:** when there is a mix of trend and seasonal patterns with autocorrelation, user can use auto ARIMA, which automatically selects the best parameters (AR, I, MA) based on the data 
+    -   **STL ARIMA:** when there are complex seasonality or non-linear trends in the data, user can choose this model 
+-   **ETS Models:**  
+    -   **Auto ETS:** user can choose this model if the data shows clear, stable trends or seasonal patterns with little noise  
+
+# 5 R Packages
+
+The R packages we will be using for the project include:
+
+| Package | Description |
+|-------------------|-----------------------------------------------------|
+| [tidyverse](https://www.tidyverse.org/) | For data manipulation |
+| [DT](https://rstudio.github.io/DT/) | For interactive data tables |
+| [knitr](https://yihui.org/knitr/) | For dynamic report generation with R |
+| [ggstatplot](https://indrajeetpatil.github.io/ggstatsplot/) | To visual correlation matrix and plots with statistical tests |
+| [plotly](https://plotly.com/r/) | For interactive, publication-quality plots |
+| [ggiraph](https://davidgohel.github.io/ggiraph/) | For dynamic, interactive ggplot2 graphs. |
+| [scales](https://scales.r-lib.org/) | For data labels and annotations for ggplot2 |
+| [patchwork](https://patchwork.data-imaginist.com/) | For preparing composite figure created using ggplot2. |
+| [ggdist](https://mjskay.github.io/ggdist/) | For visualisations of distributions and uncertainty. |
+| [ggtext](https://wilkelab.org/ggtext/) | Providing simple Markdown and HTML rendering for ggplot2 |
+| [ggridges](https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html) | For ridgeline plots that create the impression of a mountain range. They can be useful for visualising changes in distributions over time or space. |
+| [heatmaply](http://talgalili.github.io/heatmaply/) | For building interactive cluster heatmap. |
+| [lubridate](https://lubridate.tidyverse.org) | For handling date-time data |
+| [tsibble](https://tsibble.tidyverts.org) | For tidy temporal data with wrangling tools |
+| [feasts](https://feasts.tidyverts.org) | For analysing tidy time series data with decomposition methods (STL), statistical summaries and graphics functions(cycle plot) |
+| [fable](https://fable.tidyverts.org) | Forecasting models for tidy time series data |
+| [tmap](https://r-tmap.github.io/tmap/reference/index.html) | For drawing thematic maps |
+| [sf](https://r-spatial.github.io/sf/) | Providing a standardized way to encode and analyze spatial vector data |
+
+# 6 Dashboard Prototype
+
+# 7 Project Schedule
+
+```{r}
+#| echo: false
+
+pacman::p_load(timevis, tidyverse)
+schedule <- read_csv("schedule.csv")
+timevis(schedule)
+
+
+```
+
+ 
