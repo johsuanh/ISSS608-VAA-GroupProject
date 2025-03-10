@@ -1,0 +1,188 @@
+---
+title: "import data"
+---
+
+```{r}
+pacman::p_load(rvest,dplyr,stringr,purrr,readr,httr,tidyr,fs,janitor,tidyverse,knitr)
+
+```
+
+```{undefined}
+#| eval: false
+#| include: false
+#This is the code where I downloaded the data：
+# The base URL of the target website
+base_url <- "https://www.weather.gov.sg/files/dailydata/"
+
+# Site corresponding file code
+stations <- c("Changi" = "S24", "Marina_Barrage" = "S108", "Ang_Mo_Kio" = "S109",
+              "Clementi" = "S50", "Jurong_West" = "S44", "Paya_Lebar" = "S06",
+              "Newton" = "S111", "Pasir_Panjang" = "S116", "Tai_Seng" = "S43",
+              "Admiralty" = "S104")
+
+# Define download time range (January 2019 - January 2025)
+years <- 2019:2025
+months <- sprintf("%02d", 1:12)  # 01, 02, ..., 12
+
+# Only data from January 2019 to January 2025 are retained
+date_combinations <- expand.grid(Year = years, Month = months, stringsAsFactors = FALSE) %>%
+  filter(!(Year == 2019 & Month < "01"), # Exclude before January 2019
+         !(Year == 2025 & Month > "01")) # Exclude after January 2025
+
+# Create a directory to store data
+dir.create("data", showWarnings = FALSE)
+
+# Record failed downloads
+failed_downloads <- data.frame(Station = character(), Year = integer(), Month = character(), File_URL = character(), stringsAsFactors = FALSE)
+
+# Iterate through stations, years, and months
+for (station_name in names(stations)) {
+  station_code <- stations[[station_name]]
+  
+  for (i in 1:nrow(date_combinations)) {
+    year <- date_combinations$Year[i]
+    month <- date_combinations$Month[i]
+    
+    # Construct the file name
+    file_name <- paste0("DAILYDATA_", station_code, "_", year, month, ".csv")
+    
+    # Construct the full download URL
+    file_url <- paste0(base_url, file_name)
+
+    # Local save path
+    file_path <- file.path("data", file_name)
+    
+    # Check if the URL is valid
+    response <- HEAD(file_url)
+    
+    if (status_code(response) == 200) {
+      # Download the file
+      download.file(file_url, destfile = file_path, mode = "wb")
+      cat("✅ Download successful:", file_name, "\n")
+    } else {
+      cat("❌ Download failed:", file_name, "\n")
+      
+      # Record the failed file
+      failed_downloads <- rbind(failed_downloads, data.frame(
+        Station = station_name,
+        Year = year,
+        Month = month,
+        File_URL = file_url
+      ))
+    }
+  }
+}
+
+# Save the failed download log
+if (nrow(failed_downloads) > 0) {
+  write.csv(failed_downloads, "data/failed_downloads_log.csv", row.names = FALSE)
+  cat("⚠️ The failed download files have been recorded: data/failed_downloads_log.csv\n")
+} else {
+  cat("🎉 All data downloaded successfully!\n")
+}
+
+```
+
+```{r}
+# Set the data folder path
+data_folder <- "data"
+
+# Weather stations and their corresponding SXXX codes
+stations <- c("Changi" = "S24", "Marina_Barrage" = "S108", "Ang_Mo_Kio" = "S109",
+              "Clementi" = "S50", "Jurong_West" = "S44", "Paya_Lebar" = "S06",
+              "Newton" = "S111", "Pasir_Panjang" = "S116", "Tai_Seng" = "S43",
+              "Admiralty" = "S104")
+
+# Define the range of years and months to check (January 2019 to January 2025)
+years <- 2019:2025
+months <- sprintf("%02d", 1:12)  # Format as 01, 02, ..., 12
+
+# Generate the complete list of expected files
+expected_files <- expand.grid(Station = names(stations), Year = years, Month = months, stringsAsFactors = FALSE) %>%
+  filter(!(Year == 2019 & Month < "01"),  # Exclude months before January 2019
+         !(Year == 2025 & Month > "01"))  # Exclude months after January 2025
+
+# Generate the correct file name format (DAILYDATA_SXXX_YYYYMM.csv)
+expected_files <- expected_files %>%
+  mutate(File_Code = stations[Station],  # Get the corresponding SXXX code
+         File_Name = paste0("DAILYDATA_", File_Code, "_", Year, Month, ".csv"),
+         File_Path = file.path(data_folder, File_Name))
+
+# Get the list of actually downloaded files
+downloaded_files <- dir_ls(data_folder, glob = "*.csv") %>% basename()
+
+# Mark which files have been downloaded
+expected_files <- expected_files %>%
+  mutate(Downloaded = File_Name %in% downloaded_files)
+
+# Summarize the download status
+summary_table <- expected_files %>%
+  group_by(Station) %>%
+  summarise(
+    Total_Expected = n(),
+    Downloaded = sum(Downloaded),
+    Missing = Total_Expected - Downloaded
+  )
+
+# Identify missing files
+missing_files <- expected_files %>%
+  filter(!Downloaded) %>%
+  select(Station, Year, Month, File_Name)
+
+# Print the list of missing files if any
+if (nrow(missing_files) > 0) {
+  print("🚨 List of missing files:")
+  print(missing_files)
+} else {
+  cat("🎉 All data downloaded successfully, no missing files!\n")
+}
+
+# Display data download statistics
+print("📊 Data download statistics:")
+print(summary_table)
+
+```
+
+```{r}
+# Set the data folder path
+data_folder <- "data"
+
+# Get the list of all CSV files
+filenames <- dir_ls(data_folder, glob = "*.csv")
+
+# Read all files, fix encoding, standardize column names, and remove duplicate columns
+combined_data <- filenames %>%
+  map_df(~ read_csv(.x, 
+                    locale = locale(encoding = "latin1"),  # Handle encoding issues
+                    col_types = cols(.default = "character"))  # Read all columns as character type initially
+  ) %>%
+  janitor::clean_names()  # Standardize column names format
+
+# Select only the required columns
+selected_columns <- c("station", "year", "month", "day",
+                      "daily_rainfall_total_mm", "highest_30_min_rainfall_mm",
+                      "highest_60_min_rainfall_mm", "highest_120_min_rainfall_mm",
+                      "mean_temperature_c", "maximum_temperature_c",
+                      "minimum_temperature_c", "mean_wind_speed_km_h",
+                      "max_wind_speed_km_h")
+
+# Ensure the data contains only these columns and remove extra columns
+combined_data <- combined_data %>%
+  select(any_of(selected_columns))  # `any_of()` prevents errors even if some columns are missing
+
+# Convert numeric columns to numeric type and clean missing values
+numeric_cols <- selected_columns[5:length(selected_columns)]  # Select numeric columns
+
+combined_data <- combined_data %>%
+  mutate(across(all_of(numeric_cols), ~ as.numeric(str_replace(.x, "[^0-9.-]", "")), .names = "clean_{.col}")) %>% # Clean data first
+  select(-all_of(numeric_cols)) %>%  # Remove original columns
+  rename_with(~ str_remove(.x, "clean_"))  # Restore original column names
+
+# Save the merged dataset
+write_csv(combined_data, file = "data/Singapore_daily_records.csv")
+
+# Display data preview
+print("✅ The merge is complete! Saved as: `Singapore_daily_records.csv`")
+glimpse(combined_data)
+
+```

@@ -1,5 +1,9 @@
 ---
-title: ""
+title: "Visual Analytics Project"
 ---
 
-# 
+# **Building Web-enabled Visual Analytics application with Shiny for Democratising Data and Analytics**
+
+## **Overview**
+
+## **Project Topic**
