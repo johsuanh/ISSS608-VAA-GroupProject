@@ -95,14 +95,23 @@ pacman::p_load(ggdist,ggridges,lubridate,knitr)
 
 ```{r}
 station<-read_csv("data/Changi&MarinaBarrage.csv")
-station <- station %>%
-  select(1:13) %>%
-  mutate(
-    across(5:13, as.numeric),  # Convert only numeric columns
-    date = make_date(year, month, day),
-    station = as.factor(station)
-  )
 
+```
+
+```{r}
+station <- station %>%
+  mutate(mean_temperature_c = ifelse(!is.na(mean_temperature_c), 
+                                     mean_temperature_c, 
+                                     mean_temperature_a_c),
+    maximum_temperature_c = ifelse(!is.na(maximum_temperature_c),
+                     maximum_temperature_c, 
+                     maximum_temperature_a_c),
+    minimum_temperature_c = ifelse(!is.na(minimum_temperature_c), 
+                     minimum_temperature_c, 
+                     minimum_temperature_a_c),
+                     across(5:16, as.numeric,na.rm = TRUE),
+    date = make_date(year, month, day),
+    station = as.factor(station))
 ```
 
 ```{r}
@@ -202,5 +211,37 @@ p <- ggplot(data = station_data,
 
 ggplotly(p)
 
+
+```
+
+```{r}
+library(dplyr)
+
+# Replace missing values in mean_temperature_c, Maximum, and Minimum
+station <- station %>%
+  mutate(
+    mean_temperature_c = ifelse(!is.na(mean_temperature_c), mean_temperature_c, mean_temperature_a_c),
+    Maximum = ifelse(!is.na(maximum_temperature_c), maximum_temperature_c, max( maximum_temperature_a_c, na.rm = TRUE)),
+    Minimum = ifelse(!is.na(minimum_temperature_c), minimum_temperature_c, min(minimum_temperature_a_c, na.rm = TRUE))
+  )
+
+```
+
+```{r}
+
+
+changi_data <- subset(station, station == "Changi")
+
+ggplot(changi_data, aes(x = date, y = mean_wind_speed_km_h, color = station, group = station)) +
+  geom_line(size = 1, alpha = 0.8) +
+  theme_minimal() +
+  labs(title = "Mean Temperature Over Time by Station",
+       x = "Date",
+       y = "Mean Temperature (°C)") +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.title = element_blank(),
+    legend.position = "top"
+  )
 
 ```

@@ -21,13 +21,13 @@ The objectives of this proposal are to:
 
 -   Develop a Shiny App with interactive visualizations to help users better understand Singapore's weather patterns.
 
--   Analyze and compare weather variations across four stations, with a focus on areas where lower-income and elderly residents are concentrated, to generate meaningful insights.
+-   Analyze and compare weather variations across 10 AWS stations, with a focus on areas where lower-income and elderly residents are concentrated, to generate meaningful insights.
 
 # 3 Data
 
-The [historical weather data](https://www.weather.gov.sg/climate-historical-daily/) from Meteorological Service Singapore will be used for analysis. We will retrieve data from four weather stations: Changi, Marina Barrage, Ang Mo Kio, and Jurong. These weather stations have complete data available since January 2014. Therefore, all datasets will be retrieved from January 2014 to January 2025. 
+The [historical weather data](https://www.weather.gov.sg/climate-historical-daily/) from Meteorological Service Singapore will be used for analysis. We will collect data from 10 AWS stations across Singapore between January 2020 and January 2025.
 
-We will also incorporate 2020 census data from data.gov.sg on [monthly household income levels](https://data.gov.sg/datasets?query=Planning+area+income+2020&page=1&formats=CSV&resultId=d_2d6793de474551149c438ba349a108fd) and [age group distributions by planning area](https://data.gov.sg/datasets?query=age+area&page=1&formats=CSV&resultId=d_9e035622439b5d25a63d7ea0699c9451) as additional layers of map for our analysis and visualization.**⁠** 
+To enhance our analysis and visualization, we will also incorporate 2020 Singapore census data, including [Monthly Household Income from Work by Planning Area](https://tablebuilder.singstat.gov.sg/table/CT/17779)and [Resident Population by Planning Area and Age Group](https://data.gov.sg/datasets/d_9e035622439b5d25a63d7ea0699c9451/view) as additional tmap layers.
 
 # 4 Methodology
 
@@ -35,29 +35,33 @@ There will be three main components in our Shiny App: 
 
 ## 4.1 Exploratory Data Analysis (EDA)
 
-By visualizing data with interactive Shiny App, users can analyze patterns and discover relationships between time-series, rainfall, temperature and geography. 
+Through an interactive Shiny App visualization, users can analyze patterns and explore relationships between temporal data, rainfall, temperature, wind speed, and geographical features.
 
-Below are the visualization methods we will use for our EDA: 
+The following visualization methods will be used in our exploratory data analysis:
 
-#### **Bivariate Analysis** 
+**Univariate Analysis** 
 
--   **Half Eye graph + box plot:** visualize rainfall or temperature data by combining density plot and box plot and by station.
+-   **Histogram:** visualize univaritae weather data
+
+#### **Bivariate Analysis**
+
+-   **Half Eye graph + box plot:** visualize weather data by combining density plot and box plot and by station.
 
 #### **Multivariate Analysis**  
 
--   **Scatter Plot** : compare rainfall with temperature and colored by station or region.
+-   **Scatter Plot** : compare temperature with rainfall (or windspeed) and colored by station or region.
 
 #### **Time Series Analysis**  
 
--   **Line chart of time-series data:** visualize rainfall or temperature by station overtimes 
+-   **Line chart of time-series data:** visualize weather data by station overtimes 
 
 #### **Geospatial Analysis**
 
--   **Choropleth Maps:** use the tmap package to plot weather data across stations, faceted by year, and create additional layers with census data. This will allow users to compare and explore areas with high temperatures and high proportions of low-income or elderly residents to assess the social impact of extreme weather conditions.
+-   **Choropleth Maps:** using the tmap package, we will plot weather data across stations with yearly facets and overlay census data layers. This visualization will enable users to analyze the social impact of extreme weather conditions by comparing areas that experience high temperatures with regions having higher concentrations of low-income or elderly residents.
 
 ## 4.2 Confirmatory Data Analysis (CDA)
 
-After EDA, apply the following statistical tests to confirm whether mean rainfall or temperature differs across regions or seasons: 
+After EDA, user can apply the following statistical tests to confirm whether mean rainfall or temperature differs across stations:
 
 #### **Normality Test**
 
@@ -83,7 +87,7 @@ After EDA, apply the following statistical tests to confirm whether mean rain
 
 -   **ARIMA Models:**  
     -   **Auto ARIMA:** when there is a mix of trend and seasonal patterns with autocorrelation, user can use auto ARIMA, which automatically selects the best parameters (AR, I, MA) based on the data 
-    -   **STL ARIMA:** when there are complex seasonality or non-linear trends in the data, user can choose this model 
+    -   **STL ARIMA:** when there are complex seasonality or non-linear trends in the data, user can choose this model for weather forecasting
 -   **ETS Models:**  
     -   **Auto ETS:** user can choose this model if the data shows clear, stable trends or seasonal patterns with little noise  
 
@@ -92,7 +96,7 @@ After EDA, apply the following statistical tests to confirm whether mean rain
 The R packages we will be using for the project include:
 
 | Package | Description |
-|-------------------|-----------------------------------------------------|
+|----|----|
 | [tidyverse](https://www.tidyverse.org/) | For data manipulation |
 | [DT](https://rstudio.github.io/DT/) | For interactive data tables |
 | [knitr](https://yihui.org/knitr/) | For dynamic report generation with R |
@@ -113,6 +117,26 @@ The R packages we will be using for the project include:
 | [sf](https://r-spatial.github.io/sf/) | Providing a standardized way to encode and analyze spatial vector data |
 
 # 6 Dashboard Prototype
+
+Below is the Prototype for EDA panel:
+
+::: panel-tabset
+## Bivariate Analysis
+
+![](/images/prototype/prototype.png){fig-align="center"}
+
+## Multivariate Analysis
+
+![](/images/prototype/prototype-2.png){fig-align="center"}
+
+## Time Series Analysis
+
+![](/images/prototype/prototype-3.png){fig-align="center"}
+
+## Geospatial Analysis
+
+![](/images/prototype/prototype-4.png){fig-align="center"}
+:::
 
 # 7 Project Schedule
 
