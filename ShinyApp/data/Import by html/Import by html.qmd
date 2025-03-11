@@ -170,6 +170,10 @@ selected_columns <- c("station", "year", "month", "day",
 combined_data <- combined_data %>%
   select(any_of(selected_columns))  # `any_of()` prevents errors even if some columns are missing
 
+# Remove rows where 'station' is NA
+combined_data <- combined_data %>%
+  filter(!is.na(station) & station != "")  # Remove NA and empty station names
+
 # Convert numeric columns to numeric type and clean missing values
 numeric_cols <- selected_columns[5:length(selected_columns)]  # Select numeric columns
 

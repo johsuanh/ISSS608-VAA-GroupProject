@@ -57,8 +57,6 @@ low_income <- left_join(mpsz,low_income,by = c("PLN_AREA_N" = "Planning Area of 
 ```
 
 ```{r}
-
-
 # Ensure both layers have the same CRS
 low_income <- st_transform(low_income, st_crs(age))
 
@@ -94,24 +92,17 @@ pacman::p_load(ggdist,ggridges,lubridate,knitr)
 ```
 
 ```{r}
-station<-read_csv("data/Changi&MarinaBarrage.csv")
+station<-read_csv("data/Singapore_daily_records.csv")
 
 ```
 
 ```{r}
-station <- station %>%
-  mutate(mean_temperature_c = ifelse(!is.na(mean_temperature_c), 
-                                     mean_temperature_c, 
-                                     mean_temperature_a_c),
-    maximum_temperature_c = ifelse(!is.na(maximum_temperature_c),
-                     maximum_temperature_c, 
-                     maximum_temperature_a_c),
-    minimum_temperature_c = ifelse(!is.na(minimum_temperature_c), 
-                     minimum_temperature_c, 
-                     minimum_temperature_a_c),
-                     across(5:16, as.numeric,na.rm = TRUE),
-    date = make_date(year, month, day),
-    station = as.factor(station))
+pacman::p_load(dplyr, lubridate)
+
+#station <- station %>%mutate(across(where(is.character), as.numeric)) 
+
+str(station)
+
 ```
 
 ```{r}
@@ -157,7 +148,6 @@ ggplot(station,
 ```
 
 ```{r}
-
 quartile_station_table <- station %>%
   group_by(station) %>%
   summarize(
@@ -176,12 +166,11 @@ kable(quartile_station_table)
 ```
 
 ```{r}
-library(plotly)
-library(ggplot2)
-library(dplyr)
+pacman::p_load(plotly,ggplot2,dplyr)
 
 # Change to "all" to display all stations
-selected_station <- c("Changi", "Marina Barrage")  
+selected_station <- c("Changi", "Marina Barrage","Ang Mo Kio","Clementi","Jurong (West)","Paya Lebar","Newton","Pasir Panjang","Tai Seng","Admiralty"
+)
 
 # Filter the data accordingly
 station_data <- if ("all" %in% selected_station) {
@@ -215,29 +204,25 @@ ggplotly(p)
 ```
 
 ```{r}
-library(dplyr)
-
-# Replace missing values in mean_temperature_c, Maximum, and Minimum
-station <- station %>%
-  mutate(
-    mean_temperature_c = ifelse(!is.na(mean_temperature_c), mean_temperature_c, mean_temperature_a_c),
-    Maximum = ifelse(!is.na(maximum_temperature_c), maximum_temperature_c, max( maximum_temperature_a_c, na.rm = TRUE)),
-    Minimum = ifelse(!is.na(minimum_temperature_c), minimum_temperature_c, min(minimum_temperature_a_c, na.rm = TRUE))
-  )
+colnames(station)
 
 ```
 
 ```{r}
+# Create the Date column
+station <- station %>%
+  mutate(date = as.Date(paste(year, month, day, sep = "-"), format = "%Y-%m-%d"))
 
+# Filter only Changi site data
+changi_data <- subset(station, station == "Marina Barrage")
 
-changi_data <- subset(station, station == "Changi")
-
+# Drawing
 ggplot(changi_data, aes(x = date, y = mean_wind_speed_km_h, color = station, group = station)) +
-  geom_line(size = 1, alpha = 0.8) +
+  geom_line(linewidth = 1, alpha = 0.8) +
   theme_minimal() +
-  labs(title = "Mean Temperature Over Time by Station",
+  labs(title = "Mean Wind Speed Over Time at Changi",
        x = "Date",
-       y = "Mean Temperature (°C)") +
+       y = "Mean Wind Speed (km/h)") +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5),
     legend.title = element_blank(),
