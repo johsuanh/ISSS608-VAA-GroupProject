@@ -2,8 +2,24 @@
 title: "Visual Analytics Project"
 ---
 
-# **Building Web-enabled Visual Analytics application with Shiny for Democratising Data and Analytics**
+# **🌍 Who We Are**
 
-## **Overview**
+We are a team of data analysts passionate about **climate research and data-driven decision-making**. Our project focuses on making **climate data more accessible** and helping people **understand the impact of extreme weather in Singapore** through interactive visualizations and predictive models.
 
-## **Project Topic**
+#### **🛠 Our Approach**
+
+#### ✔ **Data-Driven Insights** – We leverage real-world climate and census data for accurate analysis.
+
+✔ **Interactive Shiny Dashboard** – Users can explore data dynamically and generate insights. ✔ **Advanced Forecasting Models** – We apply **statistical and machine learning techniques** to predict future weather trends.
+
+#### **📈 Why This Matters**
+
+Climate change affects **health, urban planning, and daily life**. Understanding weather patterns can help:\
+
+✅ **Government agencies** prepare for extreme weather.\
+
+✅ **Residents** make informed lifestyle and home energy choices.\
+
+✅ **Businesses** adapt operations to changing climate conditions.
+
+This dashboard serves as a **powerful tool** for analyzing Singapore’s climate trends and their social impact. We hope it will provide **valuable insights for policymakers, researchers, and the general public**.

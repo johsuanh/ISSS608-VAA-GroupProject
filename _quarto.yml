@@ -8,6 +8,10 @@ website:
     logo: images/Logo.png
     title: false
     right:
+      - href: index.qmd
+        text: Home
+      - href: about.qmd
+        text: About
       - text: "Overview"
         href: Overview/Overview.html
       - text: "Shiny App"
@@ -24,10 +28,6 @@ website:
             href: Team/Meeting_Records.html
           - text: "Acknowledgement"
             href: Team/Project_Proposal.html
-      - href: index.qmd
-        text: Home
-      - href: about.qmd
-        text: About
       
 format:
   html:

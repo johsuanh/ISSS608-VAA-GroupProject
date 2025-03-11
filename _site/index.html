@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>VAA Group Project – ISSS608-VAA-GroupProject</title>
+<title>Welcome to the Singapore Climate Analysis Dashboard - VAA Group Project – ISSS608-VAA-GroupProject</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -69,6 +69,7 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="nav-fixed">
@@ -79,7 +80,7 @@ ul.task-list li input[type="checkbox"] {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="./index.html" class="navbar-brand navbar-brand-logo">
-    <img src="./images/favicon/web-app-manifest-512x512.png" alt="" class="navbar-logo">
+    <img src="./images/Logo.png" alt="" class="navbar-logo">
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -88,6 +89,14 @@ ul.task-list li input[type="checkbox"] {
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="./index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
   <li class="nav-item">
     <a class="nav-link" href="./Overview/Overview.html"> 
 <span class="menu-text">Overview</span></a>
@@ -123,14 +132,6 @@ ul.task-list li input[type="checkbox"] {
   </li>  
     </ul>
   </li>
-  <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
-<span class="menu-text">Home</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./about.html"> 
-<span class="menu-text">About</span></a>
-  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -142,15 +143,25 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#understanding-weather-trends-social-impacts-in-singapore" id="toc-understanding-weather-trends-social-impacts-in-singapore" class="nav-link active" data-scroll-target="#understanding-weather-trends-social-impacts-in-singapore">🌏 <strong>Understanding Weather Trends &amp; Social Impacts in Singapore</strong></a></li>
+  <li><a href="#key-features-of-our-dashboard" id="toc-key-features-of-our-dashboard" class="nav-link" data-scroll-target="#key-features-of-our-dashboard"><strong>🌟 Key Features of Our Dashboard</strong></a>
+  <ul class="collapse">
+  <li><a href="#explore-the-dashboard" id="toc-explore-the-dashboard" class="nav-link" data-scroll-target="#explore-the-dashboard"><strong>📊 Explore the Dashboard</strong></a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">VAA Group Project</h1>
+<h1 class="title">Welcome to the Singapore Climate Analysis Dashboard - VAA Group Project</h1>
 </div>
 
 
@@ -167,8 +178,39 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="understanding-weather-trends-social-impacts-in-singapore" class="level2">
+<h2 class="anchored" data-anchor-id="understanding-weather-trends-social-impacts-in-singapore">🌏 <strong>Understanding Weather Trends &amp; Social Impacts in Singapore</strong></h2>
+<p>Climate change is reshaping weather patterns worldwide, and Singapore, as a tropical nation, is experiencing increasing temperatures, fluctuating rainfall, and extreme weather events. These changes particularly affect vulnerable populations, including <strong>low-income families and elderly residents</strong>, who may struggle to adapt to rising heat and changing rainfall patterns.</p>
+<p>This project provides an <strong>interactive Shiny Dashboard</strong> designed to <strong>visualize, analyze, and forecast</strong> Singapore’s climate trends using real-world data from <strong>Meteorological Service Singapore (2020-2025)</strong>. Our tool integrates <strong>weather station data</strong> with <strong>demographic insights from the 2020 Singapore Census</strong> to explore the relationships between weather conditions and social impact.</p>
+<hr>
+</section>
+<section id="key-features-of-our-dashboard" class="level2">
+<h2 class="anchored" data-anchor-id="key-features-of-our-dashboard"><strong>🌟 Key Features of Our Dashboard</strong></h2>
+<p>✔ <strong>Interactive Visualizations</strong> – Explore historical trends in temperature, rainfall, and wind speed.<br>
+</p>
+<p>✔ <strong>Comparative Analysis</strong> – Understand weather differences across <strong>10 AWS stations</strong>.<br>
+</p>
+<p>✔ <strong>Geospatial Mapping</strong> – Overlay weather data with <strong>socioeconomic factors</strong> such as income and age distribution.<br>
+</p>
+<p>✔ <strong>Statistical Testing</strong> – Validate whether weather patterns significantly differ across regions.<br>
+</p>
+<p>✔ <strong>Time Series Forecasting</strong> – Predict future climate trends using <strong>ARIMA, STL, and ETS models</strong>.</p>
+<p>By offering these insights, our project aims to help <strong>researchers, policymakers, and the public</strong> make informed decisions about Singapore’s climate resilience strategies. 🌿</p>
+<hr>
+<section id="explore-the-dashboard" class="level3">
+<h3 class="anchored" data-anchor-id="explore-the-dashboard"><strong>📊 Explore the Dashboard</strong></h3>
+<p>🔹 <strong>Bivariate Analysis</strong> – Compare weather variables (temperature vs.&nbsp;rainfall) across regions.<br>
+</p>
+<p>🔹 <strong>Multivariate Analysis</strong> – Investigate how multiple weather factors interact.<br>
+</p>
+<p>🔹 <strong>Time Series Analysis</strong> – Visualize long-term weather trends over time.<br>
+</p>
+<p>🔹 <strong>Geospatial Analysis</strong> – Map extreme weather impacts on different communities.</p>
+<p>📌 Click on <strong>“Dashboard”</strong> in the navigation menu to start exploring!</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
