@@ -1,39 +1,6 @@
 ---
-title: "Welcome to the Singapore Climate Analysis Dashboard - VAA Group Project"
+title: " "
+format:
+  html:
+    css: Landing.css
 ---
-
-## 🌏 **Understanding Weather Trends & Social Impacts in Singapore**
-
-Climate change is reshaping weather patterns worldwide, and Singapore, as a tropical nation, is experiencing increasing temperatures, fluctuating rainfall, and extreme weather events. These changes particularly affect vulnerable populations, including **low-income families and elderly residents**, who may struggle to adapt to rising heat and changing rainfall patterns.
-
-This project provides an **interactive Shiny Dashboard** designed to **visualize, analyze, and forecast** Singapore's climate trends using real-world data from **Meteorological Service Singapore (2020-2025)**. Our tool integrates **weather station data** with **demographic insights from the 2020 Singapore Census** to explore the relationships between weather conditions and social impact.
-
-------------------------------------------------------------------------
-
-## **🌟 Key Features of Our Dashboard**
-
-✔ **Interactive Visualizations** – Explore historical trends in temperature, rainfall, and wind speed.\
-
-✔ **Comparative Analysis** – Understand weather differences across **10 AWS stations**.\
-
-✔ **Geospatial Mapping** – Overlay weather data with **socioeconomic factors** such as income and age distribution.\
-
-✔ **Statistical Testing** – Validate whether weather patterns significantly differ across regions.\
-
-✔ **Time Series Forecasting** – Predict future climate trends using **ARIMA, STL, and ETS models**.
-
-By offering these insights, our project aims to help **researchers, policymakers, and the public** make informed decisions about Singapore's climate resilience strategies. 🌿
-
-------------------------------------------------------------------------
-
-### **📊 Explore the Dashboard**
-
-🔹 **Bivariate Analysis** – Compare weather variables (temperature vs. rainfall) across regions.\
-
-🔹 **Multivariate Analysis** – Investigate how multiple weather factors interact.\
-
-🔹 **Time Series Analysis** – Visualize long-term weather trends over time.\
-
-🔹 **Geospatial Analysis** – Map extreme weather impacts on different communities.
-
-📌 Click on **"Dashboard"** in the navigation menu to start exploring!

@@ -39,7 +39,7 @@ Through an interactive Shiny App visualization, users can analyze patterns and e
 
 The following visualization methods will be used in our exploratory data analysis:
 
-**Univariate Analysis** 
+#### **Univariate Analysis** 
 
 -   **Histogram:** visualize univaritae weather data
 
@@ -96,7 +96,7 @@ After EDA, user can apply the following statistical tests to confirm whether 
 The R packages we will be using for the project include:
 
 | Package | Description |
-|----|----|
+|------------------------------------|------------------------------------|
 | [tidyverse](https://www.tidyverse.org/) | For data manipulation |
 | [DT](https://rstudio.github.io/DT/) | For interactive data tables |
 | [knitr](https://yihui.org/knitr/) | For dynamic report generation with R |
@@ -123,7 +123,7 @@ Below is the Prototype for EDA panel:
 ::: panel-tabset
 ## Bivariate Analysis
 
-![](/images/prototype/prototype.png){fig-align="center"}
+![](/images/prototype/prototype-2.png){fig-align="center"}
 
 ## Multivariate Analysis
 

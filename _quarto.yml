@@ -4,37 +4,40 @@ project:
 website:
   title: "ISSS608-VAA-GroupProject"
   favicon: images/favicon/favicon-96x96.png
+  page-navigation: true
   navbar: 
-    logo: images/Logo.png
+    logo: images/Logo2.png
     title: false
+    collapse-below: lg
+    search: true
     right:
-      - href: index.qmd
-        text: Home
       - href: about.qmd
         text: About
-      - text: "Overview"
-        href: Overview/Overview.html
+      - text: "Project Poster"
+        #href: Overview/Overview.html
       - text: "Shiny App"
         menu:
           - text: "ShinyApp"
             #href: ShinyApp/Take-Home_Ex1.html
           - text: "User Guide"
-            href: ShinyApp/User_Guide.html
+            #href: ShinyApp/User_Guide.html
       - text: "Team"
         menu:
           - text: "Project Proporsal"
             href: Team/Project_Proposal.html
           - text: "Meeting Records"
-            href: Team/Meeting_Records.html
-          - text: "Acknowledgement"
-            href: Team/Project_Proposal.html
+            #href: Team/Meeting_Records.html
+
       
 format:
   html:
-    theme: cosmo
-    css: 
-      - styles.css
     toc: true
     toc-location: right
+    theme: 
+      - theme.scss
+    highlight-style: tango
+    code-copy: hover
+    code-overflow: wrap
+    css: style.css
 
 editor: visual
