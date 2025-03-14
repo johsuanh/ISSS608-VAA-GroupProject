@@ -2,7 +2,7 @@
 
 /*-- scss:defaults --*/
 
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Oswald:wght@200..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 // Colors
 
@@ -28,7 +28,7 @@ $navbar-hl: $off-white; // highlight color when hovering over navbar links
 $body-bg: $off-white; // page background 
 $body-color: $darker-gray; // page text 
 $footer-bg: $grass; // footer 
-$link-color: $purple-blue; // hyperlinks 
+$link-color: $darker-p-b; // hyperlinks 
 
 // Code blocks
 $code-block-bg: $white;
@@ -36,7 +36,8 @@ $code-block-bg: $white;
 // fonts
 
 $font-family: 'Roboto', sans-serif;
-$font-family-h: 'Oswald',  sans-serif;
+$font-family-h: 'Merriweather Sans', sans-serif;
+$font-family-h2: 'Lora', serif;
 
 //toc 
 $toc-font-size: 13px;
@@ -74,13 +75,13 @@ $callout-color-important: $yellow;
   margin-top: 1em !important;
   margin-bottom: 1.5em;
   font-size: 32px;
-  font-family: $font-family-h;
+  font-family: $font-family-h2;
   font-weight: 700;
   color: $black;
 }
 
 .subtitle {
-  font-size: 18px;
+  font-size: 28px;
   font-family: $font-family-h;
   font-weight: 500;
   color: $black;
@@ -107,7 +108,7 @@ h1 {
   font-size: 26px;
   font-family: $font-family-h;
   font-variant: normal; 
-  font-weight: 600; 
+  font-weight: 700; 
 }
 
 /* Heading 2 */
@@ -115,9 +116,9 @@ h2 {
   font-size: 22px;
   font-family: $font-family-h;
   font-variant: normal; 
-  font-weight: 500; 
-  color: $darker-p-b;
-  border-bottom: 1px solid $grass;
+  font-weight: 700; 
+  color: $black;
+  border-bottom: 1px dotted $blue;
 }
 
 /* Heading 3 */
@@ -125,14 +126,16 @@ h3 {
   font-size: 18px;
   font-family: $font-family-h;
   font-variant: normal; 
-  font-weight: 500; 
+  color: $black;
+  font-weight: 600; 
 }
 
 /* Heading 4 */
 h4 {
   font-size: 18px;
-  font-family: $font-family-h;
+  font-family: $font-family-h2;
   font-variant: normal; 
+  color: $black;
   font-weight: 500; 
 }
 

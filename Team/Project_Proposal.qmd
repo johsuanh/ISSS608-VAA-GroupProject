@@ -96,7 +96,7 @@ After EDA, user can apply the following statistical tests to confirm whether 
 The R packages we will be using for the project include:
 
 | Package | Description |
-|------------------------------------|------------------------------------|
+|----|----|
 | [tidyverse](https://www.tidyverse.org/) | For data manipulation |
 | [DT](https://rstudio.github.io/DT/) | For interactive data tables |
 | [knitr](https://yihui.org/knitr/) | For dynamic report generation with R |
