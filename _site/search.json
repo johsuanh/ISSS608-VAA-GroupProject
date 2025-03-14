@@ -35,34 +35,6 @@
     "text": "4.3 Forecasting\n\nPlots\n\nACF & PCF plots : help users understand the autocorrelation in time series data and identify which lags might be useful for forecasting model. \nSTL plots: help decompose the time series into its seasonal, trend, and remainder components, providing insight into the structure of the data. \n\n\n\nForecasting Models\n\nARIMA Models:  \n\nAuto ARIMA: when there is a mix of trend and seasonal patterns with autocorrelation, user can use auto ARIMA, which automatically selects the best parameters (AR, I, MA) based on the data \nSTL ARIMA: when there are complex seasonality or non-linear trends in the data, user can choose this model for weather forecasting\n\nETS Models:  \n\nAuto ETS: user can choose this model if the data shows clear, stable trends or seasonal patterns with little noise"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "ISSS608-VAA-GroupProject",
-    "section": "",
-    "text": "format: html: background-image: “images/Landing_Page.png”\n—"
-  },
-  {
-    "objectID": "index.html#understanding-weather-trends-social-impacts-in-singapore",
-    "href": "index.html#understanding-weather-trends-social-impacts-in-singapore",
-    "title": "Welcome to the Singapore Climate Analysis Dashboard - VAA Group Project",
-    "section": "",
-    "text": "Climate change is reshaping weather patterns worldwide, and Singapore, as a tropical nation, is experiencing increasing temperatures, fluctuating rainfall, and extreme weather events. These changes particularly affect vulnerable populations, including low-income families and elderly residents, who may struggle to adapt to rising heat and changing rainfall patterns.\nThis project provides an interactive Shiny Dashboard designed to visualize, analyze, and forecast Singapore’s climate trends using real-world data from Meteorological Service Singapore (2020-2025). Our tool integrates weather station data with demographic insights from the 2020 Singapore Census to explore the relationships between weather conditions and social impact."
-  },
-  {
-    "objectID": "index.html#key-features-of-our-dashboard",
-    "href": "index.html#key-features-of-our-dashboard",
-    "title": "Welcome to the Singapore Climate Analysis Dashboard - VAA Group Project",
-    "section": "🌟 Key Features of Our Dashboard",
-    "text": "🌟 Key Features of Our Dashboard\n✔ Interactive Visualizations – Explore historical trends in temperature, rainfall, and wind speed.\n\n✔ Comparative Analysis – Understand weather differences across 10 AWS stations.\n\n✔ Geospatial Mapping – Overlay weather data with socioeconomic factors such as income and age distribution.\n\n✔ Statistical Testing – Validate whether weather patterns significantly differ across regions.\n\n✔ Time Series Forecasting – Predict future climate trends using ARIMA, STL, and ETS models.\nBy offering these insights, our project aims to help researchers, policymakers, and the public make informed decisions about Singapore’s climate resilience strategies. 🌿\n\n\n📊 Explore the Dashboard\n🔹 Bivariate Analysis – Compare weather variables (temperature vs. rainfall) across regions.\n\n🔹 Multivariate Analysis – Investigate how multiple weather factors interact.\n\n🔹 Time Series Analysis – Visualize long-term weather trends over time.\n\n🔹 Geospatial Analysis – Map extreme weather impacts on different communities.\n📌 Click on “Dashboard” in the navigation menu to start exploring!"
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "Visual Analytics Project",
-    "section": "",
-    "text": "🌍 Who We Are\nWe are a team of data analysts passionate about climate research and data-driven decision-making. Our project focuses on making climate data more accessible and helping people understand the impact of extreme weather in Singapore through interactive visualizations and predictive models.\n\n🛠 Our Approach\n\n\n✔ Data-Driven Insights – We leverage real-world climate and census data for accurate analysis.\n✔ Interactive Shiny Dashboard – Users can explore data dynamically and generate insights. ✔ Advanced Forecasting Models – We apply statistical and machine learning techniques to predict future weather trends.\n\n\n📈 Why This Matters\nClimate change affects health, urban planning, and daily life. Understanding weather patterns can help:\n\n✅ Government agencies prepare for extreme weather.\n\n✅ Residents make informed lifestyle and home energy choices.\n\n✅ Businesses adapt operations to changing climate conditions.\nThis dashboard serves as a powerful tool for analyzing Singapore’s climate trends and their social impact. We hope it will provide valuable insights for policymakers, researchers, and the general public."
-  },
-  {
     "objectID": "ShinyApp/data/Import by html/Import by html.html",
     "href": "ShinyApp/data/Import by html/Import by html.html",
     "title": "import data",
