@@ -1,51 +1,92 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    https://shiny.posit.co/
-#
-
 library(shiny)
 
-# Define UI for application that draws a histogram
-ui <- fluidPage(
+#========================================================== 
+## UI Components
+#========================================================== 
 
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
-    )
+# main header ---
+header <- dashboardHeader(
+  title = tags$img(src = "images/Logo.png", height = "50px")
 )
 
-# Define server logic required to draw a histogram
-server <- function(input, output) {
+# main sidebar ---
+sidebar <- dashboardSidebar(
+  sidebarMenu(
+    menuItem("Home", href = "https://vaagroup13.netlify.app", target = "_blank"),
+    menuItem("Data Exploration", tabName = "Data Exploration"),
+    menuItem("Confirmatory Ananlysis", tabName = "Confirmatory Ananlysis"),
+    menuItem("Forecasting", tabName = "Forecasting")
+  )
+)
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
 
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
-    })
-}
+# main body ---
+body <- dashboardBody(
+  tabItems(
+    tabItem(tabName = "Data Exploration",
+            EDASubTabs
+    ),
+    tabItem(tabName = "Confirmatory Ananlysis",
+            CDASubTabs 
+    ),
+    tabItem(tabName = "Forecasting",
+            ForecastSubTabs
+    )))
 
-# Run the application 
-shinyApp(ui = ui, server = server)
+# fluidRows ---
+
+# aspatial analysis tab
+EDAUnivariate <-  fluidRow(
+  highchartOutput(), # display line chart
+  sliderInput(), # select year range
+  selectizeInput(), # select event (allows multiple selection)
+  radioButtons(), # select administrative region level
+  selectizeInput(), # select administrative region (allows multiple selection)
+  actionButton(), # action button
+  checkboxInput(), # conditional panel (option to display line chart)
+  highchartOutput(), # display line chart
+  checkboxInput(), # conditional panel (option to display map information)
+  leafletOutput(), # display point spatial map
+)
+
+#========edit to here========#
+
+AspatialOverviewrow2 <-  fluidRow(
+  DT::dataTableOutput() # display datatable
+)
+
+AspatialDistributionrow1 <-  fluidRow(
+  sliderInput(), # select year range
+  radioButtons(), # select administrative region level
+  radioButtons(), # select display rates
+  selectInput(), # select colour palette
+  checkboxInput(), # Customise Spatial Map
+  selectInput(), # Spatial Map Classification Type
+  sliderInput(), # Number of Classes
+  checkboxInput(), # Customise Density Ridge Plot
+  selectInput(), # Density Ridge Style
+  tmapOutput(), # choropleth map
+  plotOutput() # density ridge plot
+)
+
+AspatialDistributionrow2 <-  fluidRow(
+  textOutput()
+)
+
+# geospatial analysis tab
+Cluster2 <- fluidRow(
+  selectInput(), # select period
+  selectInput(), # select Moran Event Type
+  radioButtons(), # select Contiguity method 
+  selectInput(), # select Spatial Weights Style
+  sliderInput(), # Number of Simulations
+  actionButton(), # action button 
+  radioButtons(), # select confidence interval 
+  selectInput(), # select Lisa Classification
+  selectInput(), # select Local Moran's Stat
+  plotOutput(), # LocalMoranMap
+  plotOutput(), # LisaMap 
+  textOutput(),
+  DT::dataTableOutput()
+)
+
