@@ -1,0 +1,156 @@
+# Meta information about the brand
+meta:
+  name:
+    full: "Weather or Not"  # Full brand name
+    short: "WoN"           # Short brand name for usage in smaller spaces
+  link:
+    home: https://vaagroup13.netlify.app  # Link to the homepage
+    
+# Color palette and usage
+color:
+  palette:
+    sky-blue: "#8AA4FF"  # Main blue used in the logo and interface
+    medium-blue: "#6F87FF" # Slightly darker blue for hover states
+    dark-blue: "#5A6FD6"   # Even darker blue for active states
+    light-purple: "#C4C8FF" # Light purple background for UI elements
+    grey: "#ADADAD"        # Grey for inactive tabs
+    dark-grey: "#4D4D4D"   # Dark grey for text
+    light-grey: "#E5E5E5"  # Light grey for borders and dividers
+    off-white: "#F5F5F5"   # Off-white for main background
+    white: "#FFFFFF"       # Pure white
+    black: "#1A1A1A"       # Near black for text
+  foreground: dark-grey    # Default text color
+  background: off-white    # Background color
+  primary: light-blue      # Primary color used for key elements
+  secondary: light-blue   # Secondary color for UI elements
+  active: light-purple      # Color for active elements
+  inactive: grey           # Color for inactive elements
+  light: white             # Light color for certain elements
+  dark: black              # Dark color for specific components
+
+# Typography settings
+typography:
+  fonts:
+    - family: "Open Sans"  # Sans-serif font for UI elements
+      source: google
+      weight: [400, 600, 700]
+      style: [normal]
+      display: swap
+    - family: "Roboto"     # Clean font for data values and metrics
+      source: google
+      weight: [400, 500]
+      style: [normal]
+      display: swap
+  base:
+    family: "Open Sans"    # Default font for body text
+    size: 12px             # Base font size
+    weight: 400            # Default font weight
+    line-height: 1.5       # Line height for readability
+  headings:
+    family: "Open Sans"
+    weight: 700
+    line-height: 1.2
+    style: normal
+  labels:
+    family: "Open Sans"
+    weight: 600
+    size: 12px
+  data:
+    family: "Roboto"
+    weight: 500
+    size: 12px
+  tabs:
+    family: "Open Sans"
+    weight: 600
+    size: 12px
+    active-color: black
+    inactive-color: grey
+  monospace:
+    family: "Roboto Mono"
+    size: 12px
+    weight: 400
+    
+# UI Component styling
+components:
+  card:
+    background: white
+    border-radius: 4px
+    shadow: "0 2px 5px rgba(0,0,0,0.1)"
+    padding: "20px"
+  dropdown:
+    background: white
+    border: "1px solid light-grey"
+    border-radius: 4px
+  slider:
+    track-color: light-grey
+    thumb-color: light-blue
+  tabs:
+    active-color: black
+    inactive-color: grey
+    border-top: "0px solid light-blue"  #pending changed
+    
+# Data visualization settings
+visualization:
+  plots:
+    background: white
+    grid-lines: "#EEEEEE"
+    axis-color: dark-grey
+  boxplot:
+    fill-color: light-blue
+    border-color: light-blue
+  density:
+    fill-color: "rgba(138, 164, 255, 0.3)"
+    line-color: light-blue
+    
+# Default theme configurations
+defaults:
+  bootstrap:
+    variables:
+      primary: "$light-blue"
+      secondary: "$light-purple"
+      body-bg: "$off-white"
+      body-color: "$dark-grey"
+      border-radius: "5px"
+      font-family-base: "Open Sans, sans-serif"
+  shiny:
+    theme:
+      preset: default
+      rules: |
+        .nav-tabs .nav-link.active { 
+          color: $black;
+          border-bottom: none;
+          border-top: 0px solid $sky-blue;
+          border-left: none;
+          border-right: none;
+          background-color: transparent;
+        }
+        .nav-tabs .nav-link { 
+          color: $grey; 
+          background-color: transparent;
+          border: none;
+          padding: 12px 16px;
+        }
+        .box { 
+          border-radius: 4px;
+          box-shadow: 0 0px 0px rgba(0,0,0,0.1);
+          padding: 20px;
+          background-color: $white;
+        }
+        .select-input { 
+          background-color: $light-grey;
+          border: 1px solid $dark-grey;
+          border-radius: 2px;
+          padding: 8px 12px;
+          font-family: "Roboto", sans-serif !important;
+          font-size: 12px !important;
+          font-weight: 500 !important;
+        }
+
+        
+
+
+        .shiny-plot-output {
+          background-color: $white;
+          border-radius: 2px;
+          padding: 10px;
+        }

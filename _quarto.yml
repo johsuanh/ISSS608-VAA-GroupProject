@@ -18,7 +18,7 @@ website:
       - text: "Shiny App"
         menu:
           - text: "ShinyApp"
-            #href: ShinyApp/Take-Home_Ex1.html
+            href: https://johsuanh.shinyapps.io/WeatherOrNot/
           - text: "User Guide"
             #href: ShinyApp/User_Guide.html
       - text: "Team"
@@ -38,6 +38,5 @@ format:
     highlight-style: tango
     code-copy: hover
     code-overflow: wrap
-    css: style.css
 
 editor: visual
