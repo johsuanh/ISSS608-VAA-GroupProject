@@ -11,70 +11,69 @@ execute:
 
 # 1 Motivation
 
-Climate change is a critical global issue, and Singapore is no exception. As a tropical country, Singapore experiences consistently hot and humid weather. However, climate change has intensified extreme weather events, leading to higher temperatures, floods, and even droughts. These changes disproportionately affect low-income and elderly residents who may struggle to afford air conditioning or improve their living conditions.
+Climate change poses significant challenges for Singapore's urban environment and infrastructure. As a densely populated tropical country, Singapore faces particular vulnerability to rising temperatures, extreme rainfall, and changing weather patterns. These climate-related risks affect not just daily life, but also impact urban planning, public health, and economic activities.
 
-To address this, our team will use open-source weather data to analyze temperature and rainfall patterns across Singapore. By collecting data from four weather stations in the East, Central, West, and North regions, we aim to create visualizations and forecasts that provide a comprehensive understanding of local weather trends.
+To address this challenge, our team will develop an interactive analytics dashboard using R Shiny App to transform complex weather data into actionable insights. Through analysis of historical and real-time data from 10 AWS stations across Singapore, we aim to create a platform that helps the public better understand and respond to Singapore's changing climate conditions through intuitive visualizations and forecasting models.
 
 # ⁠2 Objective
 
 The objectives of this proposal are to:
 
--   Develop a Shiny App with interactive visualizations to help users better understand Singapore's weather patterns.
+-   Create an interactive dashboard that transforms complex weather data into accessible insights for public understanding
 
--   Analyze and compare weather variations across 10 AWS stations, with a focus on areas where lower-income and elderly residents are concentrated, to generate meaningful insights.
+-   Implement comparative analysis tools to evaluate weather patterns across 10 AWS stations, featuring multiple temporal resolutions and visualization techniques
+
+-   Design and integrate multi-horizon forecasting models (daily/weekly/monthly) to predict weather trends
 
 # 3 Data
 
-The [historical weather data](https://www.weather.gov.sg/climate-historical-daily/) from Meteorological Service Singapore will be used for analysis. We will collect data from 10 AWS stations across Singapore between January 2020 and January 2025.
+The [historical weather data](https://www.weather.gov.sg/climate-historical-daily/) from Meteorological Service Singapore will be used for analysis. We will collect data from the following 10 AWS stations across Singapore between January 2020 and January 2025:
 
-To enhance our analysis and visualization, we will also incorporate 2020 Singapore census data, including [Monthly Household Income from Work by Planning Area](https://tablebuilder.singstat.gov.sg/table/CT/17779)and [Resident Population by Planning Area and Age Group](https://data.gov.sg/datasets/d_9e035622439b5d25a63d7ea0699c9451/view) as additional tmap layers.
+|                     |                   |                     |
+|---------------------|-------------------|---------------------|
+| **Weather Station** | **Planning Area** | **Planning Region** |
+| Changi              | Changi            | East Region         |
+| Paya Lebar          | Paya Lebar        | East Region         |
+| Marina Barrage      | Marina South      | Central Region      |
+| Newton              | Newton            | Central Region      |
+| Tai Seng            | Geylang           | North-East Region   |
+| Ang Mo Kio          | Ang Mo Kio        | North-East Region   |
+| Admiralty           | Woodlands         | North Region        |
+| Pasir Panjang       | Queenstown        | West Region         |
+| Clementi            | Clementi          | West Region         |
+| Jurong West         | Jurong West       | West Region         |
 
 # 4 Methodology
 
 There will be three main components in our Shiny App: 
 
-## 4.1 Exploratory Data Analysis (EDA)
+## 4.1 Exploratory Data Analysis
 
 Through an interactive Shiny App visualization, users can analyze patterns and explore relationships between temporal data, rainfall, temperature, wind speed, and geographical features.
 
 The following visualization methods will be used in our exploratory data analysis:
 
-#### **Univariate Analysis** 
-
--   **Histogram:** visualize univaritae weather data
-
-#### **Bivariate Analysis**
-
--   **Half Eye graph + box plot:** visualize weather data by combining density plot and box plot and by station.
-
-#### **Multivariate Analysis**  
-
--   **Scatter Plot** : compare temperature with rainfall (or windspeed) and colored by station or region.
-
 #### **Time Series Analysis**  
 
--   **Line chart of time-series data:** visualize weather data by station overtimes 
+-   **Line Chart:** Visualize daily, weekly, and monthly weather trends by station over time.
+
+    -   **Seasonal Monsoon Patterns:** Highlight monsoon periods Northeast Monsoon (Dec–Mar), Southwest Monsoon (Jun–Sep) and Inter-monsoon (Apr–May, Oct–Nov) with different color, letting user observe weather differences across stations.
+
+-   **Ridge Plot:** Show the distribution of daily, weekly, and monthly weather variations by station.
+
+-   **Geofacet:** Display weather data with station layouts reflecting their geographical positions. Use faceted line charts (for temperature) and histograms (for rainfall) to highlight seasonal variations.
 
 #### **Geospatial Analysis**
 
--   **Choropleth Maps:** using the tmap package, we will plot weather data across stations with yearly facets and overlay census data layers. This visualization will enable users to analyze the social impact of extreme weather conditions by comparing areas that experience high temperatures with regions having higher concentrations of low-income or elderly residents.
+-   **Isoline Maps:** Visualize weather patterns using isolines overlaid on station data with `tmap`, showing spatial gradients.
 
-## 4.2 Confirmatory Data Analysis (CDA)
+## 4.2 Co-variation Analysis
 
-After EDA, user can apply the following statistical tests to confirm whether mean rainfall or temperature differs across stations:
+After EDA, user can apply the following statistical tests to confirm whether rainfall, wind speed and temperature exhibit correlation with each other:
 
-#### **Normality Test**
+-   **Cross-Correlation Function:** Measures how two time series are correlated at different time lags. Helps identify lead-lag relationships, like "does a drop in temperature precede heavy rainfall?"
 
--   **Shapiro-Wilk Test** : check if the data follows a normal distribution, which will affect which statistical parameters to use in the analysis 
-
-#### **Parametric Tests (comparing multiple groups)**
-
--   **One-way ANOVA test:** Comparing mean rainfall or temperature across stations 
--   **Two-way ANOVA test:** Comparing mean rainfall or temperature across both station and month 
-
-#### **Non-Parametric Tests (comparing multiple groups)** 
-
--   **Kruskal-Wallis Test:** Comparing median rainfall or temperature across stations or both station and month 
+-   **Cointegration Analysis:** Tests if two time series move together in the long run despite short-term fluctuations, using the `urca` package.
 
 ## 4.3 Forecasting
 
@@ -108,13 +107,13 @@ The R packages we will be using for the project include:
 | [ggdist](https://mjskay.github.io/ggdist/) | For visualisations of distributions and uncertainty. |
 | [ggtext](https://wilkelab.org/ggtext/) | Providing simple Markdown and HTML rendering for ggplot2 |
 | [ggridges](https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html) | For ridgeline plots that create the impression of a mountain range. They can be useful for visualising changes in distributions over time or space. |
-| [heatmaply](http://talgalili.github.io/heatmaply/) | For building interactive cluster heatmap. |
 | [lubridate](https://lubridate.tidyverse.org) | For handling date-time data |
 | [tsibble](https://tsibble.tidyverts.org) | For tidy temporal data with wrangling tools |
 | [feasts](https://feasts.tidyverts.org) | For analysing tidy time series data with decomposition methods (STL), statistical summaries and graphics functions(cycle plot) |
 | [fable](https://fable.tidyverts.org) | Forecasting models for tidy time series data |
 | [tmap](https://r-tmap.github.io/tmap/reference/index.html) | For drawing thematic maps |
 | [sf](https://r-spatial.github.io/sf/) | Providing a standardized way to encode and analyze spatial vector data |
+| [urca](https://www.pfaffikus.de/rpacks/urca/) | For co-integration analysis (Engle-Granger and Johansen tests) |
 
 # 6 Dashboard Prototype
 
@@ -138,7 +137,11 @@ Below is the Prototype for EDA panel:
 ![](/images/prototype/prototype-4.png){fig-align="center"}
 :::
 
-# 7 Project Schedule
+# 7 Moudule allocation
+
+![](/images/TaskAllocation.png)
+
+# 8 Project Schedule
 
 ```{r}
 #| echo: false
@@ -150,4 +153,6 @@ timevis(schedule)
 
 ```
 
- 
+# 9 Reference
+
+-   **Meteorological Service Singapore.** (2025). *Climate Map*. Meteorological Service Singapore. <https://www.weather.gov.sg/climate-detailed-view/>

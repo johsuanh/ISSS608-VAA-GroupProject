@@ -150,13 +150,15 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">3 Data</a></li>
   <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">4 Methodology</a>
   <ul class="collapse">
-  <li><a href="#exploratory-data-analysis-eda" id="toc-exploratory-data-analysis-eda" class="nav-link" data-scroll-target="#exploratory-data-analysis-eda">4.1 Exploratory Data Analysis (EDA)</a></li>
-  <li><a href="#confirmatory-data-analysis-cda" id="toc-confirmatory-data-analysis-cda" class="nav-link" data-scroll-target="#confirmatory-data-analysis-cda">4.2 Confirmatory Data Analysis (CDA)</a></li>
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">4.1 Exploratory Data Analysis</a></li>
+  <li><a href="#co-variation-analysis" id="toc-co-variation-analysis" class="nav-link" data-scroll-target="#co-variation-analysis">4.2 Co-variation Analysis</a></li>
   <li><a href="#forecasting" id="toc-forecasting" class="nav-link" data-scroll-target="#forecasting">4.3 Forecasting</a></li>
   </ul></li>
   <li><a href="#r-packages" id="toc-r-packages" class="nav-link" data-scroll-target="#r-packages">5 R Packages</a></li>
   <li><a href="#dashboard-prototype" id="toc-dashboard-prototype" class="nav-link" data-scroll-target="#dashboard-prototype">6 Dashboard Prototype</a></li>
-  <li><a href="#project-schedule" id="toc-project-schedule" class="nav-link" data-scroll-target="#project-schedule">7 Project Schedule</a></li>
+  <li><a href="#moudule-allocation" id="toc-moudule-allocation" class="nav-link" data-scroll-target="#moudule-allocation">7 Moudule allocation</a></li>
+  <li><a href="#project-schedule" id="toc-project-schedule" class="nav-link" data-scroll-target="#project-schedule">8 Project Schedule</a></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">9 Reference</a></li>
   </ul>
 </nav>
     </div>
@@ -183,7 +185,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">March 15, 2025</p>
+      <p class="date-modified">March 20, 2025</p>
     </div>
   </div>
     
@@ -196,82 +198,113 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="motivation" class="level1">
 <h1>1 Motivation</h1>
-<p>Climate change is a critical global issue, and Singapore is no exception. As a tropical country, Singapore experiences consistently hot and humid weather. However, climate change has intensified extreme weather events, leading to higher temperatures, floods, and even droughts. These changes disproportionately affect low-income and elderly residents who may struggle to afford air conditioning or improve their living conditions.</p>
-<p>To address this, our team will use open-source weather data to analyze temperature and rainfall patterns across Singapore. By collecting data from four weather stations in the East, Central, West, and North regions, we aim to create visualizations and forecasts that provide a comprehensive understanding of local weather trends.</p>
+<p>Climate change poses significant challenges for Singapore’s urban environment and infrastructure. As a densely populated tropical country, Singapore faces particular vulnerability to rising temperatures, extreme rainfall, and changing weather patterns. These climate-related risks affect not just daily life, but also impact urban planning, public health, and economic activities.</p>
+<p>To address this challenge, our team will develop an interactive analytics dashboard using R Shiny App to transform complex weather data into actionable insights. Through analysis of historical and real-time data from 10 AWS stations across Singapore, we aim to create a platform that helps the public better understand and respond to Singapore’s changing climate conditions through intuitive visualizations and forecasting models.</p>
 </section>
 <section id="objective" class="level1">
 <h1>⁠2 Objective</h1>
 <p>The objectives of this proposal are to:</p>
 <ul>
-<li><p>Develop a Shiny App with interactive visualizations to help users better understand Singapore’s weather patterns.</p></li>
-<li><p>Analyze and compare weather variations across 10 AWS stations, with a focus on areas where lower-income and elderly residents are concentrated, to generate meaningful insights.</p></li>
+<li><p>Create an interactive dashboard that transforms complex weather data into accessible insights for public understanding</p></li>
+<li><p>Implement comparative analysis tools to evaluate weather patterns across 10 AWS stations, featuring multiple temporal resolutions and visualization techniques</p></li>
+<li><p>Design and integrate multi-horizon forecasting models (daily/weekly/monthly) to predict weather trends</p></li>
 </ul>
 </section>
 <section id="data" class="level1">
 <h1>3 Data</h1>
-<p>The&nbsp;<a href="https://www.weather.gov.sg/climate-historical-daily/">historical weather data</a>&nbsp;from Meteorological Service Singapore will be used for analysis. We will collect data from 10 AWS stations across Singapore between January 2020 and January 2025.</p>
-<p>To enhance our analysis and visualization, we will also incorporate 2020 Singapore census data, including <a href="https://tablebuilder.singstat.gov.sg/table/CT/17779">Monthly Household Income from Work by Planning Area</a>and&nbsp;<a href="https://data.gov.sg/datasets/d_9e035622439b5d25a63d7ea0699c9451/view">Resident Population by Planning Area and Age Group</a>&nbsp;as additional tmap layers.</p>
+<p>The <a href="https://www.weather.gov.sg/climate-historical-daily/">historical weather data</a> from Meteorological Service Singapore will be used for analysis. We will collect data from the following 10 AWS stations across Singapore between January 2020 and January 2025:</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Weather Station</strong></td>
+<td><strong>Planning Area</strong></td>
+<td><strong>Planning Region</strong></td>
+</tr>
+<tr class="even">
+<td>Changi</td>
+<td>Changi</td>
+<td>East Region</td>
+</tr>
+<tr class="odd">
+<td>Paya Lebar</td>
+<td>Paya Lebar</td>
+<td>East Region</td>
+</tr>
+<tr class="even">
+<td>Marina Barrage</td>
+<td>Marina South</td>
+<td>Central Region</td>
+</tr>
+<tr class="odd">
+<td>Newton</td>
+<td>Newton</td>
+<td>Central Region</td>
+</tr>
+<tr class="even">
+<td>Tai Seng</td>
+<td>Geylang</td>
+<td>North-East Region</td>
+</tr>
+<tr class="odd">
+<td>Ang Mo Kio</td>
+<td>Ang Mo Kio</td>
+<td>North-East Region</td>
+</tr>
+<tr class="even">
+<td>Admiralty</td>
+<td>Woodlands</td>
+<td>North Region</td>
+</tr>
+<tr class="odd">
+<td>Pasir Panjang</td>
+<td>Queenstown</td>
+<td>West Region</td>
+</tr>
+<tr class="even">
+<td>Clementi</td>
+<td>Clementi</td>
+<td>West Region</td>
+</tr>
+<tr class="odd">
+<td>Jurong West</td>
+<td>Jurong West</td>
+<td>West Region</td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="methodology" class="level1">
 <h1>4 Methodology</h1>
 <p>There will be three main components in our Shiny App:&nbsp;</p>
-<section id="exploratory-data-analysis-eda" class="level2">
-<h2 class="anchored" data-anchor-id="exploratory-data-analysis-eda">4.1 Exploratory Data Analysis (EDA)</h2>
+<section id="exploratory-data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis">4.1 Exploratory Data Analysis</h2>
 <p>Through an interactive Shiny App visualization, users can analyze patterns and explore relationships between temporal data, rainfall, temperature, wind speed, and geographical features.</p>
 <p>The following visualization methods will be used in our exploratory data analysis:</p>
-<section id="univariate-analysis" class="level4">
-<h4 class="anchored" data-anchor-id="univariate-analysis"><strong>Univariate Analysis</strong>&nbsp;</h4>
-<ul>
-<li><strong>Histogram:</strong> visualize univaritae weather data</li>
-</ul>
-</section>
-<section id="bivariate-analysis" class="level4">
-<h4 class="anchored" data-anchor-id="bivariate-analysis"><strong>Bivariate Analysis</strong></h4>
-<ul>
-<li><strong>Half Eye graph + box plot:</strong> visualize weather data by combining density plot and box plot and by station.</li>
-</ul>
-</section>
-<section id="multivariate-analysis" class="level4">
-<h4 class="anchored" data-anchor-id="multivariate-analysis"><strong>Multivariate Analysis</strong> &nbsp;</h4>
-<ul>
-<li><strong>Scatter Plot</strong> : compare temperature with rainfall (or windspeed) and colored by station or region.</li>
-</ul>
-</section>
 <section id="time-series-analysis" class="level4">
 <h4 class="anchored" data-anchor-id="time-series-analysis"><strong>Time Series Analysis</strong> &nbsp;</h4>
 <ul>
-<li><strong>Line chart of time-series data:</strong> visualize weather data by station overtimes&nbsp;</li>
+<li><p><strong>Line Chart:</strong>&nbsp;Visualize daily, weekly, and monthly weather trends by station over time.</p>
+<ul>
+<li><strong>Seasonal Monsoon Patterns:</strong> Highlight monsoon periods Northeast Monsoon (Dec–Mar), Southwest Monsoon (Jun–Sep) and Inter-monsoon (Apr–May, Oct–Nov) with different color, letting user observe weather differences across stations.</li>
+</ul></li>
+<li><p><strong>Ridge Plot:</strong>&nbsp;Show the distribution of daily, weekly, and monthly weather variations by station.</p></li>
+<li><p><strong>Geofacet:</strong>&nbsp;Display weather data with station layouts reflecting their geographical positions. Use faceted line charts (for temperature) and histograms (for rainfall) to highlight seasonal variations.</p></li>
 </ul>
 </section>
 <section id="geospatial-analysis" class="level4">
 <h4 class="anchored" data-anchor-id="geospatial-analysis"><strong>Geospatial Analysis</strong></h4>
 <ul>
-<li><strong>Choropleth Maps:</strong> using the tmap package, we will plot weather data across stations with yearly facets and overlay census data layers. This visualization will enable users to analyze the social impact of extreme weather conditions by comparing areas that experience high temperatures with regions having higher concentrations of low-income or elderly residents.</li>
+<li><strong>Isoline Maps:</strong>&nbsp;Visualize weather patterns using isolines overlaid on station data with&nbsp;<code>tmap</code>, showing spatial gradients.</li>
 </ul>
 </section>
 </section>
-<section id="confirmatory-data-analysis-cda" class="level2">
-<h2 class="anchored" data-anchor-id="confirmatory-data-analysis-cda">4.2 Confirmatory Data Analysis (CDA)</h2>
-<p>After EDA, user can apply the following&nbsp;statistical tests&nbsp;to confirm whether&nbsp;mean rainfall or temperature differs across stations:</p>
-<section id="normality-test" class="level4">
-<h4 class="anchored" data-anchor-id="normality-test"><strong>Normality Test</strong></h4>
+<section id="co-variation-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="co-variation-analysis">4.2 Co-variation Analysis</h2>
+<p>After EDA, user can apply the following&nbsp;statistical tests&nbsp;to confirm whether rainfall, wind speed and temperature exhibit correlation with each other:</p>
 <ul>
-<li><strong>Shapiro-Wilk Test</strong> : check if the data follows a normal distribution, which will affect which statistical parameters to use in the analysis&nbsp;</li>
+<li><p><strong>Cross-Correlation Function:</strong> Measures how two time series are correlated at different time lags. Helps identify lead-lag relationships, like “does a drop in temperature precede heavy rainfall?”</p></li>
+<li><p><strong>Cointegration Analysis:</strong> Tests if two time series move together in the long run despite short-term fluctuations, using the <code>urca</code> package.</p></li>
 </ul>
-</section>
-<section id="parametric-tests-comparing-multiple-groups" class="level4">
-<h4 class="anchored" data-anchor-id="parametric-tests-comparing-multiple-groups"><strong>Parametric Tests (comparing multiple groups)</strong></h4>
-<ul>
-<li><strong>One-way ANOVA test:</strong> Comparing mean rainfall or temperature across stations&nbsp;</li>
-<li><strong>Two-way ANOVA test:</strong> Comparing mean rainfall or temperature across both station and month&nbsp;</li>
-</ul>
-</section>
-<section id="non-parametric-tests-comparing-multiple-groups" class="level4">
-<h4 class="anchored" data-anchor-id="non-parametric-tests-comparing-multiple-groups"><strong>Non-Parametric Tests (comparing multiple groups)</strong>&nbsp;</h4>
-<ul>
-<li><strong>Kruskal-Wallis Test:</strong> Comparing median rainfall or temperature across stations or both station and month&nbsp;</li>
-</ul>
-</section>
 </section>
 <section id="forecasting" class="level2">
 <h2 class="anchored" data-anchor-id="forecasting">4.3 Forecasting</h2>
@@ -354,32 +387,32 @@ ul.task-list li input[type="checkbox"] {
 <td>For ridgeline plots that create the impression of a mountain range. They can be useful for visualising changes in distributions over time or space.</td>
 </tr>
 <tr class="even">
-<td><a href="http://talgalili.github.io/heatmaply/">heatmaply</a></td>
-<td>For building interactive cluster heatmap.</td>
-</tr>
-<tr class="odd">
 <td><a href="https://lubridate.tidyverse.org">lubridate</a></td>
 <td>For handling date-time data</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="https://tsibble.tidyverts.org">tsibble</a></td>
 <td>For tidy temporal data with wrangling tools</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="https://feasts.tidyverts.org">feasts</a></td>
 <td>For analysing tidy time series data with decomposition methods (STL), statistical summaries and graphics functions(cycle plot)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="https://fable.tidyverts.org">fable</a></td>
 <td>Forecasting models for tidy time series data</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="https://r-tmap.github.io/tmap/reference/index.html">tmap</a></td>
 <td>For drawing thematic maps</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="https://r-spatial.github.io/sf/">sf</a></td>
 <td>Providing a standardized way to encode and analyze spatial vector data</td>
+</tr>
+<tr class="even">
+<td><a href="https://www.pfaffikus.de/rpacks/urca/">urca</a></td>
+<td>For co-integration analysis (Engle-Granger and Johansen tests)</td>
 </tr>
 </tbody>
 </table>
@@ -393,7 +426,7 @@ ul.task-list li input[type="checkbox"] {
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="../images/prototype/prototype-2.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<p><img src="../images/prototype/prototype.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
 </div>
@@ -421,19 +454,29 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </section>
+<section id="moudule-allocation" class="level1">
+<h1>7 Moudule allocation</h1>
+<p><img src="../images/TaskAllocation.png" class="img-fluid"></p>
+</section>
 <section id="project-schedule" class="level1">
-<h1>7 Project Schedule</h1>
+<h1>8 Project Schedule</h1>
 <div class="cell">
 <div class="cell-output-display">
-<div class="timevis html-widget html-fill-item" id="htmlwidget-d196e91a5457e01538c7" style="width:100%;height:464px;">
+<div class="timevis html-widget html-fill-item" id="htmlwidget-12a4859cb7503817e7a1" style="width:100%;height:464px;">
 <div class="btn-group zoom-menu">
 <button type="button" class="btn btn-default btn-lg zoom-in" title="Zoom in">+</button>
 <button type="button" class="btn btn-default btn-lg zoom-out" title="Zoom out">-</button>
 </div>
 </div>
-<script type="application/json" data-for="htmlwidget-d196e91a5457e01538c7">{"x":{"items":[{"id":"1","content":"Explore Idea","start":"3/1/25","end":"3/3/25"},{"id":"2","content":"Finalize Topic","start":"3/3/25"},{"id":"3","content":"Setup GitHub and Netlify","start":"3/7/25"},{"id":"4","content":"Project Proposal","start":"3/7/25","end":"3/9/25"},{"id":"5","content":"Data Preparation & Exploration ","start":"3/8/25","end":"3/10/25"},{"id":"6","content":"Website Design and Shiny App ","start":"3/11/25","end":"3/26/25"},{"id":"7","content":"User Guide","start":"3/26/25","end":"3/29/25"},{"id":"8","content":"Poster","start":"3/26/25","end":"3/29/25"},{"id":"9","content":"Final Meeting","start":"3/27/25"},{"id":"10","content":"Final Submission","start":"4/6/25"}],"groups":null,"showZoom":true,"zoomFactor":0.5,"fit":true,"options":[],"height":null,"timezone":null,"api":[]},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-12a4859cb7503817e7a1">{"x":{"items":[{"id":"1","content":"Explore Idea","start":"3/1/25","end":"3/3/25"},{"id":"2","content":"Finalize Topic","start":"3/3/25"},{"id":"3","content":"Setup GitHub and Netlify","start":"3/7/25"},{"id":"4","content":"Project Proposal","start":"3/7/25","end":"3/9/25"},{"id":"5","content":"Data Preparation & Exploration ","start":"3/8/25","end":"3/10/25"},{"id":"6","content":"Website Design and Shiny App ","start":"3/11/25","end":"3/26/25"},{"id":"7","content":"User Guide","start":"3/26/25","end":"3/29/25"},{"id":"8","content":"Poster","start":"3/26/25","end":"3/29/25"},{"id":"9","content":"Final Meeting","start":"3/27/25"},{"id":"10","content":"Final Submission","start":"4/6/25"}],"groups":null,"showZoom":true,"zoomFactor":0.5,"fit":true,"options":[],"height":null,"timezone":null,"api":[]},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
+</section>
+<section id="reference" class="level1">
+<h1>9 Reference</h1>
+<ul>
+<li><strong>Meteorological Service Singapore.</strong> (2025). <em>Climate Map</em>.&nbsp;Meteorological Service Singapore. <a href="https://www.weather.gov.sg/climate-detailed-view/" class="uri">https://www.weather.gov.sg/climate-detailed-view/</a></li>
+</ul>
 
 
 </section>
