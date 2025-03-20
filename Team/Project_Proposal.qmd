@@ -137,7 +137,7 @@ Below is the Prototype for EDA panel:
 ![](/images/prototype/prototype-4.png){fig-align="center"}
 :::
 
-# 7 Moudule allocation
+# 7 Task allocation
 
 ![](/images/TaskAllocation.png)
 
