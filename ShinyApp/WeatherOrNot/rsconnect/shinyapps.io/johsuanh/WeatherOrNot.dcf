@@ -5,7 +5,7 @@ account: johsuanh
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14255601
-bundleId: 9950454
+bundleId: 9950493
 url: https://johsuanh.shinyapps.io/WeatherOrNot/
 version: 1
 asMultiple: FALSE
