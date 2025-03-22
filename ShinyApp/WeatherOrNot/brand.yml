@@ -145,10 +145,6 @@ defaults:
           font-size: 12px !important;
           font-weight: 500 !important;
         }
-
-        
-
-
         .shiny-plot-output {
           background-color: $white;
           border-radius: 2px;

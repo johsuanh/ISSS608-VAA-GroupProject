@@ -4,7 +4,7 @@ format: html
 ---
 
 ```{r}
-pacman::p_load(sf, tmap, tidyverse,readxl)
+pacman::p_load(sf, tmap, tidyverse,readxl,urca,tseries,plotly,ggdist,ggridges,lubridate,knitr)
 ```
 
 ```{r}
@@ -92,7 +92,7 @@ pacman::p_load(ggdist,ggridges,lubridate,knitr)
 ```
 
 ```{r}
-station<-read_csv("data/Singapore_daily_records.csv")
+station<-readRDS("data/station_data.rds")
 
 ```
 
@@ -214,19 +214,23 @@ station <- station %>%
   mutate(date = as.Date(paste(year, month, day, sep = "-"), format = "%Y-%m-%d"))
 
 # Filter only Changi site data
-changi_data <- subset(station, station == "Marina Barrage")
+changi_data <- subset(station, station == "Changi")
 
 # Drawing
-ggplot(changi_data, aes(x = date, y = mean_wind_speed_km_h, color = station, group = station)) +
+ggplot(changi_data, aes(x = date, y = mean_temperature_c, color = station, group = station)) +
   geom_line(linewidth = 1, alpha = 0.8) +
   theme_minimal() +
   labs(title = "Mean Wind Speed Over Time at Changi",
        x = "Date",
-       y = "Mean Wind Speed (km/h)") +
+       y = "Mean temperature (celcius degree)") +
   theme(
     plot.title = element_text(face = "bold", hjust = 0.5),
     legend.title = element_blank(),
     legend.position = "top"
   )
+
+```
+
+```{r}
 
 ```

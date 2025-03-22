@@ -65,7 +65,7 @@ The following visualization methods will be used in our exploratory data analysi
 
 #### **Geospatial Analysis**
 
--   **Isoline Maps:** Visualize weather patterns using isolines overlaid on station data with `tmap`, showing spatial gradients.
+-   **Isohyet Map:** Visualize weather patterns using isolines overlaid on station data with `tmap`, showing spatial gradients.
 
 ## 4.2 Co-variation Analysis
 

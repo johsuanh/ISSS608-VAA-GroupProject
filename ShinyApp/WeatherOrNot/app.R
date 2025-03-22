@@ -1,6 +1,15 @@
 # Load necessary libraries
 pacman::p_load(shiny, shinydashboard, highcharter, leaflet, bslib, yaml, bsicons)
 
+
+# Import Data
+dataset <- readRDS("www/station_data.rds")
+
+
+#========================================================== 
+## brand.yml and css 
+#========================================================== 
+
 # Read the brand.yml file
 brand_settings <- yaml.load_file("brand.yml")
 
@@ -16,7 +25,7 @@ text_color <- brand_colors$`dark-grey`
 viz_settings <- brand_settings$visualization
 component_settings <- brand_settings$components
 
-# Custom CSS based on brand.yml with enhanced styling
+# Custom CSS based on brand.yml
 custom_css <- paste0('
   /* Main Layout */
   body {
@@ -461,7 +470,7 @@ custom_css <- paste0('
   }
 
   /* Update button specific styling */
-  #update_overview, #update, #update_bivariate, #update_network {
+  #update_overview, #update, #update_RidgePlot, #update_network {
     background-color: ', primary_color, ' !important;
     border: none !important;
     font-size: 13px !important;
@@ -569,27 +578,26 @@ sidebar <- dashboardSidebar(
     menuItem("Home", tabName = "home", icon = icon("home")),
     
     # EDA Section
-    menuItem("Exploratory Analysis", tabName = "EDA", icon = icon("chart-line"),
-      menuSubItem("Univariate Analysis", tabName = "univariate"),
-      menuSubItem("Bivariate Analysis", tabName = "bivariate"),
-      menuSubItem("Multivariate Analysis", tabName = "multivariate"),
-      menuSubItem("Time Series Analysis", tabName = "timeseries"),
-      menuSubItem("Geospatial Analysis", tabName = "geospatial")
+    menuItem("Exploratory Analysis", tabName = "EDA", icon = icon("glasses"),
+      menuItem(HTML("<b>Time-series Analysis:</b>"), tabName = NULL,icon = icon("calendar-days")),
+      menuSubItem("Line Chart", tabName = "LineChart"),
+      menuSubItem("Ridge Plot", tabName = "RidgePlot"),
+      menuSubItem("Geofacet", tabName = "Geofacet"),
+      menuSubItem(HTML("<b>Geospatial Analysis:</b>"), tabName = NULL,icon = icon("map")),
+      menuSubItem("Isoline Map", tabName = "geospatial")
     ),
     
     # CDA Section
-    menuItem("Confirmatory Analysis", tabName = "CDA", icon = icon("check-circle"),
-      menuSubItem("Normality Tests", tabName = "normality"),
-      menuSubItem("ANOVA Tests", tabName = "anova"),
-      menuSubItem("Non-Parametric Tests", tabName = "nonparametric")
-    ),
+    menuItem("Co-variation Analysis", tabName = "CDA", icon = icon("check-circle"),
+      menuSubItem("Cross-Correlation Function", tabName = "CrossCorrelationFunction"),
+      menuSubItem("Cointegration Analysis", tabName = "Cointegration")
+      ),
     
     # Forecasting Section
     menuItem("Forecasting", tabName = "Forecasting", icon = icon("chart-line"),
       menuSubItem("Time Series Decomposition", tabName = "decomposition"),
-      menuSubItem("ARIMA Models", tabName = "arima"),
-      menuSubItem("ETS Models", tabName = "ets")
-    ),
+      menuSubItem("Forecasting Models", tabName = "arima")
+      ),
     
     # About section
     menuItem("About", tabName = "about", icon = icon("info-circle"))
@@ -615,38 +623,49 @@ homeTab <- fluidRow(
 )
 
 # EDA Components
-univariateTab <- fluidRow(
+LineChartTab <- fluidRow(
   # Left column - Controls
   column(width = 3,
     box(width = 12, title = "Data Selection", status = "info",
-      selectInput("variable", "Select Variable:", 
+        selectInput("variable_ts", "Select Variable:", 
                     choices = c("Temperature", "Rainfall", "Wind Speed"),
                     selected = "Temperature"),
-      selectInput("station_uni", "Select Stations:", 
-                    choices = c("All"),
-                    selected = "All"),
-      dateRangeInput("date_range", "Date Range:",
-                    start = "2020-01-01", 
-                    end = "2025-01-31",
-                    separator = " - ",
-                    format = "yyyy-mm-dd"),
-      div(style = "text-align: right;",
-        actionButton("update_univariate", "Update View", 
-                    class = "btn-primary",
-                    icon = icon("refresh"))
-      )
+        selectInput("station_ts", "Select Stations:", 
+                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
+                                "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
+                                "Tai_Seng", "Admiralty"),
+                    multiple = TRUE,
+                    selected = "Changi"),
+        selectInput("aggregation", "Time Aggregation:",
+                    choices = c("Daily", "Weekly", "Monthly"),
+                    selected = "Daily"),
+        dateRangeInput("date_range_ts", "Date Range:",
+                       start = "2020-01-01", 
+                       end = "2025-01-31",
+                       separator = " - ",
+                       format = "yyyy-mm-dd"),                 
+        div(style = "text-align: right;",
+            actionButton("update_ts", "Update View", 
+                         class = "btn-primary",
+                         icon = icon("refresh"))
+        )
+    ),
+    box(width = 12, title = "Display Options", status = "info",
+        checkboxInput("show_trend_ts", "Show Trend", value = TRUE),
+        checkboxInput("show_seasonal", "Show Seasonality", value = TRUE),
+        checkboxInput("show_outliers", "Show Outliers", value = TRUE)
     )
   ),
-  # Right column - Histogram and Stats
+  # Right column - Line Chart
   column(width = 9,
     box(width = 12,
-      title = "Univariate Analysis",
+      title = "Time Series Analysis: Line Chart",
       status = "primary",
       solidHeader = TRUE,
-      # Histogram
+      # Line Chart
       fluidRow(
         column(width = 12,
-          highchartOutput("histogram", height = "400px")
+          highchartOutput("linechart", height = "400px")
         )
       ),
       # Summary Statistics
@@ -711,8 +730,8 @@ overviewTab <- fluidRow(
   )
 )
 
-# Bivariate Analysis Tab
-bivariateTab <- fluidRow(
+# RidgePlot Analysis Tab
+RidgePlotTab <- fluidRow(
   # Left column - Controls
   column(width = 3,
     box(width = 12, title = "Data Selection", status = "info",
@@ -731,7 +750,7 @@ bivariateTab <- fluidRow(
                     separator = " - ",
                     format = "yyyy-mm-dd"),                  
       div(style = "text-align: right;",
-        actionButton("update_bivariate", "Update View", 
+        actionButton("update_RidgePlot", "Update View", 
                     class = "btn-primary",
                     icon = icon("refresh"))
       )
@@ -740,7 +759,7 @@ bivariateTab <- fluidRow(
   # Right column - Density Plot and Statistics
   column(width = 9,
     box(width = 12,
-      title = "Bivariate Analysis",
+      title = "RidgePlot Analysis",
       status = "primary",
       solidHeader = TRUE,
       # Density Plot
@@ -762,8 +781,8 @@ bivariateTab <- fluidRow(
   )
 )
 
-# Multivariate Analysis Tab
-multivariateTab <- fluidRow(
+# Geofacet Analysis Tab
+GeofacetTab <- fluidRow(
   # Left column - Controls
   column(width = 3,
     box(width = 12, title = "Data Selection", status = "info",
@@ -790,7 +809,7 @@ multivariateTab <- fluidRow(
                     separator = " - ",
                     format = "yyyy-mm-dd"),
       div(style = "text-align: right;",
-        actionButton("update_multivariate", "Update View", 
+        actionButton("update_Geofacet", "Update View", 
                     class = "btn-primary",
                     icon = icon("refresh"))
       )
@@ -803,8 +822,8 @@ multivariateTab <- fluidRow(
   # Right column - Visualizations and Statistics
   column(width = 9,
     tabBox(width = 12,
-      title = "Multivariate Analysis",
-      id = "multivariate_tabs",
+      title = "Geofacet Analysis",
+      id = "Geofacet_tabs",
       tabPanel("Scatter Plot",
         fluidRow(
           column(width = 12,
@@ -839,57 +858,6 @@ multivariateTab <- fluidRow(
   )
 )
 
-# Time Series Analysis Tab
-timeseriesTab <- fluidRow(
-  # Left column - Controls
-  column(width = 3,
-    box(width = 12, title = "Time Series Settings", status = "info",
-      selectInput("variable_ts", "Select Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = "Temperature"),
-      selectInput("station_ts", "Select Stations:", 
-                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                              "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                              "Tai_Seng", "Admiralty"),
-                    multiple = TRUE,
-                    selected = "Changi"),
-      selectInput("aggregation", "Time Aggregation:",
-                 choices = c("Daily", "Weekly", "Monthly"),
-                 selected = "Daily"),
-      dateRangeInput("date_range_ts", "Date Range:",
-                    start = "2020-01-01", 
-                    end = "2025-01-31",
-                    separator = " - ",
-                    format = "yyyy-mm-dd"),                 
-      div(style = "text-align: right;",
-        actionButton("update_ts", "Update View", 
-                    class = "btn-primary",
-                    icon = icon("refresh"))
-      )
-    ),
-    box(width = 12, title = "Display Options", status = "info",
-      checkboxInput("show_trend_ts", "Show Trend", value = TRUE),
-      checkboxInput("show_seasonal", "Show Seasonality", value = TRUE),
-      checkboxInput("show_outliers", "Show Outliers", value = TRUE)
-    )
-  ),
-  # Right column - Visualizations
-  column(width = 9,
-    tabBox(width = 12,
-      title = "Time Series Analysis",
-      id = "timeseries_tabs",
-      tabPanel("Line Chart",
-        highchartOutput("line_chart")
-      ),
-      tabPanel("Seasonal Pattern",
-        highchartOutput("seasonal_plot")
-      ),
-      tabPanel("Statistics",
-        verbatimTextOutput("ts_stats")
-      )
-    )
-  )
-)
 
 # Geospatial Analysis Tab
 geospatialTab <- fluidRow(
@@ -945,7 +913,7 @@ geospatialTab <- fluidRow(
 )
 
 # Placeholder content for other tabs
-CDASubTabs <- fluidRow(
+CATabs <- fluidRow(
   box(width = 12, 
       h3("Confirmatory Analysis Content Here")
   )
@@ -957,88 +925,75 @@ ForecastSubTabs <- fluidRow(
   )
 )
 
-# Normality Tests Tab
-normalityTab <- fluidRow(
+# CrossCorrelationFunction Tests Tab
+CrossCorrelationFunctionTab <- fluidRow(
   # Left column - Controls
   column(width = 3,
     box(width = 12, title = "Test Settings", status = "info",
-      selectInput("variable_norm", "Select Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = "Temperature"),
-      selectInput("station_norm", "Select Station:", 
-                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                              "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                              "Tai_Seng", "Admiralty"),
-                    multiple = TRUE,
-                    selected = "Changi"),
-      dateRangeInput("date_range_norm", "Date Range:",
-                    start = "2020-01-01", 
-                    end = "2025-01-31",
-                    separator = " - ",
-                    format = "yyyy-mm-dd"),
-      div(style = "text-align: right;",
-        actionButton("run_normality", "Run Test", 
-                    class = "btn-primary",
-                    icon = icon("play"))
+        selectInput("station", "Select Station:", choices = unique(dataset$station)),
+        selectInput("var1", "Select First Variable:", choices = colnames(dataset)[5:12]),
+        selectInput("var2", "Select Second Variable:", choices = colnames(dataset)[5:12]),
+        dateRangeInput("date_range", "Select Date Range:", 
+                       start = min(dataset$date), end = max(dataset$date)),
+        checkboxInput("apply_diff", "Apply Differencing", value = FALSE),
+        sliderInput("lag_max", "Max Lag:", min = 1, max = 60, value = 30),
+      div(style = "text-align: right;"
+        #actionButton("run_CrossCorrelationFunction", "Run Test", 
+                    #class = "btn-primary",
+                    #icon = icon("play"))
       )
-    ),
-    box(width = 12, title = "Display Options", status = "info",
-      checkboxInput("show_qq", "Show Q-Q Plot", value = TRUE),
-      checkboxInput("show_density", "Show Density Plot", value = TRUE),
-      checkboxInput("show_test_details", "Show Test Details", value = TRUE)
     )
   ),
   # Right column - Results
   column(width = 9,
     tabBox(width = 12,
-      title = "Normality Test Results",
-      id = "normality_tabs",
+      title = "Cross Correlation Function Test Results",
+      id = "CrossCorrelationFunction_tabs",
       tabPanel("Visual Analysis",
         fluidRow(
-          column(width = 6, highchartOutput("qq_plot")),
-          column(width = 6, highchartOutput("density_plot"))
+          column(width = 10, highchartOutput("qq_plot"))
         )
       ),
       tabPanel("Test Results",
         verbatimTextOutput("shapiro_test")
       ),
       tabPanel("Summary",
-        verbatimTextOutput("normality_summary")
+        verbatimTextOutput("CrossCorrelationFunction_summary")
       )
     )
   )
 )
 
-# ANOVA Tests Tab
-anovaTab <- fluidRow(
+# Cointegration Tests Tab
+CointegrationTab <- fluidRow(
   # Left column - Controls
   column(width = 3,
-    box(width = 12, title = "ANOVA Settings", status = "info",
-      selectInput("anova_type", "Test Type:",
-                 choices = c("One-way ANOVA", "Two-way ANOVA"),
-                 selected = "One-way ANOVA"),
-      selectInput("variable_anova", "Select Variable:", 
+    box(width = 12, title = "Analysis Settings", status = "info",
+      selectInput("variable1_Cointegration", "Select Variable:",
+                 choices = c("Temperature", "Rainfall", "Wind Speed"),
+                 selected = "Temperature"),
+      selectInput("variable2_Cointegration", "Select Variable:", 
                     choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = "Temperature"),
-      selectInput("station_anova", "Select Stations:", 
+                    selected = "Rainfall"),
+      selectInput("station_Cointegration", "Select Stations:", 
                     choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
                               "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
                               "Tai_Seng", "Admiralty"),
                     multiple = TRUE,
                     selected = c("Changi", "Marina_Barrage")),
       conditionalPanel(
-        condition = "input.anova_type == 'Two-way ANOVA'",
+        condition = "input.Cointegration_type == 'Two-way Cointegration'",
         selectInput("second_factor", "Second Factor:",
                    choices = c("Month", "Season", "Year"),
                    selected = "Month")
       ),
-      dateRangeInput("date_range_anova", "Date Range:",
+      dateRangeInput("date_range_Cointegration", "Date Range:",
                     start = "2020-01-01", 
                     end = "2025-01-31",
                     separator = " - ",
                     format = "yyyy-mm-dd"),
       div(style = "text-align: right;",
-        actionButton("run_anova", "Run Test", 
+        actionButton("run_Cointegration", "Run Test", 
                     class = "btn-primary",
                     icon = icon("play"))
       )
@@ -1052,16 +1007,16 @@ anovaTab <- fluidRow(
   # Right column - Results
   column(width = 9,
     tabBox(width = 12,
-      title = "ANOVA Results",
-      id = "anova_tabs",
+      title = "Cointegration Results",
+      id = "Cointegration_tabs",
       tabPanel("Visual Analysis",
         fluidRow(
-          column(width = 6, highchartOutput("anova_boxplot")),
+          column(width = 6, highchartOutput("Cointegration_boxplot")),
           column(width = 6, highchartOutput("means_plot"))
         )
       ),
       tabPanel("Test Results",
-        verbatimTextOutput("anova_results")
+        verbatimTextOutput("Cointegration_results")
       ),
       tabPanel("Post-hoc Analysis",
         verbatimTextOutput("posthoc_results")
@@ -1342,22 +1297,19 @@ body <- dashboardBody(
     tabItem(tabName = "home", homeTab),
     
     # EDA tabs
-    tabItem(tabName = "univariate", univariateTab),
-    tabItem(tabName = "bivariate", bivariateTab),
-    tabItem(tabName = "multivariate", multivariateTab),
-    tabItem(tabName = "timeseries", timeseriesTab),
+    tabItem(tabName = "LineChart", LineChartTab),
+    tabItem(tabName = "RidgePlot", RidgePlotTab),
+    tabItem(tabName = "Geofacet", GeofacetTab),
     tabItem(tabName = "geospatial", geospatialTab),
     
-    # CDA tabs
-    tabItem(tabName = "normality", normalityTab),
-    tabItem(tabName = "anova", anovaTab),
-    tabItem(tabName = "nonparametric", nonparametricTab),
-    
+    # CA tabs
+    tabItem(tabName = "CrossCorrelationFunction", CrossCorrelationFunctionTab),
+    tabItem(tabName = "Cointegration", CointegrationTab),
+
     # Forecasting tabs
     tabItem(tabName = "decomposition", decompositionTab),
     tabItem(tabName = "arima", arimaTab),
-    tabItem(tabName = "ets", etsTab),
-    
+
     # About tab
     tabItem(tabName = "about", aboutTab)
   )
@@ -1426,8 +1378,8 @@ server <- function(input, output) {
     )
   )
   
-  # Reactive data for univariate analysis
-  univariate_data <- reactive({
+  # Reactive data for LineChart analysis
+  LineChart_data <- reactive({
     req(input$station, input$variable, input$date_range)
     # Placeholder for data retrieval
     # This should be replaced with actual data retrieval logic
@@ -1439,8 +1391,8 @@ server <- function(input, output) {
   
   # Simple histogram
   output$histogram <- renderHighchart({
-    req(univariate_data())
-    data <- univariate_data()
+    req(LineChart_data())
+    data <- LineChart_data()
     
     hc <- highchart() %>%
       hc_title(text = paste("Distribution of", input$variable)) %>%
@@ -1459,8 +1411,8 @@ server <- function(input, output) {
   
   # Simple summary statistics
   output$summary_stats <- renderPrint({
-    req(univariate_data())
-    data <- univariate_data()
+    req(LineChart_data())
+    data <- LineChart_data()
     
     # Calculate basic statistics
     stats <- summary(data$value)
@@ -1484,8 +1436,8 @@ server <- function(input, output) {
       addMarkers(lng = 103.8198, lat = 1.3521, popup = "Singapore")
   })
 
-  # Reactive data for bivariate analysis
-  bivariate_data <- reactive({
+  # Reactive data for RidgePlot analysis
+  RidgePlot_data <- reactive({
     req(input$station_biv, input$var_biv, input$date_range_biv)
     # Placeholder for data retrieval
     # This should be replaced with actual data retrieval logic
@@ -1497,8 +1449,8 @@ server <- function(input, output) {
   
   # Density plot
   output$density_plot_biv <- renderHighchart({
-    req(bivariate_data())
-    data <- bivariate_data()
+    req(RidgePlot_data())
+    data <- RidgePlot_data()
     
     # Create density estimates for each station
     densities <- lapply(unique(data$station), function(s) {
@@ -1532,8 +1484,8 @@ server <- function(input, output) {
   
   # Summary statistics by station
   output$station_stats_biv <- renderPrint({
-    req(bivariate_data())
-    data <- bivariate_data()
+    req(RidgePlot_data())
+    data <- RidgePlot_data()
     
     # Calculate statistics for each station
     cat(paste("Statistics for", input$var_biv, "by Station\n\n"))
@@ -1553,8 +1505,8 @@ server <- function(input, output) {
     }
   })
 
-  # Reactive data for multivariate analysis
-  multivariate_data <- reactive({
+  # Reactive data for Geofacet analysis
+  Geofacet_data <- reactive({
     req(input$variables, input$station_multi, input$date_range_multi)
     # Placeholder for data retrieval
     # This should be replaced with actual data retrieval logic
@@ -1570,8 +1522,8 @@ server <- function(input, output) {
   
   # Scatter plot
   output$scatter_plot <- renderHighchart({
-    req(multivariate_data())
-    data <- multivariate_data()
+    req(Geofacet_data())
+    data <- Geofacet_data()
     
     if(ncol(data) < 2) {
       return(NULL)
@@ -1645,8 +1597,8 @@ server <- function(input, output) {
   
   # Correlation matrix
   output$correlation_matrix <- renderHighchart({
-    req(multivariate_data())
-    data <- multivariate_data()
+    req(Geofacet_data())
+    data <- Geofacet_data()
     
     if(ncol(data) < 2) {
       return(NULL)
@@ -1683,8 +1635,8 @@ server <- function(input, output) {
   
   # Scatter plot statistics
   output$scatter_stats <- renderPrint({
-    req(multivariate_data())
-    data <- multivariate_data()
+    req(Geofacet_data())
+    data <- Geofacet_data()
     
     if(ncol(data) < 2) {
       cat("Please select at least two variables for analysis.\n")
@@ -1714,8 +1666,8 @@ server <- function(input, output) {
   
   # Correlation matrix statistics
   output$correlation_stats <- renderPrint({
-    req(multivariate_data())
-    data <- multivariate_data()
+    req(Geofacet_data())
+    data <- Geofacet_data()
     
     if(ncol(data) < 2) {
       cat("Please select at least two variables for analysis.\n")
