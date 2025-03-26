@@ -1,5 +1,5 @@
 # Load necessary libraries
-pacman::p_load(shiny, shinydashboard, highcharter, leaflet, bslib, yaml, bsicons)
+pacman::p_load(shiny, shinydashboard, highcharter, leaflet, bslib, yaml, bsicons,dplyr)
 
 
 # Import Data
@@ -622,40 +622,62 @@ homeTab <- fluidRow(
   )
 )
 
-# EDA Components
+# EDA Components（改了）
 LineChartTab <- fluidRow(
-  # Left column - Controls
   column(width = 3,
-    box(width = 12, title = "Data Selection", status = "info",
-        selectInput("variable_ts", "Select Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = "Temperature"),
-        selectInput("station_ts", "Select Stations:", 
-                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                                "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                                "Tai_Seng", "Admiralty"),
-                    multiple = TRUE,
-                    selected = "Changi"),
-        selectInput("aggregation", "Time Aggregation:",
-                    choices = c("Daily", "Weekly", "Monthly"),
-                    selected = "Daily"),
-        dateRangeInput("date_range_ts", "Date Range:",
-                       start = "2020-01-01", 
-                       end = "2025-01-31",
-                       separator = " - ",
-                       format = "yyyy-mm-dd"),                 
-        div(style = "text-align: right;",
-            actionButton("update_ts", "Update View", 
-                         class = "btn-primary",
-                         icon = icon("refresh"))
-        )
-    ),
-    box(width = 12, title = "Display Options", status = "info",
-        checkboxInput("show_trend_ts", "Show Trend", value = TRUE),
-        checkboxInput("show_seasonal", "Show Seasonality", value = TRUE),
-        checkboxInput("show_outliers", "Show Outliers", value = TRUE)
-    )
+         box(width = 12, title = "Data Selection", status = "info",
+             selectInput("variable_ts", "Select Variable:", 
+                         choices = c("Temperature", "Rainfall", "Wind Speed"),
+                         selected = "Temperature"),
+             selectInput("station_ts", "Select Stations:", 
+                         choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
+                                     "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
+                                     "Tai_Seng", "Admiralty"),
+                         multiple = TRUE,
+                         selected = c("Changi")),
+             selectInput("aggregation", "Time Aggregation:",
+                         choices = c("Daily", "Weekly", "Monthly"),
+                         selected = "Daily"),
+             dateRangeInput("date_range_ts", "Date Range:",
+                            start = "2019-01-01", 
+                            end = "2025-01-31",
+                            separator = " - ",
+                            format = "yyyy-mm-dd"),                 
+             div(style = "text-align: right;",
+                 actionButton("update_ts", "Update View", 
+                              class = "btn-primary",
+                              icon = icon("refresh"))
+             )
+         ),
+         box(width = 12, title = "Display Options", status = "info",
+             checkboxInput("show_trend_ts", "Show Trend", value = TRUE),
+             checkboxInput("show_seasonal", "Show Seasonality", value = TRUE),
+             checkboxInput("show_outliers", "Show Outliers", value = TRUE),
+             checkboxInput("show_monsoon", "Show Monsoon Periods", value = TRUE)  
+         )
   ),
+  column(width = 9,
+         box(width = 12,
+             title = "Time Series Analysis: Line Chart",
+             status = "primary",
+             solidHeader = TRUE,
+             fluidRow(
+               column(width = 12,
+                      highchartOutput("linechart", height = "400px")
+               )
+             ),
+             fluidRow(
+               column(width = 12,
+                      div(style = "margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;",
+                          h4("Summary Statistics"),
+                          verbatimTextOutput("summary_stats")
+                      )
+               )
+             )
+         )
+  )
+)
+
   # Right column - Line Chart
   column(width = 9,
     box(width = 12,
@@ -679,7 +701,7 @@ LineChartTab <- fluidRow(
       )
     )
   )
-)
+
 
 # Data Exploration subtab contents
 overviewTab <- fluidRow(
@@ -1330,6 +1352,8 @@ ui <- dashboardPage(
 
 # Define server
 server <- function(input, output) {
+  date_min <- min(dataset$date, na.rm = TRUE)
+  date_max <- max(dataset$date, na.rm = TRUE)
   # Configure highcharter theme based on visualization settings
   hc_theme_custom <- hc_theme(
     colors = c(primary_color, secondary_color, brand_colors$`medium-blue`, brand_colors$`dark-blue`),
@@ -1378,56 +1402,128 @@ server <- function(input, output) {
     )
   )
   
-  # Reactive data for LineChart analysis
-  LineChart_data <- reactive({
-    req(input$station, input$variable, input$date_range)
-    # Placeholder for data retrieval
-    # This should be replaced with actual data retrieval logic
-    data.frame(
-      value = rnorm(1000),
-      station = sample(input$station, 1000, replace = TRUE)
-    )
-  })
-  
-  # Simple histogram
-  output$histogram <- renderHighchart({
-    req(LineChart_data())
-    data <- LineChart_data()
+  # Reactive data for LineChart analysis（改了）
+  output$linechart <- renderHighchart({
+    req(input$variable_ts, input$station_ts, input$date_range_ts)
+    
+    variable_column <- switch(input$variable_ts,
+                              "Temperature" = "mean_temperature_c",
+                              "Rainfall" = "daily_rainfall_total_mm",
+                              "Wind Speed" = "mean_wind_speed_km_h")
+    
+    data_filtered <- dataset %>%
+      filter(station %in% input$station_ts,
+             date >= input$date_range_ts[1],
+             date <= input$date_range_ts[2]) %>%
+      select(date, station, value = all_of(variable_column))
+    
+    
+    if (nrow(data_filtered) == 0) {
+      showNotification("No data available for selected filters.", type = "error")
+      return(NULL)
+    }
+    
+    # Define monsoon bands only if checkbox is TRUE
+    monsoon_bands <- NULL
+    if (input$show_monsoon) {
+      monsoon_bands <- list()
+      years <- as.numeric(format(min(data_filtered$date), "%Y")):as.numeric(format(max(data_filtered$date), "%Y"))
+      
+      for (y in years) {
+        monsoon_bands <- append(monsoon_bands, list(
+          list(from = datetime_to_timestamp(as.Date(paste0(y - 1, "-12-01"))),
+               to   = datetime_to_timestamp(as.Date(paste0(y, "-03-31"))),
+               color = "rgba(135,206,250,0.2)"),  # NE Monsoon
+          list(from = datetime_to_timestamp(as.Date(paste0(y, "-06-01"))),
+               to   = datetime_to_timestamp(as.Date(paste0(y, "-09-30"))),
+               color = "rgba(144,238,144,0.2)"),  # SW Monsoon
+          list(from = datetime_to_timestamp(as.Date(paste0(y, "-04-01"))),
+               to   = datetime_to_timestamp(as.Date(paste0(y, "-05-31"))),
+               color = "rgba(255,228,181,0.2)"),  # Inter-monsoon I
+          list(from = datetime_to_timestamp(as.Date(paste0(y, "-10-01"))),
+               to   = datetime_to_timestamp(as.Date(paste0(y, "-11-30"))),
+               color = "rgba(255,228,181,0.2)")   # Inter-monsoon II
+        ))
+      }
+    }
     
     hc <- highchart() %>%
-      hc_title(text = paste("Distribution of", input$variable)) %>%
-      hc_xAxis(title = list(text = input$variable)) %>%
-      hc_yAxis(title = list(text = "Frequency")) %>%
-      hc_add_series(
-        data = data$value,
-        type = "histogram",
-        name = "Frequency",
-        color = primary_color
+      hc_title(text = paste("Time Series of", input$variable_ts)) %>%
+      hc_subtitle(
+        text = "<span style='font-size:14px'>
+           <span style='background-color:rgba(135,206,250,0.2); padding: 4px 8px; display: inline-block;'></span> NE Monsoon &nbsp;&nbsp;
+           <span style='background-color:rgba(144,238,144,0.2); padding: 4px 8px; display: inline-block;'></span> SW Monsoon &nbsp;&nbsp;
+           <span style='background-color:rgba(255,228,181,0.2); padding: 4px 8px; display: inline-block;'></span> Inter-monsoon
+         </span>",
+        useHTML = TRUE
+      )%>%
+      hc_xAxis(
+        type = "datetime",
+        title = list(text = "Date"),
+        plotBands = monsoon_bands
       ) %>%
-      hc_add_theme(hc_theme_custom)
+      hc_yAxis(title = list(text = input$variable_ts)) %>%
+      hc_tooltip(shared = TRUE)
     
-    hc
+    for(st in unique(data_filtered$station)) {
+      st_data <- data_filtered %>% filter(station == st)
+      
+      if (nrow(st_data) == 0) next
+      
+      hc <- hc %>%
+        hc_add_series(
+          data = list_parse2(data.frame(
+            x = datetime_to_timestamp(st_data$date),
+            y = st_data$value
+          )),
+          name = st,
+          type = "line"
+        )
+    }
+    
+    hc %>% hc_add_theme(hc_theme_custom)
   })
+  
+
+
   
   # Simple summary statistics
   output$summary_stats <- renderPrint({
-    req(LineChart_data())
-    data <- LineChart_data()
+    req(input$variable_ts, input$station_ts, input$date_range_ts)
     
-    # Calculate basic statistics
-    stats <- summary(data$value)
-    cat("Basic Statistics:\n\n")
-    print(stats)
+    variable_column <- switch(input$variable_ts,
+                              "Temperature" = "mean_temperature_c",
+                              "Rainfall" = "daily_rainfall_total_mm",
+                              "Wind Speed" = "mean_wind_speed_km_h")
     
-    cat("\nStandard Deviation:", round(sd(data$value), 2))
+    data_filtered <- dataset %>%
+      filter(station %in% input$station_ts,
+             date >= input$date_range_ts[1],
+             date <= input$date_range_ts[2]) %>%
+      pull(all_of(variable_column))
+    
+    cat("Summary statistics for", input$variable_ts, "\n\n")
+    print(summary(data_filtered))
+    cat("\nStandard Deviation:", round(sd(data_filtered, na.rm = TRUE), 2))
   })
   
+  
   # Placeholder chart
-  output$line_chart <- renderHighchart({
-    highchart() %>% 
-      hc_title(text = "Sample Line Chart") %>%
-      hc_add_theme(hc_theme_custom)
+  LineChart_data <- reactive({
+    req(input$station_ts, input$variable_ts, input$date_range_ts)
+    
+    variable_column <- switch(input$variable_ts,
+                              "Temperature" = "mean_temperature_c",
+                              "Rainfall" = "daily_rainfall_total_mm",
+                              "Wind Speed" = "mean_wind_speed_km_h")
+    
+    station %>%
+      filter(station %in% input$station_ts,
+             date >= input$date_range_ts[1],
+             date <= input$date_range_ts[2]) %>%
+      select(date, station, value = all_of(variable_column))
   })
+  
   
   # Placeholder map
   output$map <- renderLeaflet({
