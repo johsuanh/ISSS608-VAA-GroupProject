@@ -1,5 +1,5 @@
 # Load necessary libraries
-pacman::p_load(shiny, shinydashboard, highcharter, leaflet, bslib, yaml, bsicons,dplyr)
+pacman::p_load(shiny, shinydashboard, highcharter, leaflet, bslib, yaml, bsicons,dplyr,lubridate,zoo,tidyr)
 
 
 # Import Data
@@ -630,9 +630,7 @@ LineChartTab <- fluidRow(
                          choices = c("Temperature", "Rainfall", "Wind Speed"),
                          selected = "Temperature"),
              selectInput("station_ts", "Select Stations:", 
-                         choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                                     "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                                     "Tai_Seng", "Admiralty"),
+                         choices = sort(unique(dataset$station)),
                          multiple = TRUE,
                          selected = c("Changi")),
              selectInput("aggregation", "Time Aggregation:",
@@ -766,6 +764,9 @@ RidgePlotTab <- fluidRow(
                               "Tai_Seng", "Admiralty"),
                     multiple = TRUE,
                     selected = c("Changi", "Marina_Barrage")),
+      selectInput("aggregation_biv", "Time Aggregation:",
+                  choices = c("Daily", "Weekly", "Monthly"),
+                  selected = "Daily"),
       dateRangeInput("date_range_biv", "Date Range:",
                     start = "2020-01-01", 
                     end = "2025-01-31",
@@ -1415,13 +1416,23 @@ server <- function(input, output) {
       filter(station %in% input$station_ts,
              date >= input$date_range_ts[1],
              date <= input$date_range_ts[2]) %>%
-      select(date, station, value = all_of(variable_column))
+      select(date, station, value = all_of(variable_column)) %>%
+      mutate(period = case_when(
+        input$aggregation == "Weekly" ~ floor_date(date, "week"),
+        input$aggregation == "Monthly" ~ floor_date(date, "month"),
+        TRUE ~ date
+      )) %>%
+      group_by(station, period) %>%
+      summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+      rename(date = period) %>%
+      mutate(date = as.Date(date))
     
     
     if (nrow(data_filtered) == 0) {
       showNotification("No data available for selected filters.", type = "error")
       return(NULL)
     }
+    
     
     # Define monsoon bands only if checkbox is TRUE
     monsoon_bands <- NULL
@@ -1532,40 +1543,77 @@ server <- function(input, output) {
       addMarkers(lng = 103.8198, lat = 1.3521, popup = "Singapore")
   })
 
-  # Reactive data for RidgePlot analysis
+  # Reactive data for RidgePlot analysis（改了）
   RidgePlot_data <- reactive({
-    req(input$station_biv, input$var_biv, input$date_range_biv)
+    req(input$station_biv, input$var_biv, input$date_range_biv, input$aggregation_biv)
     # Placeholder for data retrieval
     # This should be replaced with actual data retrieval logic
-    data.frame(
-      value = c(rnorm(500, mean = 25, sd = 2), rnorm(500, mean = 26, sd = 2.5)),
-      station = rep(input$station_biv, each = 500)
-    )
+    variable_column <- switch(input$var_biv,
+                              "Temperature" = "mean_temperature_c",
+                              "Rainfall" = "daily_rainfall_total_mm",
+                              "Wind Speed" = "mean_wind_speed_km_h")
+
+    data_filtered <- dataset %>%
+      filter(station %in% input$station_biv,
+             date >= input$date_range_biv[1],
+             date <= input$date_range_biv[2]) %>%
+      select(date, station, value = all_of(variable_column)) %>%
+      mutate(period = case_when(
+        input$aggregation_biv == "Weekly" ~ floor_date(date, "week"),
+        input$aggregation_biv == "Monthly" ~ floor_date(date, "month"),
+        TRUE ~ date  # Daily
+      )) %>%
+      group_by(station, period) %>%
+      summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+      rename(date = period)
+    
+    return(data_filtered)
   })
   
-  # Density plot
+  # Density plot（改了）
   output$density_plot_biv <- renderHighchart({
     req(RidgePlot_data())
     data <- RidgePlot_data()
     
-    # Create density estimates for each station
+    # Interpolating missing values: Fill NA with moving average
+    data <- data %>%
+      group_by(station) %>%
+      arrange(date) %>%
+      mutate(value = ifelse(is.na(value), 
+                            rollmean(value, k = 3, fill = NA, align = "center"), 
+                            value)) %>%
+      ungroup()
+    
+    # The density data for each station is processed again
     densities <- lapply(unique(data$station), function(s) {
-      d <- density(data$value[data$station == s])
+      station_values <- data$value[data$station == s]
+      
+      # Skip sites with insufficient data
+      if (sum(!is.na(station_values)) < 10) {
+        showNotification(paste("Station", s, "has insufficient data for density plot."), type = "warning")
+        return(NULL)
+      }
+      
+      d <- density(station_values)
       data.frame(x = d$x, y = d$y, station = s)
     })
     
-    # Combine all densities
+    densities <- Filter(Negate(is.null), densities)
+    
+    if (length(densities) == 0) {
+      showNotification("No sufficient data to generate Ridge Plot.", type = "error")
+      return(NULL)
+    }
+    
     all_densities <- do.call(rbind, densities)
     
-    # Create the plot
     hc <- highchart() %>%
       hc_title(text = paste("Distribution of", input$var_biv, "by Station")) %>%
       hc_xAxis(title = list(text = input$var_biv)) %>%
       hc_yAxis(title = list(text = "Density")) %>%
       hc_tooltip(shared = TRUE)
     
-    # Add a line for each station
-    for(station in unique(all_densities$station)) {
+    for (station in unique(all_densities$station)) {
       station_data <- subset(all_densities, station == station)
       hc <- hc %>%
         hc_add_series(
@@ -1577,6 +1625,9 @@ server <- function(input, output) {
     
     hc %>% hc_add_theme(hc_theme_custom)
   })
+  
+  
+  
   
   # Summary statistics by station
   output$station_stats_biv <- renderPrint({
@@ -1601,76 +1652,113 @@ server <- function(input, output) {
     }
   })
 
-  # Reactive data for Geofacet analysis
+  
+  # Reactive data for Geofacet analysis (real data + region mapping)（改了）
   Geofacet_data <- reactive({
-    req(input$variables, input$station_multi, input$date_range_multi)
-    # Placeholder for data retrieval
-    # This should be replaced with actual data retrieval logic
-    data <- data.frame(
-      Temperature = rnorm(1000, mean = 25, sd = 2),
-      Rainfall = rnorm(1000, mean = 100, sd = 30),
-      Wind_Speed = rnorm(1000, mean = 15, sd = 5),
-      station = sample(input$station_multi, 1000, replace = TRUE),
-      region = sample(c("North", "South", "East", "West", "Central"), 1000, replace = TRUE)
+    req(input$station_multi, input$date_range_multi,
+        input$x_scatter_variable, input$y_scatter_variable)
+    
+    # Match variable column names
+    x_col <- switch(input$x_scatter_variable,
+                    "Temperature" = "mean_temperature_c",
+                    "Rainfall" = "daily_rainfall_total_mm",
+                    "Wind Speed" = "mean_wind_speed_km_h")
+    
+    y_col <- switch(input$y_scatter_variable,
+                    "Temperature" = "mean_temperature_c",
+                    "Rainfall" = "daily_rainfall_total_mm",
+                    "Wind Speed" = "mean_wind_speed_km_h")
+    
+    # ✅ User-defined region mapping
+    region_mapping <- tibble::tibble(
+      station = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi",
+                  "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang",
+                  "Tai_Seng", "Admiralty"),
+      region = c("East", "South", "Central", "West",
+                 "West", "East", "Central", "South",
+                 "Central", "North")
     )
-    return(data)
+    
+    df <- dataset %>%
+      filter(station %in% input$station_multi,
+             date >= input$date_range_multi[1],
+             date <= input$date_range_multi[2]) %>%
+      select(date, station,
+             x = all_of(x_col),
+             y = all_of(y_col)) %>%
+      filter(!is.na(x), !is.na(y)) %>%   # ✅ Avoid drop_na NULL errors
+      left_join(region_mapping, by = "station")
+    
+    # ✅ rename for compatible UI display
+    colnames(df)[colnames(df) == "x"] <- input$x_scatter_variable
+    colnames(df)[colnames(df) == "y"] <- input$y_scatter_variable
+    
+    return(df)
   })
   
-  # Scatter plot
+  
+  
+  
+  
+  # Scatter plot（改了）
   output$scatter_plot <- renderHighchart({
     req(Geofacet_data())
     data <- Geofacet_data()
     
-    if(ncol(data) < 2) {
+    # Ensure that the variable name exists and is numeric
+    x_col <- input$x_scatter_variable
+    y_col <- input$y_scatter_variable
+    color_col <- input$color_by
+    
+    if (!x_col %in% names(data) || !y_col %in% names(data)) {
+      showNotification("Selected variables not found in data.", type = "error")
       return(NULL)
     }
     
-    var1 <- input$variables[1]
-    var2 <- input$variables[2]
+    if (!is.numeric(data[[x_col]]) || !is.numeric(data[[y_col]])) {
+      showNotification("Selected variables must be numeric.", type = "error")
+      return(NULL)
+    }
     
     hc <- highchart() %>%
-      hc_title(text = paste("Scatter Plot:", var1, "vs", var2)) %>%
-      hc_xAxis(title = list(text = var1)) %>%
-      hc_yAxis(title = list(text = var2)) %>%
-      hc_tooltip(pointFormat = paste(
-        "{point.x}", var1, "<br>",
-        "{point.y}", var2, "<br>",
-        if(input$color_by != "NULL") paste("{point.", input$color_by, "}", sep="")
-      ))
+      hc_title(text = paste("Scatter Plot:", x_col, "vs", y_col)) %>%
+      hc_xAxis(title = list(text = x_col)) %>%
+      hc_yAxis(title = list(text = y_col)) %>%
+      hc_tooltip(shared = TRUE)
     
-    if(input$color_by == "NULL") {
-      # Single color for all points
+    # Group color
+    if (color_col == "NULL") {
       hc <- hc %>%
         hc_add_series(
-          data = list_parse2(data.frame(x = data[[var1]], y = data[[var2]])),
+          data = list_parse2(data.frame(x = data[[x_col]], y = data[[y_col]])),
           type = "scatter",
-          marker = list(symbol = "circle", radius = 4),
           name = "Observations",
-          color = primary_color
+          color = primary_color,
+          marker = list(symbol = "circle", radius = 4)
         )
     } else {
-      # Color by group
-      groups <- unique(data[[input$color_by]])
-      for(group in groups) {
-        group_data <- data[data[[input$color_by]] == group, ]
+      groups <- unique(data[[color_col]])
+      for (grp in groups) {
+        grp_data <- data[data[[color_col]] == grp, ]
         hc <- hc %>%
           hc_add_series(
-            data = list_parse2(data.frame(
-              x = group_data[[var1]], 
-              y = group_data[[var2]],
-              name = group
-            )),
+            data = list_parse2(data.frame(x = grp_data[[x_col]], y = grp_data[[y_col]])),
+            name = as.character(grp),
             type = "scatter",
-            marker = list(symbol = "circle", radius = 4),
-            name = group
+            marker = list(symbol = "circle", radius = 4)
           )
       }
     }
     
-    if(input$show_trend_multi) {
-      fit <- lm(data[[var2]] ~ data[[var1]])
-      pred_x <- seq(min(data[[var1]]), max(data[[var1]]), length.out = 100)
-      pred_y <- predict(fit, newdata = data.frame(x = pred_x))
+    # Add a trend line
+    if (input$show_trend_multi) {
+      fit <- lm(as.formula(paste0("`", y_col, "` ~ `", x_col, "`")), data = data)
+      pred_x <- seq(min(data[[x_col]], na.rm = TRUE),
+                    max(data[[x_col]], na.rm = TRUE), length.out = 100)
+      pred_df <- data.frame(x = pred_x)
+      names(pred_df) <- x_col  
+      
+      pred_y <- predict(fit, newdata = pred_df)
       
       hc <- hc %>%
         hc_add_series(
@@ -1682,8 +1770,8 @@ server <- function(input, output) {
         )
     }
     
-    hc %>% 
-      hc_add_theme(hc_theme_custom) %>%
+    
+    hc %>% hc_add_theme(hc_theme_custom) %>%
       hc_legend(
         align = "right",
         verticalAlign = "top",
@@ -1691,30 +1779,41 @@ server <- function(input, output) {
       )
   })
   
-  # Correlation matrix
+  
+  # Correlation matrix（改了）
   output$correlation_matrix <- renderHighchart({
     req(Geofacet_data())
     data <- Geofacet_data()
     
-    if(ncol(data) < 2) {
+    # Only numerical variables are kept in the calculation
+    numeric_data <- data %>% 
+      select(where(is.numeric)) %>% 
+      drop_na()
+    
+    if(ncol(numeric_data) < 2) {
+      showNotification("Not enough numeric variables for correlation matrix.", type = "error")
       return(NULL)
     }
     
-    cor_matrix <- cor(data)
+    cor_matrix <- cor(numeric_data, use = "complete.obs")
+    
+    # Image format: x=row, y=col
+    heatmap_data <- list()
+    for(i in seq_len(nrow(cor_matrix))) {
+      for(j in seq_len(ncol(cor_matrix))) {
+        heatmap_data[[length(heatmap_data) + 1]] <- list(
+          x = j - 1,
+          y = i - 1,
+          value = cor_matrix[i, j]
+        )
+      }
+    }
     
     hc <- highchart() %>%
-      hc_title(text = "Correlation Matrix") %>%
       hc_chart(type = "heatmap") %>%
-      hc_xAxis(categories = names(data)) %>%
-      hc_yAxis(categories = names(data)) %>%
-      hc_add_series(
-        data = map(1:nrow(cor_matrix), function(i) {
-          map(1:ncol(cor_matrix), function(j) {
-            list(x = j-1, y = i-1, value = cor_matrix[i,j])
-          })
-        }) %>% unlist(recursive = FALSE),
-        dataLabels = list(enabled = TRUE)
-      ) %>%
+      hc_title(text = "Correlation Matrix") %>%
+      hc_xAxis(categories = colnames(cor_matrix), title = list(text = NULL)) %>%
+      hc_yAxis(categories = colnames(cor_matrix), title = list(text = NULL)) %>%
       hc_colorAxis(
         stops = list(
           list(0, "#FF0000"),
@@ -1724,25 +1823,55 @@ server <- function(input, output) {
         min = -1,
         max = 1
       ) %>%
+      hc_add_series(
+        data = heatmap_data,
+        dataLabels = list(enabled = TRUE, format = '{point.value:.2f}')
+      ) %>%
+      hc_tooltip(formatter = JS(
+        "function () {
+         return '<b>' + this.series.xAxis.categories[this.point.x] + 
+         '</b> vs <b>' + this.series.yAxis.categories[this.point.y] + 
+         '</b>: ' + Highcharts.numberFormat(this.point.value, 2);
+       }"
+      )) %>%
       hc_add_theme(hc_theme_custom)
     
-    hc
+    return(hc)
   })
   
-  # Scatter plot statistics
+  
+  # Scatter plot statistics（改了）
   output$scatter_stats <- renderPrint({
     req(Geofacet_data())
     data <- Geofacet_data()
     
-    if(ncol(data) < 2) {
-      cat("Please select at least two variables for analysis.\n")
+    x_col <- input$x_scatter_variable
+    y_col <- input$y_scatter_variable
+    
+    x <- suppressWarnings(as.numeric(data[[x_col]]))
+    y <- suppressWarnings(as.numeric(data[[y_col]]))
+
+    
+    if (any(is.na(x)) || any(is.na(y))) {
+      cat("Selected variables contain non-numeric or missing values.\n")
       return(NULL)
     }
     
-    var1 <- names(data)[1]
-    var2 <- names(data)[2]
+    fit <- lm(y ~ x)
     
-    # Calculate correlation
+    cat("=== Linear Model Summary ===\n")
+    print(summary(fit))
+    
+    cat("\n=== Correlation ===\n")
+    print(cor(x, y, use = "complete.obs"))
+    
+    cat("\nR-squared:", round(summary(fit)$r.squared, 3))
+  
+  
+  
+  
+    
+    # Calculate correlation（改了吗？不确定）
     cor_test <- cor.test(data[[1]], data[[2]])
     
     cat("=== Relationship Analysis ===\n\n")
@@ -1752,7 +1881,7 @@ server <- function(input, output) {
     cat("\n95% Confidence Interval:", 
         paste0("[", paste(round(cor_test$conf.int, 3), collapse = ", "), "]"))
     
-    # Linear regression summary
+    # Linear regression summary（改了吗？不确定）
     fit <- lm(data[[2]] ~ data[[1]])
     cat("\n\n=== Linear Regression ===\n")
     cat("\nIntercept:", round(coef(fit)[1], 3))
@@ -1789,6 +1918,8 @@ server <- function(input, output) {
     }
   })
 }
+
+
 
 # Run the application 
 shinyApp(ui = ui, server = server)
