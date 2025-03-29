@@ -648,9 +648,6 @@ LineChartTab <- fluidRow(
              )
          ),
          box(width = 12, title = "Display Options", status = "info",
-             checkboxInput("show_trend_ts", "Show Trend", value = TRUE),
-             checkboxInput("show_seasonal", "Show Seasonality", value = TRUE),
-             checkboxInput("show_outliers", "Show Outliers", value = TRUE),
              checkboxInput("show_monsoon", "Show Monsoon Periods", value = TRUE)  
          )
   ),
