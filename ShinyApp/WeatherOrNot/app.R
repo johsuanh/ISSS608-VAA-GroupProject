@@ -104,13 +104,13 @@ custom_css <- paste0('
     font-family: "', brand_settings$typography$headings$family, '", sans-serif;
     font-weight: ', brand_settings$typography$headings$weight, ';
     color: ', brand_colors$`dark-grey`, ' !important;
-    height: 80px;
-    line-height: 80px;
+    height: 60px;
+    line-height: 60px;
   }
   .skin-blue .main-header .navbar { 
     background-color: ', background_color, ' !important; 
     border-bottom: 1px solid ', brand_colors$`light-grey`, ';
-    min-height: 80px;
+    min-height: 60px;
   }
   
   /* Dashboard Sidebar */
@@ -118,7 +118,7 @@ custom_css <- paste0('
     background-color: ', background_color, ' !important;
     box-shadow: none !important;
   }
-  
+
   /* Content wrapper adjustment for taller header */
   .content-wrapper, .right-side {
     background-color: ', background_color, ' !important;
@@ -135,20 +135,20 @@ custom_css <- paste0('
   
   /* Adjust main header height */
   .main-header {
-    height: 80px !important;
+    height: 60px !important;
     position: fixed;
     width: 100%;
     z-index: 1000;
   }
 
   .main-header .navbar {
-    height: 80px !important;
+    height: 60px !important;
     margin-left: 150px;  /* Match titleWidth */
   }
 
   .main-header .logo {
-    height: 80px !important;
-    line-height: 80px !important;
+    height: 60px !important;
+    line-height: 60px !important;
     position: fixed;
     width: 150px;  /* Match titleWidth */
     z-index: 1001;
@@ -157,14 +157,14 @@ custom_css <- paste0('
   }
 
   .main-header .logo img {
-    height: 80px;
+    height: 60px;
     width: auto;
   }
 
   /* Adjust content area */
   .content-wrapper {
-    padding-top: 80px !important;
-    min-height: calc(100vh - 80px) !important;
+    padding-top: 60px !important;
+    min-height: calc(100vh - 60px) !important;
   }
 
   /* Ensure sidebar menu items are visible */
@@ -435,7 +435,7 @@ custom_css <- paste0('
   }
 
   .main-header .logo img {
-    height: 80px;
+    height: 50px;
     width: auto;
     margin: 0 !important;
   }
