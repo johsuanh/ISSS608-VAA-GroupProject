@@ -1,9 +1,10 @@
 # Load necessary libraries
-pacman::p_load(shiny, shinydashboard, highcharter, leaflet, bslib, yaml, bsicons,dplyr,lubridate,zoo,tidyr)
+pacman::p_load(shiny, shinydashboard, highcharter, leaflet, bslib, yaml, bsicons,dplyr,lubridate,zoo,tidyr,ggplot2,ggridges,tibble,geofacet)
 
 
-# Import Data
-dataset <- readRDS("www/station_data.rds")
+# Import Data + Add Region Info
+dataset <- readRDS("www/station_data.rds") 
+
 
 
 #========================================================== 
@@ -559,6 +560,24 @@ custom_css <- paste0('
 
 ')
 
+# --- Station-Region label choices for UI display (RidgePlot module only) ---
+region_mapping_ui <- tibble(
+  station = c("Changi", "Marina Barrage", "Ang Mo Kio", "Clementi",
+              "Jurong (West)", "Paya Lebar", "Newton", "Pasir Panjang",
+              "Tai Seng", "Admiralty"),
+  region = c("East", "Central", "North-East", "West",
+             "West", "East", "Central", "Central",
+             "Central", "North")
+)
+
+region_label_choices <- setNames(
+  region_mapping_ui$station,
+  paste0(region_mapping_ui$station, " (", region_mapping_ui$region, ")")
+)
+
+dataset <- dataset %>%
+  left_join(region_mapping_ui, by = "station")
+
 #========================================================== 
 ## UI Components
 #========================================================== 
@@ -630,9 +649,9 @@ LineChartTab <- fluidRow(
                          choices = c("Temperature", "Rainfall", "Wind Speed"),
                          selected = "Temperature"),
              selectInput("station_ts", "Select Stations:", 
-                         choices = sort(unique(dataset$station)),
+                         choices = setNames(dataset$station, paste0(dataset$station, " (", dataset$region, ")")),
                          multiple = TRUE,
-                         selected = c("Changi")),
+                         selected = "Changi"),
              selectInput("aggregation", "Time Aggregation:",
                          choices = c("Daily", "Weekly", "Monthly"),
                          selected = "Daily"),
@@ -756,11 +775,9 @@ RidgePlotTab <- fluidRow(
                     choices = c("Temperature", "Rainfall", "Wind Speed"),
                     selected = "Temperature"),
       selectInput("station_biv", "Select Stations:", 
-                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                              "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                              "Tai_Seng", "Admiralty"),
-                    multiple = TRUE,
-                    selected = c("Changi", "Marina_Barrage")),
+                  choices = region_label_choices,
+                  multiple = TRUE,
+                  selected = c("Changi", "Marina Barrage")),
       selectInput("aggregation_biv", "Time Aggregation:",
                   choices = c("Daily", "Weekly", "Monthly"),
                   selected = "Daily"),
@@ -785,7 +802,7 @@ RidgePlotTab <- fluidRow(
       # Density Plot
       fluidRow(
         column(width = 12,
-          highchartOutput("density_plot_biv", height = "400px")
+               plotOutput("ridge_plot_biv", height = "500px"))
         )
       ),
       # Summary Statistics by Station
@@ -799,138 +816,148 @@ RidgePlotTab <- fluidRow(
       )
     )
   )
-)
 
-# Geofacet Analysis Tab
+
+# geofacet:
+
 GeofacetTab <- fluidRow(
-  # Left column - Controls
-  column(width = 3,
-    box(width = 12, title = "Data Selection", status = "info",
-      selectInput("x_scatter_variable", "Select X-Axis Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = c("Temperature")),
-      selectInput("y_scatter_variable", "Select Y-Axis Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = c("Rainfall")),
-      selectInput("station_multi", "Select Stations:", 
-                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                              "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                              "Tai_Seng", "Admiralty"),
-                    multiple = TRUE,
-                    selected = c("Changi", "Marina_Barrage")),
-      selectInput("color_by", "Color By:",
-                 choices = c("Station" = "station", 
-                           "Region" = "region",
-                           "None" = "NULL"),
-                 selected = "NULL"),
-      dateRangeInput("date_range_multi", "Date Range:",
-                    start = "2020-01-01", 
-                    end = "2025-01-31",
-                    separator = " - ",
-                    format = "yyyy-mm-dd"),
-      div(style = "text-align: right;",
-        actionButton("update_Geofacet", "Update View", 
-                    class = "btn-primary",
-                    icon = icon("refresh"))
-      )
-    ),
-    box(width = 12, title = "Display Options", status = "info",
-      checkboxInput("show_trend_multi", "Show Trend Lines", value = TRUE),
-      checkboxInput("show_labels", "Show Labels", value = TRUE)
-    )
-  ),
-  # Right column - Visualizations and Statistics
-  column(width = 9,
-    tabBox(width = 12,
-      title = "Geofacet Analysis",
-      id = "Geofacet_tabs",
-      tabPanel("Scatter Plot",
-        fluidRow(
-          column(width = 12,
-            highchartOutput("scatter_plot", height = "400px")
-          )
-        ),
-        fluidRow(
-          column(width = 12,
-            div(style = "margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;",
-              h4("Scatter Plot Statistics"),
-              verbatimTextOutput("scatter_stats")
-            )
-          )
-        )
-      ),
-      tabPanel("Correlation Matrix",
-        fluidRow(
-          column(width = 12,
-            highchartOutput("correlation_matrix", height = "400px")
-          )
-        ),
-        fluidRow(
-          column(width = 12,
-            div(style = "margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;",
-              h4("Correlation Statistics"),
-              verbatimTextOutput("correlation_stats")
-            )
-          )
-        )
-      )
-    )
+  column(width = 12,
+         tabBox(width = 12,
+                id = "geofacet_tabs",
+                title = "Geofacet Analysis",
+                
+                # Tab 1: All stations shown by region 
+                tabPanel("All Stations",
+                         fluidRow(
+                           column(width = 3,
+                                  box(width = 12, title = "Data Selection", status = "info",
+                                      selectInput("station_multi", "Select Stations:", 
+                                                  choices = setNames(dataset$station, paste0(dataset$station, " (", dataset$region, ")")),
+                                                  multiple = TRUE,
+                                                  selected = unique(dataset$station)),
+                                      selectInput("var_geofacet", "Select Variable:",
+                                                  choices = c("Temperature", "Rainfall", "Wind Speed"),
+                                                  selected = "Temperature"),
+                                      selectInput("aggregation_geofacet", "Time Aggregation:",
+                                                  choices = c("Daily", "Weekly", "Monthly"),
+                                                  selected = "Daily"),
+                                      dateRangeInput("date_range_multi", "Date Range:",
+                                                     start = "2020-01-01", 
+                                                     end = "2025-01-31",
+                                                     separator = " - ",
+                                                     format = "yyyy-mm-dd"),
+                                      div(style = "text-align: right;",
+                                          actionButton("update_Geofacet", "Update View", 
+                                                       class = "btn-primary",
+                                                       icon = icon("refresh"))
+                                      )
+                                  ),
+                                  box(width = 12, title = "Display Options", status = "info",
+                                      checkboxInput("show_trend_multi", "Show Trend Lines", value = TRUE),
+                                      checkboxInput("show_labels", "Show Labels", value = TRUE)
+                                  )
+                           ),
+                           column(width = 9,
+                                  box(width = 12,
+                                      title = "Geofacet Visualization",
+                                      status = "primary",
+                                      solidHeader = TRUE,
+                                      plotOutput("geofacet_plot", height = "600px")
+                                  )
+                           )
+                         )
+                ),
+                
+                # Tab 2: User selects individual stations to view them separately
+                tabPanel("Selected Stations",
+                         fluidRow(
+                           column(width = 3,
+                                  box(width = 12, title = "Station Selection", status = "info",
+                                      selectInput("station_single", "Select Stations:",
+                                                  choices = unique(dataset$station),
+                                                  multiple = TRUE,
+                                                  selected = "Changi"),
+                                      selectInput("var_single", "Select Variable:",
+                                                  choices = c("Temperature", "Rainfall", "Wind Speed"),
+                                                  selected = "Temperature"),
+                                      dateRangeInput("date_range_single", "Date Range:",
+                                                     start = "2020-01-01", 
+                                                     end = "2025-01-31"),
+                                      selectInput("aggregation_single", "Time Aggregation:",
+                                                  choices = c("Daily", "Weekly", "Monthly"),
+                                                  selected = "Daily"),
+                                      div(style = "text-align: right;",
+                                          actionButton("update_single", "Update View", 
+                                                       class = "btn-primary",
+                                                       icon = icon("refresh"))
+                                      )
+                                  )
+                           ),
+                           column(width = 9,
+                                  box(width = 12,
+                                      title = "Selected Station Trend(s)",
+                                      status = "primary",
+                                      solidHeader = TRUE,
+                                      plotOutput("station_line_plot", height = "600px")
+                                  )
+                           )
+                         )
+                )
+         )
   )
 )
 
 
-# Geospatial Analysis Tab
+
+###
 geospatialTab <- fluidRow(
-  # Left column - Controls
   column(width = 3,
-    box(width = 12, title = "Map Settings", status = "info",
-      selectInput("variable_map", "Select Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = "Temperature"),
-      selectInput("time_period", "Time Period:",
-                 choices = c("Daily", "Monthly", "Yearly"),
-                 selected = "Monthly"),
-      selectInput("station_map", "Select Stations:", 
-                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                              "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                              "Tai_Seng", "Admiralty"),
-                    multiple = TRUE,
-                    selected = "Changi"),
-      dateRangeInput("date_range_map", "Date Range:",
-                    start = "2020-01-01", 
-                    end = "2025-01-31",
-                    separator = " - ",
-                    format = "yyyy-mm-dd"),
-      div(style = "text-align: right;",
-        actionButton("update_map", "Update View", 
-                    class = "btn-primary",
-                    icon = icon("refresh"))
-      )
-    ),
-    box(width = 12, title = "Layer Options", status = "info",
-      checkboxInput("show_stations", "Show Weather Stations", value = TRUE),
-      checkboxInput("show_planning_areas", "Show Planning Areas", value = TRUE),
-      checkboxInput("show_income_layer", "Show Income Distribution", value = FALSE),
-      checkboxInput("show_age_layer", "Show Age Distribution", value = FALSE)
-    )
+         box(width = 12, title = "Map Settings", status = "info",
+             selectInput("variable_map", "Select Variable:", 
+                         choices = c("Temperature", "Rainfall", "Wind Speed"),
+                         selected = "Temperature"),
+             selectInput("time_period", "Time Period:",
+                         choices = c("Daily", "Monthly", "Yearly"),
+                         selected = "Monthly"),
+             selectInput("station_map", "Select Stations:", 
+                         choices = unique(dataset$station),
+                         multiple = TRUE,
+                         selected = "Changi"),
+             dateRangeInput("date_range_map", "Date Range:",
+                            start = "2020-01-01", 
+                            end = "2025-01-31",
+                            separator = " - ",
+                            format = "yyyy-mm-dd"),
+             div(style = "text-align: right;",
+                 actionButton("update_map", "Update View", 
+                              class = "btn-primary",
+                              icon = icon("refresh"))
+             )
+         ),
+         box(width = 12, title = "Layer Options", status = "info",
+             checkboxInput("show_stations", "Show Weather Stations", value = TRUE),
+             checkboxInput("show_planning_areas", "Show Planning Areas", value = TRUE),
+             checkboxInput("show_income_layer", "Show Income Distribution", value = FALSE),
+             checkboxInput("show_age_layer", "Show Age Distribution", value = FALSE)
+         )
   ),
-  # Right column - Visualizations
   column(width = 9,
-    tabBox(width = 12,
-      title = "Geospatial Analysis",
-      id = "geospatial_tabs",
-      tabPanel("Choropleth Map",
-        leafletOutput("choropleth_map", height = "600px")
-      ),
-      tabPanel("Station Analysis",
-        highchartOutput("station_comparison")
-      ),
-      tabPanel("Statistics",
-        verbatimTextOutput("spatial_stats")
-      )
-    )
+         tabBox(width = 12,
+                title = "Geospatial Analysis",
+                id = "geospatial_tabs",
+                tabPanel("Choropleth Map",
+                         leafletOutput("choropleth_map", height = "600px")
+                ),
+                tabPanel("Station Analysis",
+                         highchartOutput("station_comparison")
+                ),
+                tabPanel("Statistics",
+                         verbatimTextOutput("spatial_stats")
+                )
+         )
   )
 )
+
 
 # Placeholder content for other tabs
 CATabs <- fluidRow(
@@ -1543,13 +1570,31 @@ server <- function(input, output) {
   # Reactive data for RidgePlot analysis（改了）
   RidgePlot_data <- reactive({
     req(input$station_biv, input$var_biv, input$date_range_biv, input$aggregation_biv)
-    # Placeholder for data retrieval
-    # This should be replaced with actual data retrieval logic
+    
+   
+    region_mapping <- tibble(
+      station = c("Changi", "Marina Barrage", "Ang Mo Kio", "Clementi",
+                  "Jurong (West)", "Paya Lebar", "Newton", "Pasir Panjang",
+                  "Tai Seng", "Admiralty"),
+      region = c("East", "Central", "North-East", "West",
+                 "West", "East", "Central", "Central",
+                 "Central", "North"),
+      region_code = c("ER", "CR", "NER", "WR",
+                      "WR", "ER", "CR", "CR",
+                      "CR", "NR")
+    )
+    
+
+    dataset <- dataset %>%
+      left_join(region_mapping, by = "station")
+    
+    
     variable_column <- switch(input$var_biv,
                               "Temperature" = "mean_temperature_c",
                               "Rainfall" = "daily_rainfall_total_mm",
                               "Wind Speed" = "mean_wind_speed_km_h")
-
+    
+ 
     data_filtered <- dataset %>%
       filter(station %in% input$station_biv,
              date >= input$date_range_biv[1],
@@ -1558,7 +1603,7 @@ server <- function(input, output) {
       mutate(period = case_when(
         input$aggregation_biv == "Weekly" ~ floor_date(date, "week"),
         input$aggregation_biv == "Monthly" ~ floor_date(date, "month"),
-        TRUE ~ date  # Daily
+        TRUE ~ date
       )) %>%
       group_by(station, period) %>%
       summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
@@ -1567,63 +1612,112 @@ server <- function(input, output) {
     return(data_filtered)
   })
   
-  # Density plot（改了）
-  output$density_plot_biv <- renderHighchart({
-    req(RidgePlot_data())
-    data <- RidgePlot_data()
+  
+#import data to geofacet
+  station_to_geo <- tibble(
+    station = c("Changi", "Marina Barrage", "Ang Mo Kio", "Clementi",
+                "Jurong (West)", "Paya Lebar", "Newton", "Pasir Panjang",
+                "Tai Seng", "Admiralty"),
+    lat = c(1.35735, 1.28062, 1.37011, 1.31511, 1.34039, 1.35917, 1.31141, 1.27642, 1.33554, 1.44066),
+    lon = c(103.9874, 103.8718, 103.8490, 103.7650, 103.7054, 103.8944, 103.8369, 103.7919, 103.8885, 103.8000)
+  )
+  
+  station_grid <- station_to_geo %>%
+    mutate(
+      code = station,
+      name = station,
+      row = c(4, 6, 2, 3, 2, 3, 4, 5, 4, 1),  
+      col = c(5, 4, 3, 1, 1, 4, 3, 2, 4, 3)   
+    ) %>%
+    select(code, name, row, col)
+  
+  
+  
+  # Import data to Geofacet
+  Geofacet_data <- reactive({
+    req(input$station_multi, input$var_geofacet, input$date_range_multi, input$aggregation_geofacet)
     
-    # Interpolating missing values: Fill NA with moving average
-    data <- data %>%
-      group_by(station) %>%
-      arrange(date) %>%
-      mutate(value = ifelse(is.na(value), 
-                            rollmean(value, k = 3, fill = NA, align = "center"), 
-                            value)) %>%
-      ungroup()
+    variable_column <- switch(input$var_geofacet,
+                              "Temperature" = "mean_temperature_c",
+                              "Rainfall" = "daily_rainfall_total_mm",
+                              "Wind Speed" = "mean_wind_speed_km_h")
     
-    # The density data for each station is processed again
-    densities <- lapply(unique(data$station), function(s) {
-      station_values <- data$value[data$station == s]
-      
-      # Skip sites with insufficient data
-      if (sum(!is.na(station_values)) < 10) {
-        showNotification(paste("Station", s, "has insufficient data for density plot."), type = "warning")
-        return(NULL)
-      }
-      
-      d <- density(station_values)
-      data.frame(x = d$x, y = d$y, station = s)
-    })
-    
-    densities <- Filter(Negate(is.null), densities)
-    
-    if (length(densities) == 0) {
-      showNotification("No sufficient data to generate Ridge Plot.", type = "error")
-      return(NULL)
-    }
-    
-    all_densities <- do.call(rbind, densities)
-    
-    hc <- highchart() %>%
-      hc_title(text = paste("Distribution of", input$var_biv, "by Station")) %>%
-      hc_xAxis(title = list(text = input$var_biv)) %>%
-      hc_yAxis(title = list(text = "Density")) %>%
-      hc_tooltip(shared = TRUE)
-    
-    for (station in unique(all_densities$station)) {
-      station_data <- subset(all_densities, station == station)
-      hc <- hc %>%
-        hc_add_series(
-          data = list_parse2(data.frame(x = station_data$x, y = station_data$y)),
-          name = station,
-          type = "line"
-        )
-    }
-    
-    hc %>% hc_add_theme(hc_theme_custom)
+    dataset %>%
+      filter(station %in% input$station_multi,
+             date >= input$date_range_multi[1],
+             date <= input$date_range_multi[2]) %>%
+      mutate(date = case_when(
+        input$aggregation_geofacet == "Weekly" ~ floor_date(date, "week"),
+        input$aggregation_geofacet == "Monthly" ~ floor_date(date, "month"),
+        TRUE ~ date
+      )) %>%
+      group_by(station, date) %>%
+      summarise(value = mean(.data[[variable_column]], na.rm = TRUE), .groups = "drop") %>%
+      drop_na(value)
   })
   
   
+  output$geofacet_plot <- renderPlot({
+    req(Geofacet_data())  
+    df <- Geofacet_data()  
+    
+    ggplot(df, aes(x = date, y = value)) +
+      geom_line(color = "#0072B2", size = 0.7) +
+      facet_geo(~ station, grid = station_grid) +
+      labs(title = paste("Weather Trends by Station -", input$var_geofacet),
+           x = "Date", y = input$var_geofacet) +
+      scale_x_date(date_labels = "%Y", date_breaks = "1 year") +   
+      theme_minimal(base_size = 12) +
+      theme(
+        strip.text = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(angle = 45, hjust = 1),  
+        axis.title.x = element_text(margin = margin(t = 10)),  
+        axis.text.y = element_text(size = 9)  
+      )
+    
+  })
+  
+  
+  
+    
+  
+  
+  
+  
+  
+  # Density plot（改了）
+  output$ridge_plot_biv <- renderPlot({
+    req(RidgePlot_data())
+    data <- RidgePlot_data()
+    
+    # Fill missing values using moving average
+    data <- data %>%
+      group_by(station) %>%
+      arrange(date) %>%
+      mutate(value = zoo::na.approx(value, na.rm = TRUE, maxgap = 30)) %>%
+      drop_na(value)
+    
+    
+    # Use ggridges to create ridgeline plot
+    ggplot(data, aes(x = value, y = station, fill = station)) +
+      ggridges::geom_density_ridges(
+        scale = 2,
+        alpha = 0.8,
+        color = "white"
+      ) +
+      labs(
+        title = paste("Ridgeline Plot of", input$var_biv, "by Station"),
+        x = input$var_biv,
+        y = "Station"
+      ) +
+      theme_minimal(base_size = 13) +
+      theme(
+        legend.position = "none",
+        plot.title = element_text(face = "bold", size = 16),
+        axis.title.y = element_text(margin = margin(r = 10)),
+        plot.margin = margin(t = 10, r = 10, b = 40, l = 10)  
+      )
+  })
   
   
   # Summary statistics by station
@@ -1639,282 +1733,50 @@ server <- function(input, output) {
       
       cat("\n=== ", station, " ===\n")
       cat("Number of observations:", length(station_data), "\n")
-      cat("Mean:", round(mean(station_data), 2), "\n")
-      cat("Standard Deviation:", round(sd(station_data), 2), "\n")
-      cat("Minimum:", round(min(station_data), 2), "\n")
-      cat("Maximum:", round(max(station_data), 2), "\n")
+      cat("Mean:", round(mean(station_data, na.rm = TRUE), 2), "\n")
+      cat("Standard Deviation:", round(sd(station_data, na.rm = TRUE), 2), "\n")
+      cat("Minimum:", round(min(station_data, na.rm = TRUE), 2), "\n")
+      cat("Maximum:", round(max(station_data, na.rm = TRUE), 2), "\n")
       cat("Quartiles:\n")
-      print(round(quantile(station_data, probs = c(0.25, 0.5, 0.75)), 2))
+      print(round(quantile(station_data, probs = c(0.25, 0.5, 0.75), na.rm = TRUE), 2))
       cat("\n")
     }
   })
 
   
-  # Reactive data for Geofacet analysis (real data + region mapping)（改了）
-  Geofacet_data <- reactive({
-    req(input$station_multi, input$date_range_multi,
-        input$x_scatter_variable, input$y_scatter_variable)
+  # Reactive data for Geofacet analysis（改了）
+  output$station_line_plot <- renderPlot({
+    req(input$station_single, input$var_single, input$date_range_single)
     
-    # Match variable column names
-    x_col <- switch(input$x_scatter_variable,
-                    "Temperature" = "mean_temperature_c",
-                    "Rainfall" = "daily_rainfall_total_mm",
-                    "Wind Speed" = "mean_wind_speed_km_h")
-    
-    y_col <- switch(input$y_scatter_variable,
-                    "Temperature" = "mean_temperature_c",
-                    "Rainfall" = "daily_rainfall_total_mm",
-                    "Wind Speed" = "mean_wind_speed_km_h")
-    
-    # ✅ User-defined region mapping
-    region_mapping <- tibble::tibble(
-      station = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi",
-                  "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang",
-                  "Tai_Seng", "Admiralty"),
-      region = c("East", "South", "Central", "West",
-                 "West", "East", "Central", "South",
-                 "Central", "North")
-    )
+    variable_column <- switch(input$var_single,
+                              "Temperature" = "mean_temperature_c",
+                              "Rainfall" = "daily_rainfall_total_mm",
+                              "Wind Speed" = "mean_wind_speed_km_h")
     
     df <- dataset %>%
-      filter(station %in% input$station_multi,
-             date >= input$date_range_multi[1],
-             date <= input$date_range_multi[2]) %>%
-      select(date, station,
-             x = all_of(x_col),
-             y = all_of(y_col)) %>%
-      filter(!is.na(x), !is.na(y)) %>%   # ✅ Avoid drop_na NULL errors
-      left_join(region_mapping, by = "station")
-    
-    # ✅ rename for compatible UI display
-    colnames(df)[colnames(df) == "x"] <- input$x_scatter_variable
-    colnames(df)[colnames(df) == "y"] <- input$y_scatter_variable
-    
-    return(df)
-  })
-  
-  
-  
-  
-  
-  # Scatter plot（改了）
-  output$scatter_plot <- renderHighchart({
-    req(Geofacet_data())
-    data <- Geofacet_data()
-    
-    # Ensure that the variable name exists and is numeric
-    x_col <- input$x_scatter_variable
-    y_col <- input$y_scatter_variable
-    color_col <- input$color_by
-    
-    if (!x_col %in% names(data) || !y_col %in% names(data)) {
-      showNotification("Selected variables not found in data.", type = "error")
-      return(NULL)
-    }
-    
-    if (!is.numeric(data[[x_col]]) || !is.numeric(data[[y_col]])) {
-      showNotification("Selected variables must be numeric.", type = "error")
-      return(NULL)
-    }
-    
-    hc <- highchart() %>%
-      hc_title(text = paste("Scatter Plot:", x_col, "vs", y_col)) %>%
-      hc_xAxis(title = list(text = x_col)) %>%
-      hc_yAxis(title = list(text = y_col)) %>%
-      hc_tooltip(shared = TRUE)
-    
-    # Group color
-    if (color_col == "NULL") {
-      hc <- hc %>%
-        hc_add_series(
-          data = list_parse2(data.frame(x = data[[x_col]], y = data[[y_col]])),
-          type = "scatter",
-          name = "Observations",
-          color = primary_color,
-          marker = list(symbol = "circle", radius = 4)
-        )
-    } else {
-      groups <- unique(data[[color_col]])
-      for (grp in groups) {
-        grp_data <- data[data[[color_col]] == grp, ]
-        hc <- hc %>%
-          hc_add_series(
-            data = list_parse2(data.frame(x = grp_data[[x_col]], y = grp_data[[y_col]])),
-            name = as.character(grp),
-            type = "scatter",
-            marker = list(symbol = "circle", radius = 4)
-          )
-      }
-    }
-    
-    # Add a trend line
-    if (input$show_trend_multi) {
-      fit <- lm(as.formula(paste0("`", y_col, "` ~ `", x_col, "`")), data = data)
-      pred_x <- seq(min(data[[x_col]], na.rm = TRUE),
-                    max(data[[x_col]], na.rm = TRUE), length.out = 100)
-      pred_df <- data.frame(x = pred_x)
-      names(pred_df) <- x_col  
-      
-      pred_y <- predict(fit, newdata = pred_df)
-      
-      hc <- hc %>%
-        hc_add_series(
-          data = list_parse2(data.frame(x = pred_x, y = pred_y)),
-          type = "line",
-          name = "Trend Line",
-          color = secondary_color,
-          dashStyle = "Dash"
-        )
-    }
-    
-    
-    hc %>% hc_add_theme(hc_theme_custom) %>%
-      hc_legend(
-        align = "right",
-        verticalAlign = "top",
-        layout = "vertical"
-      )
-  })
-  
-  
-  # Correlation matrix（改了）
-  output$correlation_matrix <- renderHighchart({
-    req(Geofacet_data())
-    data <- Geofacet_data()
-    
-    # Only numerical variables are kept in the calculation
-    numeric_data <- data %>% 
-      select(where(is.numeric)) %>% 
-      drop_na()
-    
-    if(ncol(numeric_data) < 2) {
-      showNotification("Not enough numeric variables for correlation matrix.", type = "error")
-      return(NULL)
-    }
-    
-    cor_matrix <- cor(numeric_data, use = "complete.obs")
-    
-    # Image format: x=row, y=col
-    heatmap_data <- list()
-    for(i in seq_len(nrow(cor_matrix))) {
-      for(j in seq_len(ncol(cor_matrix))) {
-        heatmap_data[[length(heatmap_data) + 1]] <- list(
-          x = j - 1,
-          y = i - 1,
-          value = cor_matrix[i, j]
-        )
-      }
-    }
-    
-    hc <- highchart() %>%
-      hc_chart(type = "heatmap") %>%
-      hc_title(text = "Correlation Matrix") %>%
-      hc_xAxis(categories = colnames(cor_matrix), title = list(text = NULL)) %>%
-      hc_yAxis(categories = colnames(cor_matrix), title = list(text = NULL)) %>%
-      hc_colorAxis(
-        stops = list(
-          list(0, "#FF0000"),
-          list(0.5, "#FFFFFF"),
-          list(1, "#0000FF")
-        ),
-        min = -1,
-        max = 1
-      ) %>%
-      hc_add_series(
-        data = heatmap_data,
-        dataLabels = list(enabled = TRUE, format = '{point.value:.2f}')
-      ) %>%
-      hc_tooltip(formatter = JS(
-        "function () {
-         return '<b>' + this.series.xAxis.categories[this.point.x] + 
-         '</b> vs <b>' + this.series.yAxis.categories[this.point.y] + 
-         '</b>: ' + Highcharts.numberFormat(this.point.value, 2);
-       }"
+      filter(station %in% input$station_single,
+             date >= input$date_range_single[1],
+             date <= input$date_range_single[2]) %>%
+      select(date, station, value = all_of(variable_column)) %>%
+      mutate(date = case_when(
+        input$aggregation_single == "Weekly" ~ floor_date(date, "week"),
+        input$aggregation_single == "Monthly" ~ floor_date(date, "month"),
+        TRUE ~ date
       )) %>%
-      hc_add_theme(hc_theme_custom)
+      group_by(station, date) %>%
+      summarise(value = mean(value, na.rm = TRUE), .groups = "drop")
     
-    return(hc)
-  })
+    ggplot(df, aes(x = date, y = value, color = station)) +
+      geom_line() +
+      labs(title = paste("Time Series by Station:", input$var_single),
+           x = "Date", y = input$var_single) +
+      theme_minimal(base_size = 13)
+  })}
   
-  
-  # Scatter plot statistics（改了）
-  output$scatter_stats <- renderPrint({
-    req(Geofacet_data())
-    data <- Geofacet_data()
-    
-    x_col <- input$x_scatter_variable
-    y_col <- input$y_scatter_variable
-    
-    x <- suppressWarnings(as.numeric(data[[x_col]]))
-    y <- suppressWarnings(as.numeric(data[[y_col]]))
+
+
 
     
-    if (any(is.na(x)) || any(is.na(y))) {
-      cat("Selected variables contain non-numeric or missing values.\n")
-      return(NULL)
-    }
-    
-    fit <- lm(y ~ x)
-    
-    cat("=== Linear Model Summary ===\n")
-    print(summary(fit))
-    
-    cat("\n=== Correlation ===\n")
-    print(cor(x, y, use = "complete.obs"))
-    
-    cat("\nR-squared:", round(summary(fit)$r.squared, 3))
-  
-  
-  
-  
-    
-    # Calculate correlation（改了吗？不确定）
-    cor_test <- cor.test(data[[1]], data[[2]])
-    
-    cat("=== Relationship Analysis ===\n\n")
-    cat("Variables:", var1, "vs", var2, "\n")
-    cat("\nCorrelation coefficient (r):", round(cor_test$estimate, 3))
-    cat("\np-value:", format.pval(cor_test$p.value, digits = 3))
-    cat("\n95% Confidence Interval:", 
-        paste0("[", paste(round(cor_test$conf.int, 3), collapse = ", "), "]"))
-    
-    # Linear regression summary（改了吗？不确定）
-    fit <- lm(data[[2]] ~ data[[1]])
-    cat("\n\n=== Linear Regression ===\n")
-    cat("\nIntercept:", round(coef(fit)[1], 3))
-    cat("\nSlope:", round(coef(fit)[2], 3))
-    cat("\nR-squared:", round(summary(fit)$r.squared, 3))
-  })
-  
-  # Correlation matrix statistics
-  output$correlation_stats <- renderPrint({
-    req(Geofacet_data())
-    data <- Geofacet_data()
-    
-    if(ncol(data) < 2) {
-      cat("Please select at least two variables for analysis.\n")
-      return(NULL)
-    }
-    
-    # Calculate correlation matrix
-    cor_matrix <- cor(data)
-    
-    cat("=== Correlation Matrix Analysis ===\n\n")
-    
-    # Print correlations with significance tests
-    for(i in 1:(ncol(data)-1)) {
-      for(j in (i+1):ncol(data)) {
-        cor_test <- cor.test(data[[i]], data[[j]])
-        cat(names(data)[i], "vs", names(data)[j], ":\n")
-        cat("  Correlation:", round(cor_test$estimate, 3), "\n")
-        cat("  p-value:", format.pval(cor_test$p.value, digits = 3), "\n")
-        cat("  95% CI:", paste0("[", 
-            paste(round(cor_test$conf.int, 3), collapse = ", "), "]\n"))
-        cat("\n")
-      }
-    }
-  })
-}
 
 
 
