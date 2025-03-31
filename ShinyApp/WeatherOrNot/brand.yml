@@ -11,7 +11,7 @@ color:
   palette:
     sky-blue: "#8AA4FF"  # Main blue used in the logo and interface
     medium-blue: "#6F87FF" # Slightly darker blue for hover states
-    dark-blue: "#5A6FD6"   # Even darker blue for active states
+    dark-blue: "#5A6FD6"   # Even darker blue for active statesthumb_color
     light-purple: "#C4C8FF" # Light purple background for UI elements
     grey: "#ADADAD"        # Grey for inactive tabs
     dark-grey: "#4D4D4D"   # Dark grey for text

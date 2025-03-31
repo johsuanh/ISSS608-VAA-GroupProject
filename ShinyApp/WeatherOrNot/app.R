@@ -385,11 +385,11 @@ custom_css <- paste0('
   
   /* Slider styling based on component settings */
   .irs-bar, .irs-bar-edge {
-    background: ', component_settings$slider$thumb_color, ' !important;
-    border-color: ', component_settings$slider$thumb_color, ' !important;
+    background: "#8AA4FF"  !important;
+    border-color: "#8AA4FF" !important;
   }
   .irs-line {
-    background: ', component_settings$slider$track_color, ' !important;
+    background: "#8AA4FF" !important;
   }
   
   /* Tab styling based on typography settings */
@@ -708,7 +708,7 @@ LineChartTab <- fluidRow(
                          choices = setNames(dataset$station, paste0(dataset$station, " (", dataset$region, ")")),
                          multiple = TRUE,
                          selected = "Changi"),
-             selectInput("aggregation", "Time Aggregation:",
+             selectInput("aggregation", "Time Resolution:",
                          choices = c("Daily", "Weekly", "Monthly"),
                          selected = "Daily"),
              dateRangeInput("date_range_ts", "Date Range:",
@@ -786,7 +786,7 @@ RidgePlotTab <- fluidRow(
                   choices = region_label_choices,
                   multiple = TRUE,
                   selected = c("Changi", "Marina Barrage")),
-      selectInput("aggregation_biv", "Time Aggregation:",
+      selectInput("aggregation_biv", "Time Resolution:",
                   choices = c("Daily", "Weekly", "Monthly"),
                   selected = "Daily"),
       dateRangeInput("date_range_biv", "Date Range:",
@@ -846,7 +846,7 @@ GeofacetTab <- fluidRow(
                                       selectInput("var_geofacet", "Select Variable:",
                                                   choices = c("Temperature", "Rainfall", "Wind Speed"),
                                                   selected = "Temperature"),
-                                      selectInput("aggregation_geofacet", "Time Aggregation:",
+                                      selectInput("aggregation_geofacet", "Time Resolution:",
                                                   choices = c("Daily", "Weekly", "Monthly"),
                                                   selected = "Daily"),
                                       dateRangeInput("date_range_multi", "Date Range:",
@@ -890,7 +890,7 @@ GeofacetTab <- fluidRow(
                                       dateRangeInput("date_range_single", "Date Range:",
                                                      start = "2020-01-01", 
                                                      end = "2025-01-31"),
-                                      selectInput("aggregation_single", "Time Aggregation:",
+                                      selectInput("aggregation_single", "Time Resolution:",
                                                   choices = c("Daily", "Weekly", "Monthly"),
                                                   selected = "Daily"),
                                       div(style = "text-align: right;",
@@ -961,12 +961,13 @@ IsohyetmapTab <- fluidRow(
     box(width = 12,
       title = "Step 2: IDW Settings",
       status = "info",
-      height = "120px",
-      numericInput("idw_nmax", 
+      height = "140px",
+      sliderInput("idw_nmax", 
                   "IDW Nmax (groups):",
                   value = 6,
                   min = 1,
-                  max = 20)
+                  max = 20,
+                  step = 1)
     ),
     
     # Step 3: Variogram Settings
@@ -983,7 +984,7 @@ IsohyetmapTab <- fluidRow(
     # Run Model Button
     box(width = 12,
       status = "primary",
-      height = "100px",
+      height = "80px",
       div(style = "text-align: center; padding-top: 20px;",
         actionButton("run_map", 
                     "Run Model", 
@@ -1309,10 +1310,11 @@ ModelTab <- fluidRow(
                     end = "2025-01-31",
                     separator = " - ",
                     format = "yyyy-mm-dd"),
-      numericInput("forecast_period_model", "Forecast Period:",
+      sliderInput("forecast_period_model", "Forecast Period:",
                   value = 12,
                   min = 1,
-                  max = 24),
+                  max = 24,
+                  step = 1),
       selectInput("models_final", "Select Final Models:",
                         choices = c(
                           "ETS(AAA)" = "ETS_AAA",
@@ -1373,17 +1375,11 @@ aboutTab <- fluidRow(
       style = "font-size: 13px;"),
       h3("Data Sources"),
       tags$ul(
-        tags$li(HTML("<strong>Weather Data:</strong> Historical weather data from Meteorological Service Singapore (2020-2025)")),
-        tags$li(HTML("<strong>Census Data:</strong> Singapore census data (2020), including:")),
-        tags$ul(
-          tags$li("Monthly Household Income from Work by Planning Area"),
-          tags$li("Resident Population by Planning Area and Age Group")
-        )
+        tags$li(HTML("<strong>Weather Data:</strong> Historical weather data from Meteorological Service Singapore (2019-2025)"))
       ),
       h3("Analysis Components"),
       tags$ul(
         tags$li(HTML("<strong>Exploratory Analysis:</strong> Interactive visualizations for understanding weather patterns")),
-        tags$li(HTML("<strong>Confirmatory Analysis:</strong> Statistical tests to validate weather-related hypotheses")),
         tags$li(HTML("<strong>Forecasting:</strong> Advanced time series models for weather prediction"))
       ),
       h3("Contact"),
