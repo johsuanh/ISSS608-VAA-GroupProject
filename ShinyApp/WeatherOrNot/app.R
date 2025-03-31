@@ -326,7 +326,7 @@ custom_css <- paste0('
     color: ', brand_colors$`dark-grey`, ' !important;
     font-family: "', brand_settings$typography$headings$family, '", sans-serif;
     font-weight: ', brand_settings$typography$headings$weight, ';
-    font-size: 12px !important;
+    font-size: 11px !important;
     text-align: center !important;
   }
 
@@ -334,7 +334,7 @@ custom_css <- paste0('
     color: ', brand_colors$`sky-blue`, ' !important;
     font-family: "', brand_settings$typography$headings$family, '", sans-serif;
     font-weight: ', brand_settings$typography$headings$weight, ';
-    font-size: 12px !important;
+    font-size: 11px !important;
     text-align: center !important;
   }
 
@@ -503,7 +503,8 @@ custom_css <- paste0('
     color: white !important;
     font-family: "', brand_settings$typography$base$family, '" !important;
     font-weight: 500 !important;
-    padding: 6px 12px !important;
+    font-size: 12px !important;
+    padding: 4px 8px !important;
     border-radius: 4px !important;
     transition: all 0.3s ease !important;
   }
@@ -527,7 +528,7 @@ custom_css <- paste0('
   #update_overview, #update, #update_RidgePlot, #update_network {
     background-color: ', primary_color, ' !important;
     border: none !important;
-    font-size: 13px !important;
+    font-size: 10px !important;
     height: 34px !important;
     margin-top: 15px !important;
   }
@@ -600,9 +601,13 @@ custom_css <- paste0('
   .daterangepicker,
   .btn,
   .action-button {
-    border-radius: 10px !important;
+    border-radius: 5px !important;
   }
 
+
+.daterangepicker input {
+      font-size: 10px;
+    }
   /* Statistics container rounder corners */
   .statistics-container,
   .stat-box {
@@ -862,7 +867,6 @@ GeofacetTab <- fluidRow(
                            ),
                            column(width = 9,
                                   box(width = 12,
-                                      title = "Geofacet Visualization",
                                       status = "primary",
                                       solidHeader = TRUE,
                                       plotOutput("geofacet_plot", height = "600px")
@@ -1970,7 +1974,6 @@ output$station_map <- renderPlot({
   
   tmap_mode("plot")
   
-  title_text <- paste("Distribution of", input$variable_map)
   legend_text <- paste(input$variable_map)
   
   tm_shape(mpsz) +
@@ -1982,9 +1985,6 @@ output$station_map <- renderPlot({
             alpha = 0.9, 
             title = legend_text)+
     tm_layout(
-            main.title = title_text,
-            main.title.size = 1,
-            main.title.position = "center", 
             frame = FALSE,
             legend.frame = FALSE,
             legend.outside = TRUE,
@@ -1997,7 +1997,6 @@ output$idw_map <- renderPlot({
   
   tmap_mode("plot")
   
-  title_text <- paste("Distribution of", input$variable_map)
   legend_text <- paste(input$variable_map)
   
   tm_shape(results$idw_pred) + 
@@ -2006,9 +2005,6 @@ output$idw_map <- renderPlot({
                 values = "brewer.purples"),
               col.legend = tm_legend(legend_text)) +
     tm_layout(
-            main.title = title_text,
-            main.title.size = 1,
-            main.title.position = "center", 
             frame = FALSE,
             legend.frame = FALSE,
             legend.outside = TRUE,
@@ -2037,7 +2033,6 @@ output$kriging_map <- renderPlot({
   
   tmap_mode("plot")
   
-  title_text <- paste("Distribution of", input$variable_map)
   legend_text <- paste(input$variable_map)
   
   tm_shape(results$kriging_pred) + 
@@ -2046,9 +2041,6 @@ output$kriging_map <- renderPlot({
                 values = "brewer.purples"),
               col.legend = tm_legend(legend_text)) +
     tm_layout(
-            main.title = title_text,
-            main.title.size = 1,
-            main.title.position = "center", 
             frame = FALSE,
             legend.frame = FALSE,
             legend.outside = TRUE,
@@ -2502,7 +2494,13 @@ output$kriging_map <- renderPlot({
       
       # Define models
       models <- list(
+        ETS_AAA = ETS(value ~ error("A") + trend("A") + season("A")), 
+        ETS_MAM = ETS(value ~ error("M") + trend("A") + season("M")),
         ETS_MMM = ETS(value ~ error("M") + trend("M") + season("M")),
+        ETS_AAN = ETS(value ~ error("A") + trend("A") + season("N")),
+        ETS_MMN = ETS(value ~ error("M") + trend("M") + season("N")),
+        ETS_ANN = ETS(value ~ error("A") + trend("N") + season("N")),
+        Auto_ETS = ETS(value),
         Auto_ARIMA = ARIMA(value)
       )
       

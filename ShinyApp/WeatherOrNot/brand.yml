@@ -43,7 +43,7 @@ typography:
       display: swap
   base:
     family: "Open Sans"    # Default font for body text
-    size: 11px             # Base font size
+    size: 10px             # Base font size
     weight: 400            # Default font weight
     line-height: 1.5       # Line height for readability
   headings:
@@ -54,20 +54,20 @@ typography:
   labels:
     family: "Open Sans"
     weight: 600
-    size: 11px
+    size: 10px
   data:
     family: "Roboto"
     weight: 500
-    size: 11px
+    size: 10px
   tabs:
     family: "Open Sans"
     weight: 600
-    size: 11px
+    size: 10px
     active-color: black
     inactive-color: grey
   monospace:
     family: "Roboto Mono"
-    size: 11px
+    size: 10px
     weight: 400
     
 # UI Component styling
