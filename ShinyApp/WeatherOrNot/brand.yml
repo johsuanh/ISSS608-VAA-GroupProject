@@ -43,7 +43,7 @@ typography:
       display: swap
   base:
     family: "Open Sans"    # Default font for body text
-    size: 12px             # Base font size
+    size: 11px             # Base font size
     weight: 400            # Default font weight
     line-height: 1.5       # Line height for readability
   headings:
@@ -54,20 +54,20 @@ typography:
   labels:
     family: "Open Sans"
     weight: 600
-    size: 12px
+    size: 11px
   data:
     family: "Roboto"
     weight: 500
-    size: 12px
+    size: 11px
   tabs:
     family: "Open Sans"
     weight: 600
-    size: 12px
+    size: 11px
     active-color: black
     inactive-color: grey
   monospace:
     family: "Roboto Mono"
-    size: 12px
+    size: 11px
     weight: 400
     
 # UI Component styling
@@ -75,12 +75,12 @@ components:
   card:
     background: white
     border-radius: 4px
-    shadow: "0 2px 5px rgba(0,0,0,0.1)"
-    padding: "20px"
+    shadow: "0 0px 0px rgba(0,0,0,0.1)"
+    padding: "5px"
   dropdown:
     background: white
     border: "1px solid light-grey"
-    border-radius: 4px
+    border-radius: 3px
   slider:
     track-color: light-grey
     thumb-color: light-blue
@@ -133,7 +133,7 @@ defaults:
         .box { 
           border-radius: 4px;
           box-shadow: 0 0px 0px rgba(0,0,0,0.1);
-          padding: 20px;
+          padding: 50px;
           background-color: $white;
         }
         .select-input { 
@@ -148,5 +148,5 @@ defaults:
         .shiny-plot-output {
           background-color: $white;
           border-radius: 2px;
-          padding: 10px;
+          padding: 5px;
         }

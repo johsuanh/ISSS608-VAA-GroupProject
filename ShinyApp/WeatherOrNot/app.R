@@ -1,10 +1,39 @@
 # Load necessary libraries
-pacman::p_load(shiny, shinydashboard, highcharter, leaflet, bslib, yaml, bsicons,dplyr,lubridate,zoo,tidyr,ggplot2,ggridges,tibble,geofacet)
+library(gstat)
+library(shiny)
+library(shinydashboard)
+library(highcharter)
+library(leaflet)
+library(bslib)
+library(yaml)
+library(bsicons)
+library(tidyverse)
+library(lubridate)
+library(zoo)
+library(tidyr)
+library(ggplot2)
+library(ggridges)
+library(tibble)
+library(geofacet)
+library(terra)
+library(sf)
+library(tmap)
+
+pacman::p_load(DT,tseries,knitr,tsibble,fable,feasts,ggthemes,forecast,kableExtra,shinybusy)
+
 
 
 # Import Data + Add Region Info
 dataset <- readRDS("www/station_data.rds") 
+# Load spatial data
+weekly_station_sf <- readRDS("www/station_weekly_sf.rds")
+daily_station_sf <- readRDS("www/station_daily_sf.rds")
+monthly_station_sf <- readRDS("www/station_monthly_sf.rds")
+mpsz <- readRDS("www/mpsz.rds")
+daily_station <- readRDS("www/station_daily_data.rds")
 
+# Print the structure of daily_station to verify its contents
+print(str(daily_station))
 
 
 #========================================================== 
@@ -122,7 +151,7 @@ custom_css <- paste0('
 
   /* Content wrapper adjustment for taller header */
   .content-wrapper, .right-side {
-    background-color: ', background_color, ' !important;
+    background-color: #f5f5f5 !important;
   }
   
   /* Fix sidebar positioning */
@@ -155,9 +184,7 @@ custom_css <- paste0('
     z-index: 1001;
     display: flex;
     align-items: center;
-  }
-
-  .main-header .logo img {
+  }  .main-header .logo img {
     height: 60px;
     width: auto;
   }
@@ -268,27 +295,48 @@ custom_css <- paste0('
     border: none !important;
   }
 
-  /* Box header styling */
-  .box-header {
-    display: flex; /* Enables flexbox */
-    align-items: center; /* Centers content vertically */
-    justify-content: center; /* Centers content horizontally */
+  /* Box header styling for sidebar */
+  .col-sm-3 .box-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: none !important;
     border-radius: 5px !important;
     background-color: ', background_color, ' !important;
     padding: 15px !important;
     text-align: center !important;
-    height: 20px; /* Set a height to properly center content */
+    height: 20px;
   }
 
-  .box-header h3 {
+  /* Box header styling for visualization area */
+  .col-sm-9 .box-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none !important;
+    border-bottom: 1px solid ', brand_colors$`light-grey`, ' !important;
+    border-radius: 5px 5px 0 0 !important;
+    background-color: white !important;
+    padding: 15px !important;
+    text-align: center !important;
+    height: 20px;
+  }
+
+  .col-sm-3 .box-header h3 {
     color: ', brand_colors$`dark-grey`, ' !important;
     font-family: "', brand_settings$typography$headings$family, '", sans-serif;
     font-weight: ', brand_settings$typography$headings$weight, ';
-    font-size: 14px !important;
+    font-size: 12px !important;
     text-align: center !important;
   }
 
+  .col-sm-9 .box-header h3 {
+    color: ', brand_colors$`sky-blue`, ' !important;
+    font-family: "', brand_settings$typography$headings$family, '", sans-serif;
+    font-weight: ', brand_settings$typography$headings$weight, ';
+    font-size: 12px !important;
+    text-align: center !important;
+  }
 
   .box-body {
     border: none !important;
@@ -328,6 +376,11 @@ custom_css <- paste0('
     border: ', component_settings$dropdown$border, ' !important;
     border-radius: ', component_settings$dropdown$border_radius, ' !important;
     font-family: "', brand_settings$typography$base$family, '", sans-serif;
+  }
+
+  .selectize-dropdown {
+      max-height: 100px;  /* Set a max height for the dropdown */
+      overflow-y: auto;   /* Enable vertical scrolling */
   }
   
   /* Slider styling based on component settings */
@@ -598,24 +651,22 @@ sidebar <- dashboardSidebar(
     
     # EDA Section
     menuItem("Exploratory Analysis", tabName = "EDA", icon = icon("glasses"),
-      menuItem(HTML("<b>Time-series Analysis:</b>"), tabName = NULL,icon = icon("calendar-days")),
       menuSubItem("Line Chart", tabName = "LineChart"),
       menuSubItem("Ridge Plot", tabName = "RidgePlot"),
       menuSubItem("Geofacet", tabName = "Geofacet"),
-      menuSubItem(HTML("<b>Geospatial Analysis:</b>"), tabName = NULL,icon = icon("map")),
-      menuSubItem("Isoline Map", tabName = "geospatial")
+      menuSubItem("Isohyet Map", tabName = "Isohyet")
     ),
     
-    # CDA Section
-    menuItem("Co-variation Analysis", tabName = "CDA", icon = icon("check-circle"),
-      menuSubItem("Cross-Correlation Function", tabName = "CrossCorrelationFunction"),
-      menuSubItem("Cointegration Analysis", tabName = "Cointegration")
+    # Time Series Analysis Section
+    menuItem("Time-Series Analysis", tabName = "Time", icon = icon("check-circle"),
+      menuSubItem("Time-Series Decomposition", tabName = "Decomposition"),
+      menuSubItem("Correlograms", tabName = "Correlogram")
       ),
     
     # Forecasting Section
-    menuItem("Forecasting", tabName = "Forecasting", icon = icon("chart-line"),
-      menuSubItem("Time Series Decomposition", tabName = "decomposition"),
-      menuSubItem("Forecasting Models", tabName = "arima")
+    menuItem("Univariate Forecasting", tabName = "Forecasting", icon = icon("chart-line"),
+      menuSubItem("Step 1: Model Training", tabName = "Training"),
+      menuSubItem("Step 2: Model Forecasting", tabName = "Model")
       ),
     
     # About section
@@ -717,54 +768,6 @@ LineChartTab <- fluidRow(
   )
 
 
-# Data Exploration subtab contents
-overviewTab <- fluidRow(
-  # Left column - Controls
-  column(width = 3,
-    box(width = 12, title = "Dataset Selection", status = "info",
-      selectInput("dataset", "Select Dataset:", 
-                    choices = c("Temperature", "Rainfall", "Wind", "Humidity"),
-                    selected = "Temperature"),
-      sliderInput("tempSlider", 
-                "Temperature Range:", 
-                min = -30, 
-                max = 50, 
-                value = c(0, 30),
-                width = "100%"),
-      dateRangeInput("date_range", "Date Range:",
-                    start = "2010-01-01", 
-                    end = "2020-12-31",
-                    separator = " - ",
-                    format = "yyyy-mm-dd",
-                    width = "100%"),      
-      div(style = "text-align: right;",
-        actionButton("update_overview", "Update View", 
-                    class = "btn-primary",
-                    icon = icon("refresh"))
-      )
-    ),
-    box(width = 12, title = "Display Options", status = "info",
-      checkboxInput("show_summary", "Show Summary Statistics", value = TRUE),
-      checkboxInput("show_missing", "Show Missing Data", value = TRUE)
-    )
-  ),
-  # Right column - Visualizations with subtabs
-  column(width = 9,
-    tabBox(width = 12,
-      title = "Data Analysis",
-      id = "overview_tabs",
-      tabPanel("Summary Statistics",
-        highchartOutput("summary_chart")
-      ),
-      tabPanel("Data Quality",
-        highchartOutput("quality_chart")
-      ),
-      tabPanel("Trends",
-        highchartOutput("trend_chart")
-      )
-    )
-  )
-)
 
 # RidgePlot Analysis Tab
 RidgePlotTab <- fluidRow(
@@ -909,391 +912,448 @@ GeofacetTab <- fluidRow(
 
 
 
-###
-geospatialTab <- fluidRow(
+## Isohyet Map
+IsohyetmapTab <- fluidRow(
+  # Left sidebar with settings
   column(width = 3,
-         box(width = 12, title = "Map Settings", status = "info",
-             selectInput("variable_map", "Select Variable:", 
-                         choices = c("Temperature", "Rainfall", "Wind Speed"),
-                         selected = "Temperature"),
-             selectInput("time_period", "Time Period:",
-                         choices = c("Daily", "Monthly", "Yearly"),
-                         selected = "Monthly"),
-             selectInput("station_map", "Select Stations:", 
-                         choices = unique(dataset$station),
-                         multiple = TRUE,
-                         selected = "Changi"),
-             dateRangeInput("date_range_map", "Date Range:",
-                            start = "2020-01-01", 
-                            end = "2025-01-31",
-                            separator = " - ",
-                            format = "yyyy-mm-dd"),
-             div(style = "text-align: right;",
-                 actionButton("update_map", "Update View", 
-                              class = "btn-primary",
-                              icon = icon("refresh"))
-             )
-         ),
-         box(width = 12, title = "Layer Options", status = "info",
-             checkboxInput("show_stations", "Show Weather Stations", value = TRUE),
-             checkboxInput("show_planning_areas", "Show Planning Areas", value = TRUE),
-             checkboxInput("show_income_layer", "Show Income Distribution", value = FALSE),
-             checkboxInput("show_age_layer", "Show Age Distribution", value = FALSE)
-         )
-  ),
-  column(width = 9,
-         tabBox(width = 12,
-                title = "Geospatial Analysis",
-                id = "geospatial_tabs",
-                tabPanel("Choropleth Map",
-                         leafletOutput("choropleth_map", height = "600px")
-                ),
-                tabPanel("Station Analysis",
-                         highchartOutput("station_comparison")
-                ),
-                tabPanel("Statistics",
-                         verbatimTextOutput("spatial_stats")
-                )
-         )
-  )
-)
-
-
-# Placeholder content for other tabs
-CATabs <- fluidRow(
-  box(width = 12, 
-      h3("Confirmatory Analysis Content Here")
-  )
-)
-
-ForecastSubTabs <- fluidRow(
-  box(width = 12,
-      h3("Forecasting Content Here")
-  )
-)
-
-# CrossCorrelationFunction Tests Tab
-CrossCorrelationFunctionTab <- fluidRow(
-  # Left column - Controls
-  column(width = 3,
-    box(width = 12, title = "Test Settings", status = "info",
-        selectInput("station", "Select Station:", choices = unique(dataset$station)),
-        selectInput("var1", "Select First Variable:", choices = colnames(dataset)[5:12]),
-        selectInput("var2", "Select Second Variable:", choices = colnames(dataset)[5:12]),
-        dateRangeInput("date_range", "Select Date Range:", 
-                       start = min(dataset$date), end = max(dataset$date)),
-        checkboxInput("apply_diff", "Apply Differencing", value = FALSE),
-        sliderInput("lag_max", "Max Lag:", min = 1, max = 60, value = 30),
-      div(style = "text-align: right;"
-        #actionButton("run_CrossCorrelationFunction", "Run Test", 
-                    #class = "btn-primary",
-                    #icon = icon("play"))
-      )
-    )
-  ),
-  # Right column - Results
-  column(width = 9,
-    tabBox(width = 12,
-      title = "Cross Correlation Function Test Results",
-      id = "CrossCorrelationFunction_tabs",
-      tabPanel("Visual Analysis",
-        fluidRow(
-          column(width = 10, highchartOutput("qq_plot"))
-        )
+    # Collapsible Info Box
+    box(width = 12,
+      title = "About Spatial Interpolation",
+      status = "info",
+      height = "auto",
+      collapsible = TRUE,
+      collapsed = TRUE,
+      p("Spatial interpolation helps us estimate values at unsampled locations based on known measurements from nearby weather stations."),
+      tags$ul(
+        tags$li(strong("IDW (Inverse Distance Weighting):"), "A deterministic method that assumes closer points have more influence."),
+        tags$li(strong("Kriging:"), "A geostatistical method that considers both distance and spatial patterns."),
+        tags$li(strong("Variogram:"), "Helps understand spatial correlation and optimize Kriging parameters.")
       ),
-      tabPanel("Test Results",
-        verbatimTextOutput("shapiro_test")
-      ),
-      tabPanel("Summary",
-        verbatimTextOutput("CrossCorrelationFunction_summary")
-      )
-    )
-  )
-)
-
-# Cointegration Tests Tab
-CointegrationTab <- fluidRow(
-  # Left column - Controls
-  column(width = 3,
-    box(width = 12, title = "Analysis Settings", status = "info",
-      selectInput("variable1_Cointegration", "Select Variable:",
-                 choices = c("Temperature", "Rainfall", "Wind Speed"),
-                 selected = "Temperature"),
-      selectInput("variable2_Cointegration", "Select Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = "Rainfall"),
-      selectInput("station_Cointegration", "Select Stations:", 
-                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                              "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                              "Tai_Seng", "Admiralty"),
-                    multiple = TRUE,
-                    selected = c("Changi", "Marina_Barrage")),
-      conditionalPanel(
-        condition = "input.Cointegration_type == 'Two-way Cointegration'",
-        selectInput("second_factor", "Second Factor:",
-                   choices = c("Month", "Season", "Year"),
-                   selected = "Month")
-      ),
-      dateRangeInput("date_range_Cointegration", "Date Range:",
-                    start = "2020-01-01", 
-                    end = "2025-01-31",
-                    separator = " - ",
-                    format = "yyyy-mm-dd"),
-      div(style = "text-align: right;",
-        actionButton("run_Cointegration", "Run Test", 
+      p("Use the settings below to customize your analysis.")
+    ),
+    
+    # Step 1: Map Settings
+    box(width = 12, 
+      title = "Step 1: Map Settings", 
+      status = "info",
+      height = "260px",
+      selectInput("variable_map", 
+                 "Select Variable:", 
+                 choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
+                           "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                 selected = "Mean Temperature"),
+      selectInput("time_resolution", 
+                 "Time Resolution:",
+                 choices = c("Daily", "Weekly", "Monthly"),
+                 selected = "Monthly"),
+      dateRangeInput("date_range_map", 
+                    "Date Range:",
+                    start = "2023-01-01",
+                    end = "2024-02-01",
+                    format = "yyyy-mm-dd")
+    ),
+    
+    # Step 2: IDW Settings
+    box(width = 12,
+      title = "Step 2: IDW Settings",
+      status = "info",
+      height = "120px",
+      numericInput("idw_nmax", 
+                  "IDW Nmax (groups):",
+                  value = 6,
+                  min = 1,
+                  max = 20)
+    ),
+    
+    # Step 3: Variogram Settings
+    box(width = 12,
+      title = "Step 3: Variogram Settings",
+      status = "info",
+      height = "190px",
+      selectInput("variogram_model",
+                 "Select Model:",
+                 choices = c("Gau", "Mat", "Per"),
+                 selected = "Gau")
+    ),
+    
+    # Run Model Button
+    box(width = 12,
+      status = "primary",
+      height = "100px",
+      div(style = "text-align: center; padding-top: 20px;",
+        actionButton("run_map", 
+                    "Run Model", 
                     class = "btn-primary",
                     icon = icon("play"))
       )
-    ),
-    box(width = 12, title = "Display Options", status = "info",
-      checkboxInput("show_boxplots", "Show Box Plots", value = TRUE),
-      checkboxInput("show_means", "Show Mean Plot", value = TRUE),
-      checkboxInput("show_assumptions", "Show Test Assumptions", value = TRUE)
     )
   ),
-  # Right column - Results
+  
+  # Main content area with 4 boxes in a grid
   column(width = 9,
-    tabBox(width = 12,
-      title = "Cointegration Results",
-      id = "Cointegration_tabs",
-      tabPanel("Visual Analysis",
-        fluidRow(
-          column(width = 6, highchartOutput("Cointegration_boxplot")),
-          column(width = 6, highchartOutput("means_plot"))
-        )
+    fluidRow(
+      # Step 1: Variable Selection Map
+      box(width = 6,
+        title = "Step 1: Select a Variable of Interest :)",
+        status = "primary",
+        solidHeader = TRUE,
+        height = "350px",
+        tmapOutput("station_map", height = "300px")
       ),
-      tabPanel("Test Results",
-        verbatimTextOutput("Cointegration_results")
+      
+      # Step 2: IDW Results
+      box(width = 6,
+        title = "Step 2: IDW - Determine the Max No. of Groups for Spatial Interpolation",
+        status = "primary",
+        solidHeader = TRUE,
+        height = "350px",
+        tmapOutput("idw_map", height = "300px")
+      )
+    ),
+    fluidRow(
+      # Step 3: Variogram Plot
+      box(width = 6,
+        title = "Step 3: Set Up Variogram for Ordinary Kriging Interpolation",
+        status = "primary",
+        solidHeader = TRUE,
+        height = "350px",
+        plotOutput("variogram_plot", height = "300px")
       ),
-      tabPanel("Post-hoc Analysis",
-        verbatimTextOutput("posthoc_results")
+      
+      # Step 4: Kriging Results
+      box(width = 6,
+        title = "Step 4: Ordinary Kriging - Comparing Results with IDW",
+        status = "primary",
+        solidHeader = TRUE,
+        height = "350px",
+        tmapOutput("kriging_map", height = "300px")
       )
     )
   )
 )
 
-# Non-Parametric Tests Tab
-nonparametricTab <- fluidRow(
-  # Left column - Controls
+
+## Decomposition Tab
+DecompositionTab <- fluidRow(
+  # Left sidebar with settings
   column(width = 3,
-    box(width = 12, title = "Test Settings", status = "info",
-      selectInput("nonparam_test", "Test Type:",
-                 choices = c("Kruskal-Wallis Test"),
-                 selected = "Kruskal-Wallis Test"),
-      selectInput("variable_nonparam", "Select Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = "Temperature"),
-      selectInput("station_nonparam", "Select Stations:", 
-                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                              "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                              "Tai_Seng", "Admiralty"),
-                    multiple = TRUE,
-                    selected = c("Changi", "Marina_Barrage")),
-      dateRangeInput("date_range_nonparam", "Date Range:",
-                    start = "2020-01-01", 
+    # Collapsible Info Box
+    box(width = 12,
+      title = "About STL Decomposition",
+      status = "info",
+      height = "auto",
+      collapsible = TRUE,
+      collapsed = TRUE,
+      p("STL (Seasonal-Trend decomposition using LOESS) decomposes a time series into three components:"),
+      tags$ul(
+        tags$li(strong("Trend:"), "The long-term progression of the series"),
+        tags$li(strong("Seasonal:"), "Repeating short-term cycles"),
+        tags$li(strong("Remainder:"), "The residuals after removing trend and seasonal components")
+      ),
+      p("Use the settings below to customize your analysis.")
+    ),
+    
+    # Settings
+    box(width = 12, 
+      title = "Settings", 
+      status = "info",
+      height = "380px",
+      selectInput("variable_decomp", 
+                 "Select Variable:", 
+                 choices = c("Mean Temperature", "Min Temperature", "Max Temperature",
+                           "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                 selected = "Mean Temperature"),
+      selectInput("station_decomp", 
+                 "Select Station:", 
+                 choices = unique(daily_station$station),
+                 selected = "Clementi"),                 
+      selectInput("time_resolution_decomp", 
+                 "Time Resolution:",
+                 choices = c("Daily", "Weekly", "Monthly"),
+                 selected = "Monthly"),
+      dateRangeInput("date_range_decomp", 
+                    "Date Range:",
+                    start = "2019-01-01",
                     end = "2025-01-31",
-                    separator = " - ",
-                    format = "yyyy-mm-dd"),
-      div(style = "text-align: right;",
-        actionButton("run_nonparam", "Run Test", 
+                    format = "yyyy-mm-dd")
+    ),
+    
+    # Run Model Button
+    box(width = 12,
+      status = "primary",
+      height = "100px",
+      div(style = "text-align: center; padding-top: 20px;",
+        actionButton("run_decomp", 
+                    "Run Model", 
                     class = "btn-primary",
                     icon = icon("play"))
       )
-    ),
-    box(width = 12, title = "Display Options", status = "info",
-      checkboxInput("show_ranks", "Show Rank Plot", value = TRUE),
-      checkboxInput("show_distributions", "Show Distributions", value = TRUE),
-      checkboxInput("show_pairwise", "Show Pairwise Comparisons", value = TRUE)
     )
   ),
-  # Right column - Results
+  
+  # Main content area with plots
   column(width = 9,
-    tabBox(width = 12,
-      title = "Non-Parametric Test Results",
-      id = "nonparam_tabs",
-      tabPanel("Visual Analysis",
-        fluidRow(
-          column(width = 6, highchartOutput("rank_plot")),
-          column(width = 6, highchartOutput("dist_plot"))
-        )
+    fluidRow(
+      # STL Decomposition Plot
+      box(width = 12,
+        title = "Step 1: Break Down the Time Series into Trend, Seasonal and Remainder",
+        status = "primary",
+        solidHeader = TRUE,
+        height = "350px",
+        plotOutput("stl_plot", height = "300px")
       ),
-      tabPanel("Test Results",
-        verbatimTextOutput("nonparam_results")
-      ),
-      tabPanel("Pairwise Comparisons",
-        verbatimTextOutput("pairwise_results")
+      
+      # Seasonal Plot
+      box(width = 12,
+        title = "Step 2: Seasonal Decomposition by Month",
+        status = "primary", 
+        solidHeader = TRUE,
+        height = "350px",
+        plotOutput("seasonal_plot", height = "300px")
       )
     )
   )
 )
 
-# Time Series Decomposition Tab
-decompositionTab <- fluidRow(
+
+
+# Time Series Correlogram Tab
+CorrelogramTab <- fluidRow(
   # Left column - Controls
   column(width = 3,
-    box(width = 12, title = "Decomposition Settings", status = "info",
-      selectInput("variable_decomp", "Select Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = "Temperature"),
-      selectInput("station_decomp", "Select Station:", 
-                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                              "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                              "Tai_Seng", "Admiralty"),
-                    selected = "Changi"),
-      selectInput("decomp_method", "Decomposition Method:",
-                 choices = c("STL", "Classical"),
-                 selected = "STL"),
-      dateRangeInput("date_range_decomp", "Date Range:",
-                    start = "2020-01-01", 
+    # Collapsible Info Box
+    box(width = 12,
+      title = "About Correlogram Analysis",
+      status = "info",
+      height = "auto",
+      collapsible = TRUE,
+      collapsed = TRUE,
+      p("Correlogram analysis helps us understand the temporal dependencies in time series data through:"),
+      tags$ul(
+        tags$li(strong("Autocorrelation (ACF):"), "Shows correlation between observations at different time lags"),
+        tags$li(strong("Partial Autocorrelation (PACF):"), "Shows correlation between observations after removing the effects of intermediate lags"),
+        tags$li(strong("Trend Differencing:"), "Helps identify and remove trend components"),
+        tags$li(strong("Seasonal Differencing:"), "Helps identify and remove seasonal patterns")
+      ),
+      p("Use the settings below to customize your analysis.")
+    ),
+    
+    # Settings
+    box(width = 12, 
+      title = "Settings", 
+      status = "info",
+      height = "auto",
+      selectInput("variable_corr", 
+                 "Select Variable:", 
+                 choices = c("Mean Temperature", "Min Temperature", "Max Temperature",
+                           "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                 selected = "Mean Temperature"),
+      selectInput("station_corr", 
+                 "Select Station:", 
+                 choices = unique(daily_station$station),
+                 selected = "Clementi"),
+      selectInput("time_resolution_corr", 
+                 "Time Resolution:",
+                 choices = c("Daily", "Weekly", "Monthly"),
+                 selected = "Monthly"),
+      dateRangeInput("date_range_corr", 
+                    "Date Range:",
+                    start = "2019-01-01",
+                    end = "2025-01-31",
+                    format = "yyyy-mm-dd"),
+      selectInput("plot_type", 
+                 "Plot Type:",
+                 choices = c("partial", "scatter", "histogram"),
+                 selected = "partial"),      
+      sliderInput("lag_max", 
+                  "Maximum Lag:",
+                  min = 1, 
+                  max = 52, 
+                  value = 24, 
+                  step = 1)
+    ),
+    
+    # Run Model Button
+    box(width = 12,
+      status = "primary",
+      height = "100px",
+      div(style = "text-align: center; padding-top: 20px;",
+        actionButton("run_corr", 
+                    "Run Analysis", 
+                    class = "btn-primary",
+                    icon = icon("chart-line"))
+      )
+    )
+  ),
+  
+  # Main content area with plots
+  column(width = 9,
+    # Step 1: Original Series
+    box(width = 12,
+      title = "Step 1: Check Autocorrelation with Different Plots",
+      status = "primary",
+      solidHeader = TRUE,
+      height = "300px",
+      plotOutput("original_plot", height = "300px")
+    ),
+    
+    # Step 2 and 3 side by side
+    fluidRow(
+      # Step 2: Trend Differencing
+      column(width = 6,
+        box(width = 12,
+          title = "Step 2: Trend Differencing",
+          status = "primary",
+          solidHeader = TRUE,
+          height = "300px",
+          plotOutput("trend_diff_plot", height = "280px")
+        )
+      ),
+      
+      # Step 3: Seasonal Differencing
+      column(width = 6,
+        box(width = 12,
+          title = "Step 3: Seasonal Differencing",
+          status = "primary",
+          solidHeader = TRUE,
+          height = "300px",
+          plotOutput("seasonal_diff_plot", height = "280px")
+        )
+      )
+    )
+  )
+)
+
+# Training Models Tab
+TrainingTab <- fluidRow(
+  add_busy_spinner(spin = "fading-circle"),
+  # Left column - Controls
+  column(width = 3,
+    box(width = 12, title = "Step 1: Training Settings", status = "info",
+      selectInput("variable_train", "Select Variable:", 
+                    choices = c("Mean Temperature", "Min Temperature", "Max Temperature",
+                              "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                    selected = "Mean Temperature"),
+      selectInput("station_train", "Select Station:", 
+                    choices = unique(daily_station$station),
+                    selected = "Clementi"),
+      selectInput("time_resolution_train", "Time Resolution:",
+                 choices = c("Daily", "Weekly", "Monthly"),
+                 selected = "Monthly"),
+      dateRangeInput("date_range_train", "Training Period:",
+                    start = "2022-01-01", 
                     end = "2025-01-31",
                     separator = " - ",
                     format = "yyyy-mm-dd"),
+      selectInput("models_train", "Select Models:",
+                        choices = c(
+                          "ETS(AAA)" = "ETS_AAA",
+                          "ETS(MAM)" = "ETS_MAM",
+                          "ETS(MMM)" = "ETS_MMM",
+                          "ETS(AAN)" = "ETS_AAN",
+                          "ETS(MMN)" = "ETS_MMN",
+                          "ETS(ANN)" = "ETS_ANN",
+                          "Auto ETS" = "Auto_ETS",
+                          "Auto ARIMA" = "Auto_ARIMA"
+                        ),
+                        multiple = TRUE,
+                        selected = c("ETS_AAA", "ETS_MAM", "ETS_MMM", "ETS_AAN", "ETS_MMN", "ETS_ANN", "Auto_ETS", "Auto_ARIMA")),
       div(style = "text-align: right;",
-        actionButton("run_decomp", "Analyze", 
+        actionButton("run_train", "Run Training", 
                     class = "btn-primary",
-                    icon = icon("chart-line"))
+                    icon = icon("play"))
       )
-    ),
-    box(width = 12, title = "Display Options", status = "info",
-      checkboxInput("show_acf", "Show ACF Plot", value = TRUE),
-      checkboxInput("show_pacf", "Show PACF Plot", value = TRUE),
-      checkboxInput("show_components", "Show Components", value = TRUE)
     )
   ),
   # Right column - Results
   column(width = 9,
-    tabBox(width = 12,
-      title = "Time Series Decomposition",
-      id = "decomp_tabs",
-      tabPanel("Components",
-        highchartOutput("stl_plot", height = "600px")
-      ),
-      tabPanel("Correlation Analysis",
-        fluidRow(
-          column(width = 6, highchartOutput("acf_plot")),
-          column(width = 6, highchartOutput("pacf_plot"))
+    # Step 1-1: Model Training and Evaluation
+    box(width = 6,
+      title = "Step 1-1: Model Training & Fitting (Train-Test Split: 80%-20%)",
+      status = "primary",
+      solidHeader = TRUE,
+      # Forecasting Performance Plot
+      plotOutput("forecast_plot_train", height = "400px")
+    ),
+    # Step 1-2: Model Evaluation Metrics
+    box(width = 6,
+      title = "Step 1-2: Model Evaluation: AIC, BIC and RMSE",
+      status = "primary",
+      solidHeader = TRUE,
+      DTOutput("model_metrics_table")
+    )
+  )
+)
+
+# Model Selection Tab
+ModelTab <- fluidRow(
+  # Left column - Controls
+  column(width = 3,
+    box(width = 12, title = "Step 2: Forecasting Settings", status = "info",
+      selectInput("variable_model", "Select Variable:", 
+                    choices = c("Mean Temperature", "Min Temperature", "Max Temperature",
+                              "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                    selected = "Mean Temperature"),
+      selectInput("station_model", "Select Station:", 
+                    choices = unique(daily_station$station),
+                    selected = "Clementi"),
+      selectInput("time_resolution_model", "Time Resolution:",
+                 choices = c("Daily", "Weekly", "Monthly"),
+                 selected = "Monthly"),
+      dateRangeInput("date_range_model", "Training Period:",
+                    start = "2022-01-01", 
+                    end = "2025-01-31",
+                    separator = " - ",
+                    format = "yyyy-mm-dd"),
+      numericInput("forecast_period_model", "Forecast Period:",
+                  value = 12,
+                  min = 1,
+                  max = 24),
+      selectInput("models_final", "Select Final Models:",
+                        choices = c(
+                          "ETS(AAA)" = "ETS_AAA",
+                          "ETS(MAM)" = "ETS_MAM",
+                          "ETS(MMM)" = "ETS_MMM",
+                          "ETS(AAN)" = "ETS_AAN",
+                          "ETS(MMN)" = "ETS_MMN",
+                          "ETS(ANN)" = "ETS_ANN",
+                          "Auto ETS" = "Auto_ETS",
+                          "Auto ARIMA" = "Auto_ARIMA"
+                        ),
+                        multiple = TRUE,
+                        selected = c("Auto_ETS", "Auto_ARIMA")),
+      div(style = "text-align: right;",
+        actionButton("run_model", "Generate Forecast", 
+                    class = "btn-primary",
+                    icon = icon("chart-line"))
+      )
+    )
+  ),
+  # Right column - Results
+  column(width = 9,
+    # Step 2-1: Model Training and Evaluation
+    box(width = 6,
+      title = "Step 2-1: Model Fitting and Forecasting",
+      status = "primary",
+      solidHeader = TRUE,
+      plotOutput("forecast_plot_final", height = "300px")
+    ),
+    # Step 2-2: Residual Analysis
+    box(width = 6,
+      title = "Step 2-2: Residual Analysis",
+      status = "primary",
+      solidHeader = TRUE,
+      plotOutput("residuals_plot", height = "300px")
+    ),
+    fluidRow(
+      # Parameters table
+      column(width = 12,
+        box(width = 12,
+          title = "Table: Parameters of the Selected Forecasting Models",
+          status = "primary",
+          solidHeader = TRUE,
+          DTOutput("model_parameters_table", height = "280px")
         )
-      ),
-      tabPanel("Statistics",
-        verbatimTextOutput("decomp_stats")
-      )
-    )
-  )
-)
-
-# ARIMA Models Tab
-arimaTab <- fluidRow(
-  # Left column - Controls
-  column(width = 3,
-    box(width = 12, title = "ARIMA Settings", status = "info",
-      selectInput("variable_arima", "Select Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = "Temperature"),
-      selectInput("station_arima", "Select Station:", 
-                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                              "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                              "Tai_Seng", "Admiralty"),
-                    selected = "Changi"),
-      selectInput("arima_type", "Model Type:",
-                 choices = c("Auto ARIMA", "STL ARIMA"),
-                 selected = "Auto ARIMA"),
-      dateRangeInput("date_range_arima", "Training Period:",
-                    start = "2020-01-01", 
-                    end = "2024-12-31",
-                    separator = " - ",
-                    format = "yyyy-mm-dd"),
-      numericInput("forecast_period", "Forecast Period (days):",
-                  value = 30, min = 1, max = 365),
-      div(style = "text-align: right;",
-        actionButton("run_arima", "Forecast", 
-                    class = "btn-primary",
-                    icon = icon("chart-line"))
-      )
-    ),
-    box(width = 12, title = "Model Options", status = "info",
-      checkboxInput("show_diagnostics", "Show Model Diagnostics", value = TRUE),
-      checkboxInput("show_confidence", "Show Confidence Intervals", value = TRUE),
-      checkboxInput("show_accuracy", "Show Accuracy Metrics", value = TRUE)
-    )
-  ),
-  # Right column - Results
-  column(width = 9,
-    tabBox(width = 12,
-      title = "ARIMA Forecasting",
-      id = "arima_tabs",
-      tabPanel("Forecast Plot",
-        highchartOutput("arima_forecast", height = "500px")
-      ),
-      tabPanel("Model Diagnostics",
-        highchartOutput("arima_diagnostics")
-      ),
-      tabPanel("Model Summary",
-        verbatimTextOutput("arima_summary")
-      )
-    )
-  )
-)
-
-# ETS Models Tab
-etsTab <- fluidRow(
-  # Left column - Controls
-  column(width = 3,
-    box(width = 12, title = "ETS Settings", status = "info",
-      selectInput("variable_ets", "Select Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = "Temperature"),
-      selectInput("station_ets", "Select Station:", 
-                    choices = c("Changi", "Marina_Barrage", "Ang_Mo_Kio", "Clementi", 
-                              "Jurong_West", "Paya_Lebar", "Newton", "Pasir_Panjang", 
-                              "Tai_Seng", "Admiralty"),
-                    selected = "Changi"),
-      selectInput("ets_type", "Model Type:",
-                 choices = c("Auto ETS", "Custom ETS"),
-                 selected = "Auto ETS"),
-      dateRangeInput("date_range_ets", "Training Period:",
-                    start = "2020-01-01", 
-                    end = "2024-12-31",
-                    separator = " - ",
-                    format = "yyyy-mm-dd"),
-      conditionalPanel(
-        condition = "input.ets_type == 'Custom ETS'",
-        selectInput("error", "Error Type:", 
-                   choices = c("Additive", "Multiplicative"),
-                   selected = "Additive"),
-        selectInput("trend", "Trend Type:", 
-                   choices = c("None", "Additive", "Multiplicative"),
-                   selected = "Additive"),
-        selectInput("seasonal", "Seasonal Type:", 
-                   choices = c("None", "Additive", "Multiplicative"),
-                   selected = "Additive")
-      ),
-      numericInput("forecast_period_ets", "Forecast Period (days):",
-                  value = 30, min = 1, max = 365),
-      div(style = "text-align: right;",
-        actionButton("run_ets", "Forecast", 
-                    class = "btn-primary",
-                    icon = icon("chart-line"))
-      )
-    ),
-    box(width = 12, title = "Model Options", status = "info",
-      checkboxInput("show_components_ets", "Show Components", value = TRUE),
-      checkboxInput("show_confidence_ets", "Show Confidence Intervals", value = TRUE),
-      checkboxInput("show_accuracy_ets", "Show Accuracy Metrics", value = TRUE)
-    )
-  ),
-  # Right column - Results
-  column(width = 9,
-    tabBox(width = 12,
-      title = "ETS Forecasting",
-      id = "ets_tabs",
-      tabPanel("Forecast Plot",
-        highchartOutput("ets_forecast", height = "500px")
-      ),
-      tabPanel("Components",
-        highchartOutput("ets_components")
-      ),
-      tabPanel("Model Summary",
-        verbatimTextOutput("ets_summary")
       )
     )
   )
@@ -1330,6 +1390,7 @@ aboutTab <- fluidRow(
 
 # main body
 body <- dashboardBody(
+  add_busy_spinner(spin = "fading-circle"),
   # Apply custom CSS from brand settings
   tags$head(
     tags$style(HTML(custom_css)),
@@ -1347,15 +1408,15 @@ body <- dashboardBody(
     tabItem(tabName = "LineChart", LineChartTab),
     tabItem(tabName = "RidgePlot", RidgePlotTab),
     tabItem(tabName = "Geofacet", GeofacetTab),
-    tabItem(tabName = "geospatial", geospatialTab),
+    tabItem(tabName = "Isohyet", IsohyetmapTab),
     
-    # CA tabs
-    tabItem(tabName = "CrossCorrelationFunction", CrossCorrelationFunctionTab),
-    tabItem(tabName = "Cointegration", CointegrationTab),
+    # Time-Series Tab
+    tabItem(tabName = "Decomposition", DecompositionTab),
+    tabItem(tabName = "Correlogram", CorrelogramTab),
 
     # Forecasting tabs
-    tabItem(tabName = "decomposition", decompositionTab),
-    tabItem(tabName = "arima", arimaTab),
+    tabItem(tabName = "Training", TrainingTab),
+    tabItem(tabName = "Model", ModelTab),
 
     # About tab
     tabItem(tabName = "about", aboutTab)
@@ -1377,8 +1438,15 @@ ui <- dashboardPage(
 
 # Define server
 server <- function(input, output) {
+  # Print structure of daily_station for debugging
+  print("Structure of daily_station:")
+  print(str(daily_station))
+  print("Column names of daily_station:")
+  print(colnames(daily_station))
+  
   date_min <- min(dataset$date, na.rm = TRUE)
   date_max <- max(dataset$date, na.rm = TRUE)
+  
   # Configure highcharter theme based on visualization settings
   hc_theme_custom <- hc_theme(
     colors = c(primary_color, secondary_color, brand_colors$`medium-blue`, brand_colors$`dark-blue`),
@@ -1662,7 +1730,7 @@ server <- function(input, output) {
     df <- Geofacet_data()  
     
     ggplot(df, aes(x = date, y = value)) +
-      geom_line(color = "#0072B2", size = 0.7) +
+      geom_line(color = "#4D4D4D", size = 0.7) +
       facet_geo(~ station, grid = station_grid) +
       labs(title = paste("Weather Trends by Station -", input$var_geofacet),
            x = "Date", y = input$var_geofacet) +
@@ -1674,16 +1742,8 @@ server <- function(input, output) {
         axis.title.x = element_text(margin = margin(t = 10)),  
         axis.text.y = element_text(size = 9)  
       )
-    
   })
-  
-  
-  
-    
-  
-  
-  
-  
+
   
   # Density plot（改了）
   output$ridge_plot_biv <- renderPlot({
@@ -1771,14 +1831,765 @@ server <- function(input, output) {
       labs(title = paste("Time Series by Station:", input$var_single),
            x = "Date", y = input$var_single) +
       theme_minimal(base_size = 13)
-  })}
+  })
   
+  # Isohyet Map  Server Functions
+#==========================================================
+
+# Store results in reactive values
+results <- reactiveValues(
+  station_data = NULL,
+  idw_pred = NULL,
+  variogram_fit = NULL,
+  kriging_pred = NULL
+)
+
+# Function to prepare station data
+prepare_station_data <- function() {
+  req(input$variable_map, input$time_resolution, input$date_range_map)
+  
+  # Get the appropriate dataset based on time resolution
+  time_resolution_table <- switch(tolower(input$time_resolution),
+                                "daily" = daily_station_sf,
+                                "weekly" = weekly_station_sf,
+                                "monthly" = monthly_station_sf)
+  
+  if (is.null(time_resolution_table)) {
+    stop("Invalid time resolution selected")
+  }
+  
+  # Filter and summarize data
+  station_summary <- time_resolution_table %>%
+    filter(date >= input$date_range_map[1] & date <= input$date_range_map[2]) %>%
+    group_by(station) %>%
+    summarize(value = mean(get(input$variable_map), na.rm = TRUE),
+              .groups = "drop")
+  
+  if (nrow(station_summary) == 0) {
+    stop("No data available for the selected date range")
+  }
+  
+  return(station_summary)
+}
+
+# Function to perform IDW interpolation
+perform_idw <- function(station_data) {
+  if (is.null(station_data) || nrow(station_data) == 0) {
+    stop("No station data available for interpolation")
+  }
+  
+  # Create interpolation grid
+  grid <- terra::rast(mpsz, nrows = 345, ncols = 537)
+  xy <- terra::xyFromCell(grid, 1:ncell(grid))
+  coop <- st_as_sf(as.data.frame(xy), 
+                  coords = c("x", "y"),
+                  crs = st_crs(mpsz))
+  coop <- st_filter(coop, mpsz)
+  
+  # IDW interpolation
+  res <- gstat(formula = value ~ 1, 
+              locations = station_data, 
+              nmax = input$idw_nmax,
+              set = list(idp = 0))
+  resp <- predict(res, coop)
+  
+  # Create raster from predictions
+  resp$x <- st_coordinates(resp)[,1]
+  resp$y <- st_coordinates(resp)[,2]
+  resp$pred <- resp$var1.pred
+  idw_pred <- terra::rasterize(resp, grid, field = "pred")
+  
+  return(idw_pred)
+}
+
+# Function to perform kriging
+perform_kriging <- function(station_data) {
+  if (is.null(station_data) || nrow(station_data) == 0) {
+    stop("No station data available for kriging")
+  }
+  
+  # Create interpolation grid
+  grid <- terra::rast(mpsz, nrows = 345, ncols = 537)
+  xy <- terra::xyFromCell(grid, 1:ncell(grid))
+  coop <- st_as_sf(as.data.frame(xy), 
+                  coords = c("x", "y"),
+                  crs = st_crs(mpsz))
+  coop <- st_filter(coop, mpsz)
+  
+  # Calculate and fit variogram
+  v <- variogram(value ~ 1, data = station_data)
+  if (nrow(v) == 0) {
+    stop("Could not compute variogram - insufficient data points")
+  }
+  
+  fv <- fit.variogram(object = v,
+                     model = vgm(model = input$variogram_model))
+  
+  # Perform kriging
+  k <- gstat(formula = value ~ 1, 
+            data = station_data, 
+            model = fv)
+  resp <- predict(k, coop)
+  
+  # Create raster from predictions
+  resp$x <- st_coordinates(resp)[,1]
+  resp$y <- st_coordinates(resp)[,2]
+  resp$pred <- resp$var1.pred
+  kriging_pred <- terra::rasterize(resp, grid, field = "pred")
+  
+  return(list(kriging_pred = kriging_pred, variogram_fit = fv))
+}
+
+# Run Model button observer
+observeEvent(input$run_map, {
+  withProgress(message = 'Running geospatial analysis...', {
+    tryCatch({
+      # Prepare station data
+      results$station_data <- prepare_station_data()
+      
+      # Perform IDW interpolation
+      results$idw_pred <- perform_idw(results$station_data)
+      
+      # Perform kriging
+      kriging_results <- perform_kriging(results$station_data)
+      results$kriging_pred <- kriging_results$kriging_pred
+      results$variogram_fit <- kriging_results$variogram_fit
+      
+      showNotification("Analysis completed successfully", type = "message")
+    }, error = function(e) {
+      showNotification(paste("Error:", e$message), type = "error")
+      print("Error in isohyet map analysis:")
+      print(e)
+    })
+  })
+})
+
+# Step 1: Station Map
+output$station_map <- renderPlot({
+  req(results$station_data)
+  
+  tmap_mode("plot")
+  
+  title_text <- paste("Distribution of", input$variable_map)
+  legend_text <- paste(input$variable_map)
+  
+  tm_shape(mpsz) +
+    tm_borders(lwd = 0.1,alpha = 0.6) +
+    tm_shape(results$station_data) +
+    tm_dots(col = "value", 
+            palette = "brewer.purples", 
+            size = 0.8, 
+            alpha = 0.9, 
+            title = legend_text)+
+    tm_layout(
+            main.title = title_text,
+            main.title.size = 1,
+            main.title.position = "center", 
+            frame = FALSE,
+            legend.frame = FALSE,
+            legend.outside = TRUE,
+            legend.outside.position = "right")
+})
+
+# Step 2: IDW Map
+output$idw_map <- renderPlot({
+  req(results$idw_pred)
+  
+  tmap_mode("plot")
+  
+  title_text <- paste("Distribution of", input$variable_map)
+  legend_text <- paste(input$variable_map)
+  
+  tm_shape(results$idw_pred) + 
+    tm_raster(col_alpha = 0.8, 
+              col.scale = tm_scale(
+                values = "brewer.purples"),
+              col.legend = tm_legend(legend_text)) +
+    tm_layout(
+            main.title = title_text,
+            main.title.size = 1,
+            main.title.position = "center", 
+            frame = FALSE,
+            legend.frame = FALSE,
+            legend.outside = TRUE,
+            legend.outside.position = "right")
+})
+
+# Step 3: Variogram Plot
+output$variogram_plot <- renderPlot({
+  req(results$station_data, results$variogram_fit)
+  
+  # Calculate variogram
+  v <- variogram(value ~ 1, data = results$station_data)
+  
+  # Plot variogram with improved styling
+  plot(v, results$variogram_fit, 
+       main = "Variogram with Fitted Model",
+       xlab = "Distance",
+       ylab = "Semivariance",
+       col = "#4D4D4D",
+       pch = 19)
+})
+
+# Step 4: Kriging Map
+output$kriging_map <- renderPlot({
+  req(results$kriging_pred)
+  
+  tmap_mode("plot")
+  
+  title_text <- paste("Distribution of", input$variable_map)
+  legend_text <- paste(input$variable_map)
+  
+  tm_shape(results$kriging_pred) + 
+    tm_raster(col_alpha = 0.8, 
+              col.scale = tm_scale_continuous(
+                values = "brewer.purples"),
+              col.legend = tm_legend(legend_text)) +
+    tm_layout(
+            main.title = title_text,
+            main.title.size = 1,
+            main.title.position = "center", 
+            frame = FALSE,
+            legend.frame = FALSE,
+            legend.outside = TRUE,
+            legend.outside.position = "right")
+})
 
 
+  # Server logic for DecompositionTab
+  observeEvent(input$run_decomp, {
+    tryCatch({
+      # Ensure all required inputs are provided
+      req(input$time_resolution_decomp, input$date_range_decomp, input$variable_decomp, input$station_decomp)
+      
+      # Filter and prepare data
+      data_filtered <- daily_station %>%
+        filter(
+          date >= input$date_range_decomp[1],
+          date <= input$date_range_decomp[2],
+          station == input$station_decomp
+        ) %>%
+        select(date, value = all_of(input$variable_decomp)) %>%
+        pivot_longer(cols = value, names_to = "type", values_to = "value") %>%
+        drop_na(value)
+      
+      # Convert to tsibble and aggregate based on time resolution
+      ts_data <- as_tsibble(data_filtered, index = date, key = type)
+      
+      if (input$time_resolution_decomp == "Weekly") {
+        ts_data <- ts_data %>%
+          mutate(year_week = yearweek(date)) %>%
+          group_by(type, year_week) %>%
+          summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+          distinct(type, year_week, .keep_all = TRUE) %>%
+          as_tsibble(index = year_week, key = type)
+      } else if (input$time_resolution_decomp == "Monthly") {
+        ts_data <- ts_data %>%
+          mutate(year_month = yearmonth(date)) %>%
+          group_by(type, year_month) %>%
+          summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+          distinct(type, year_month, .keep_all = TRUE) %>%
+          as_tsibble(index = year_month, key = type)
+      }
+      
+      # Perform STL decomposition
+      stl_results <- ts_data %>%
+        model(stl = STL(value ~ season(window = "periodic"))) %>%
+        components()
+      
+      # Render STL plot with improved styling
+      output$stl_plot <- renderPlot({
+        autoplot(stl_results) + 
+          theme_classic() + 
+          scale_color_manual(values = c("#4D4D4D")) +
+          labs(x="")+
+          theme(
+            plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+            plot.subtitle = element_text(hjust = 0.5, color = "#4D4D4D"),
+            axis.title = element_text(size = 8),
+            axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+            strip.background = element_rect(fill = "#C4C8FF", color = "white"),
+            strip.text = element_text(color = "#1A1A1A", size = 8),
+            legend.position = 'top',
+            legend.background = element_blank(),
+            legend.key = element_blank()
+          )
+      })
+      
+      # Render seasonal plot with improved styling
+      output$seasonal_plot <- renderPlot({
+        # Convert data to monthly resolution for cycle plot
+        monthly_data <- ts_data %>%
+          mutate(year_month = yearmonth(date)) %>%
+          index_by(year_month) %>%
+          summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+          as_tsibble(index = year_month)
+        
+        monthly_data %>%
+          gg_subseries(value) +
+            labs(title = paste("Cycle Plot of", input$variable_decomp),
+                 subtitle = paste("Station:", input$station_decomp),
+                 y = input$variable_decomp,
+                 x = "") +
+            theme_classic() +
+            scale_color_manual(values = c("#4D4D4D")) +
+            theme(
+              plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+              plot.subtitle = element_text(hjust = 0.5, color = "#4D4D4D"),
+              panel.background = element_rect(fill = "#f5f5f5", color = NA),
+              axis.title = element_text(size = 8),
+              axis.line = element_blank(),
+              axis.ticks = element_blank(),
+              axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+              strip.background.x = element_rect(fill = "#C4C8FF", color = "white"),
+              strip.background.y = element_rect(color = "white"),
+              strip.text.x = element_text(color = "#1A1A1A", size = 8),
+              strip.text.y = element_text(color = "white", size = 7),
+              axis.text.x = element_blank()
+            )
+      })
+      
+    }, error = function(e) {
+      print("Error in decomposition:")
+      print(e)
+      showNotification(paste("Error:", e$message), type = "error")
+    })
+  })
 
-    
+  # Server logic for CorrelogramTab
+  observeEvent(input$run_corr, {
+    tryCatch({
+      # Ensure all required inputs are provided
+      req(input$time_resolution_corr, input$date_range_corr, input$variable_corr, 
+          input$station_corr, input$lag_max, input$plot_type)
+      
+      # Filter and prepare data
+      data_filtered <- daily_station %>%
+        filter(
+          date >= input$date_range_corr[1],
+          date <= input$date_range_corr[2],
+          station == input$station_corr
+        ) %>%
+        group_by(date) %>%
+        select(date, value = all_of(input$variable_corr)) %>%
+        mutate(value = as.numeric(value)) %>%  # Ensure numeric type
+        pivot_longer(cols = value, 
+                    names_to = "type", 
+                    values_to = "value") %>%
+        as_tsibble(index = date, key = type)
+      
+      # Convert to tsibble and aggregate based on time resolution
+      if (input$time_resolution_corr == "Weekly") {
+        ts_data <- data_filtered %>%
+          mutate(year_week = yearweek(date)) %>%
+          group_by(type, year_week) %>%
+          summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+          distinct(type, year_week, .keep_all = TRUE) %>%
+          as_tsibble(index = year_week, key = type)
+      } else if (input$time_resolution_corr == "Monthly") {
+        ts_data <- data_filtered %>%
+          mutate(year_month = yearmonth(date)) %>%
+          group_by(type, year_month) %>%
+          summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+          distinct(type, year_month, .keep_all = TRUE) %>%
+          as_tsibble(index = year_month, key = type)
+      } else {
+        ts_data <- data_filtered
+      }
+      
+      # Print diagnostic information after aggregation
+      print("Data structure after aggregation:")
+      print(str(ts_data))
+      print("Value column type after aggregation:")
+      print(class(ts_data$value))
+      
+      # Ensure value is numeric
+      ts_data$value <- as.numeric(ts_data$value)
+      
+      # Render original series plot
+      output$original_plot <- renderPlot({
+        tryCatch({
+          ts_data %>%
+            gg_tsdisplay(
+              y = value,
+              plot_type = input$plot_type,
+              lag_max = input$lag_max
+            )
+        }, error = function(e) {
+          print("Error in original plot:")
+          print(e)
+          print("Data structure at error:")
+          print(str(ts_data))
+        })
+      })
+      
+      # Render trend differencing plot
+      output$trend_diff_plot <- renderPlot({
+        tryCatch({
+          ts_data %>%
+            gg_tsdisplay(
+              difference(value, lag = 1),
+              plot_type = "partial",
+              lag_max = input$lag_max
+            )
+        }, error = function(e) {
+          print("Error in trend differencing plot:")
+          print(e)
+          print("Data structure at error:")
+          print(str(ts_data))
+        })
+      })
+      
+      # Render seasonal differencing plot
+      output$seasonal_diff_plot <- renderPlot({
+        tryCatch({
+          ts_data %>%
+            gg_tsdisplay(
+              difference(value, difference = 12),
+              plot_type = "partial",
+              lag_max = input$lag_max
+            ) 
+        }, error = function(e) {
+          print("Error in seasonal differencing plot:")
+          print(e)
+          print("Data structure at error:")
+          print(str(ts_data))
+        })
+      })
+      
+    }, error = function(e) {
+      print("Error in correlogram analysis:")
+      print(e)
+      showNotification(paste("Error:", e$message), type = "error")
+    })
+  })
 
+  # Server logic for TrainingTab
+  observeEvent(input$run_train, {
+    tryCatch({
+      req(input$variable_train, input$station_train, input$date_range_train, 
+          input$time_resolution_train, input$models_train)
+      
+      # Filter and prepare data
+      data_filtered <- daily_station %>%
+        filter(
+          date >= as.Date("2022-01-01"),
+          date <= input$date_range_train[2],
+          station == input$station_train
+        ) %>%
+        select(date, value = all_of(input$variable_train)) %>%
+        pivot_longer(cols = value, names_to = "type", values_to = "value") %>%
+        drop_na(value)
+      
+      # Convert to tsibble and aggregate based on time resolution
+      ts_data <- as_tsibble(data_filtered, index = date, key = type)
+      
+      if (input$time_resolution_train == "Weekly") {
+        ts_data <- ts_data %>%
+          mutate(year_week = yearweek(date)) %>%
+          group_by(type, year_week) %>%
+          summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+          distinct(type, year_week, .keep_all = TRUE) %>%
+          as_tsibble(index = year_week, key = type)
+      } else if (input$time_resolution_train == "Monthly") {
+        ts_data <- ts_data %>%
+          mutate(year_month = yearmonth(date)) %>%
+          group_by(type, year_month) %>%
+          summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+          distinct(type, year_month, .keep_all = TRUE) %>%
+          as_tsibble(index = year_month, key = type)
+      }
+      
+      # Print diagnostic information
+      print("Data structure after preparation:")
+      print(str(ts_data))
+      print("Value column type:")
+      print(class(ts_data$value))
+      
+      # Split into training and test sets
+      cutoff_row <- floor(0.8 * nrow(ts_data))
+      train_data <- ts_data %>% slice(1:cutoff_row)
+      test_data <- ts_data %>% slice((cutoff_row + 1):n())
+      
+      # Define models
+      models <- list(
+        ETS_AAA = ETS(value ~ error("A") + trend("A") + season("A")), 
+        ETS_MAM = ETS(value ~ error("M") + trend("A") + season("M")),
+        ETS_MMM = ETS(value ~ error("M") + trend("M") + season("M")),
+        ETS_AAN = ETS(value ~ error("A") + trend("A") + season("N")),
+        ETS_MMN = ETS(value ~ error("M") + trend("M") + season("N")),
+        ETS_ANN = ETS(value ~ error("A") + trend("N") + season("N")),
+        Auto_ETS = ETS(value),
+        Auto_ARIMA = ARIMA(value)
+      )
+      
+      # Fit selected models with error handling
+      tryCatch({
+        # Ensure we have valid model selections
+        if (length(input$models_train) == 0) {
+          stop("Please select at least one model")
+        }
+        
+        # Create a list of selected models
+        selected_models <- list()
+        for (model_name in input$models_train) {
+          if (model_name %in% names(models)) {
+            selected_models[[model_name]] <- models[[model_name]]
+          } else {
+            warning(paste("Model", model_name, "not found in available models"))
+          }
+        }
+        
+        # Fit models if we have valid selections
+        if (length(selected_models) > 0) {
+          fit_models <- train_data %>%
+            model(!!!selected_models)
+          
+          # Generate forecasts
+          forecast_results <- fit_models %>%
+            forecast(h = nrow(test_data))
+          
+          # Model metrics table
+          matrix <- glance(fit_models) %>%
+            select(.model, AIC, BIC)
+          
+          acc <- accuracy(forecast_results, test_data) %>%
+            select(.model, RMSE)
+          
+          model_matrix <- matrix %>%
+            left_join(acc, by = ".model") %>%
+            rename(RMSE_ts = RMSE, AIC_tr = AIC, BIC_tr = BIC, Model = .model)%>%
+            mutate(RMSE_ts = round(RMSE_ts, 3),
+                   AIC_tr = round(AIC_tr, 3),
+                   BIC_tr = round(BIC_tr, 3))
+          
+          # Render model metrics table
+          output$model_metrics_table <- renderDT({
+            datatable(model_matrix,
+                      options = list(
+                        scrollY = "400px",
+                        scrollCollapse = TRUE,
+                        paging = FALSE,
+                        searching = TRUE,
+                        headerCallback = JS(
+                          "function(thead, data, start, end, display) {",
+                          "  $(thead).find('th').css({'background-color': '#C4C8FF', 'color': '#4D4D4D', 'font-weight': 'bold'});",
+                          "}"
+                        )
+                      ))
+          })
+          
+          # Comparison table
+          if (input$time_resolution_train == "Monthly") {
+            comparison_table <- forecast_results %>%
+              select(year_month, .model, value, .mean) %>%
+              rename(Actual = value, `Forecasted Value` = .mean) %>%
+              select(year_month, .model, `Forecasted Value`) %>%
+              rename(Model = .model) %>%
+              left_join(test_data %>% as_tibble(), by = "year_month") %>%
+              mutate(
+                `Forecasted Value` = round(`Forecasted Value`, 2),
+                Year = year(year_month),
+                Month = month(year_month),
+                `Actual Value` = round(value, 2)
+              ) %>%
+              select(Year, Month, Model, `Forecasted Value`, `Actual Value`) %>%
+              select(-year_month)
+          } else if (input$time_resolution_train == "Weekly") {
+            comparison_table <- forecast_results %>%
+              select(year_week, .model, value, .mean) %>%
+              rename(Actual = value, `Forecasted Value` = .mean) %>%
+              select(year_week, .model, `Forecasted Value`) %>%
+              rename(Model = .model) %>%
+              left_join(test_data %>% as_tibble(), by = "year_week") %>%
+              mutate(
+                `Forecasted Value` = round(`Forecasted Value`, 2),
+                Year = year(year_week),
+                Week = week(year_week),
+                `Actual Value` = round(value, 2)
+              ) %>%
+              select(Year, Week, Model, `Forecasted Value`, `Actual Value`) %>%
+              select(-year_week)
+          } else {  # Daily resolution
+            comparison_table <- forecast_results %>%
+              select(date, .model, value, .mean) %>%
+              rename(Actual = value, `Forecasted Value` = .mean) %>%
+              select(date, .model, `Forecasted Value`) %>%
+              rename(Model = .model) %>%
+              left_join(test_data %>% as_tibble(), by = "date") %>%
+              mutate(
+                `Forecasted Value` = round(`Forecasted Value`, 2),
+                Year = year(date),
+                Month = month(date),
+                Day = day(date),
+                `Actual Value` = round(value, 2)
+              ) %>%
+              select(Year, Month, Day, Model, `Forecasted Value`, `Actual Value`) %>%
+              select(-date)
+          }
+          
+          
+          # Forecast plot
+          output$forecast_plot_train <- renderPlot({
+            autoplot(forecast_results, level = c(95)) +
+              autolayer(ts_data, series = "Actual", color = "#4D4D4D") +
+              labs(title = "Model Training Results",
+                   y = input$variable_train,
+                   x = "") +
+              theme_classic() +
+              theme(
+                plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+                axis.line.y = element_blank(),
+                axis.line.x = element_line(color = "#4D4D4D", size = 0.5),
+                axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+                legend.position = "bottom",
+                legend.key = element_blank(),
+                legend.key.size = unit(0.2, "cm"),
+                legend.title = element_text(size = 9),
+                legend.text = element_text(size = 8)
+              )
+          })
+        } else {
+          stop("No valid models selected")
+        }
+      }, error = function(e) {
+        print("Error in model fitting:")
+        print(e)
+        showNotification(paste("Error:", e$message), type = "error")
+      })
+    }, error = function(e) {
+      print("Error in model training:")
+      print(e)
+      showNotification(paste("Error:", e$message), type = "error")
+    })
+  })
 
+  # Server logic for ModelTab
+  observeEvent(input$run_model, {
+    tryCatch({
+      req(input$variable_model, input$station_model, input$date_range_model, 
+          input$time_resolution_model, input$models_final, input$forecast_period_model)
+      
+      # Filter and prepare data
+      data_filtered <- daily_station %>%
+        filter(
+          date >= as.Date("2022-01-01"),
+          date <= input$date_range_model[2],
+          station == input$station_model
+        ) %>%
+        select(date, value = all_of(input$variable_model)) %>%
+        pivot_longer(cols = value, names_to = "type", values_to = "value") %>%
+        drop_na(value)
+      
+      # Convert to tsibble and aggregate based on time resolution
+      ts_data <- as_tsibble(data_filtered, index = date, key = type)
+      
+      if (input$time_resolution_model == "Weekly") {
+        ts_data <- ts_data %>%
+          mutate(year_week = yearweek(date)) %>%
+          group_by(type, year_week) %>%
+          summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+          distinct(type, year_week, .keep_all = TRUE) %>%
+          as_tsibble(index = year_week, key = type)
+      } else if (input$time_resolution_model == "Monthly") {
+        ts_data <- ts_data %>%
+          mutate(year_month = yearmonth(date)) %>%
+          group_by(type, year_month) %>%
+          summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+          distinct(type, year_month, .keep_all = TRUE) %>%
+          as_tsibble(index = year_month, key = type)
+      }
+      
+      # Define models
+      models <- list(
+        ETS_MMM = ETS(value ~ error("M") + trend("M") + season("M")),
+        Auto_ARIMA = ARIMA(value)
+      )
+      
+      # Fit selected models
+      models_to_fit <- models[input$models_final]
+      fit_models <- ts_data %>%
+        model(!!!models_to_fit)
+      
+      # Generate forecasts
+      forecast_results <- fit_models %>%
+        forecast(h = input$forecast_period_model)
+      
+      # Forecast plot
+      output$forecast_plot_final <- renderPlot({
+        autoplot(forecast_results, level = c(95)) +
+          autolayer(ts_data, series = "Actual", color = "#4D4D4D") +
+          labs(title = "Final Forecast Results",
+               y = input$variable_model,
+               x = "") +
+          theme_classic() +
+          theme(
+            plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+            axis.line.y = element_blank(),
+            axis.line.x = element_line(color = "#4D4D4D", size = 0.5),
+            axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+            legend.position = "bottom",
+            legend.key = element_blank(),
+            legend.key.size = unit(0.2, "cm"),
+            legend.title = element_text(size = 9),
+            legend.text = element_text(size = 8)
+          )
+      })
+      
+      # Model parameters table
+      parameters <- fit_models %>%
+        tidy() %>%
+        mutate(
+          estimate = round(estimate, 3),
+          std.error = round(std.error, 3),
+          statistic = round(statistic, 3),
+          p.value = round(p.value, 3)
+        )
+      
+      output$model_parameters_table <- renderDT({
+        datatable(parameters,
+                  options = list(
+                    scrollY = "250px",
+                    scrollCollapse = TRUE,
+                    paging = FALSE,
+                    searching = TRUE,
+                    headerCallback = JS(
+                      "function(thead, data, start, end, display) {",
+                      "  $(thead).find('th').css({'background-color': '#C4C8FF', 'color': '#4D4D4D', 'font-weight': 'bold'});",
+                      "}"
+                    )
+                  ))
+      })
+      
+      # Residuals plot
+      output$residuals_plot <- renderPlot({
+        residuals <- residuals(fit_models)
+        
+        autoplot(residuals, .vars = .resid) +
+          labs(title = "Residuals of Final Models",
+               x = "",
+               y = "Residuals") +
+          theme_classic() +
+          theme(
+            plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+            axis.line.y = element_blank(),
+            axis.line.x = element_line(color = "#4D4D4D", size = 0.5),
+            axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+            legend.position = "bottom",
+            legend.key = element_blank(),
+            legend.key.size = unit(0.2, "cm"),
+            legend.title = element_text(size = 9),
+            legend.text = element_text(size = 8)
+          )
+      })
+      
+    }, error = function(e) {
+      print("Error in final model:")
+      print(e)
+      showNotification(paste("Error:", e$message), type = "error")
+    })
+  })
+}
 
 # Run the application 
 shinyApp(ui = ui, server = server)
