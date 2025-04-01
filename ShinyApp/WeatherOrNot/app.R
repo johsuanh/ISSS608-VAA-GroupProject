@@ -736,8 +736,10 @@ LineChartTab <- fluidRow(
              fluidRow(
                column(width = 12,
                       div(style = "margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;",
-                          h4("Summary Statistics"),
-                          verbatimTextOutput("summary_stats")
+                          h4("Summary Statistics", style = "text-align: center;"),
+                          div(style = "display: flex; justify-content: center;",
+                              tableOutput("summary_stats_table")
+                          )
                       )
                )
              )
@@ -773,56 +775,82 @@ LineChartTab <- fluidRow(
 
 # RidgePlot Analysis Tab
 RidgePlotTab <- fluidRow(
-  # Left column - Controls
-  column(width = 3,
-    box(width = 12, title = "Data Selection", status = "info",
-      selectInput("var_biv", "Select Variable:", 
-                    choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
-                                "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
-                    selected = "Mean Temperature"),
-      selectInput("station_biv", "Select Stations:", 
-                  choices = region_label_choices,
-                  multiple = TRUE,
-                  selected = c("Changi", "Newton")),
-      selectInput("aggregation_biv", "Time Resolution:",
-                  choices = c("Daily", "Weekly", "Monthly"),
-                  selected = "Daily"),
-      dateRangeInput("date_range_biv", "Date Range:",
-                    start = "2019-01-01", 
-                    end = "2025-01-31",
-                    separator = " - ",
-                    format = "yyyy-mm-dd"),                  
-      div(style = "text-align: right;",
-        actionButton("update_RidgePlot", "Update View", 
-                    class = "btn-primary",
-                    icon = icon("refresh"))
-      )
-    )
-  ),
-  # Right column - Density Plot and Statistics
-  column(width = 9,
-    box(width = 12,
+  column(width = 12,
+    tabBox(
+      width = 12,
+      id = "ridge_tabs",
       title = "RidgePlot Analysis",
-      status = "primary",
-      solidHeader = TRUE,
-      # Density Plot
-      fluidRow(
-        column(width = 12,
-               plotOutput("ridge_plot_biv", height = "500px"))
+      
+      # Tab 1: Plot
+      tabPanel("Ridgeline Plot",
+        fluidRow(
+          column(width = 3,
+            box(width = 12, title = "Data Selection", status = "info",
+              selectInput("var_biv", "Select Variable:", 
+                          choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
+                                      "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                          selected = "Mean Temperature"),
+              selectInput("station_biv", "Select Stations:", 
+                          choices = setNames(daily_station$station, paste0(daily_station$station, " (", daily_station$region, ")")),
+                          multiple = TRUE,
+                          selected = c("Changi", "Newton", "Clementi", "Jurong (West)")),
+              
+              tags$script(HTML("
+  $(document).on('shiny:connected', function() {
+    var maxItems = 4;
+    var selectize = $('#station_biv')[0].selectize;
+
+    selectize.on('change', function() {
+      if (selectize.items.length > maxItems) {
+        selectize.removeItem(selectize.items[maxItems]);
+        alert('You can select up to 4 stations only!');
+      }
+    });
+  });
+")),
+              selectInput("aggregation_biv", "Time Resolution:",
+                          choices = c("Monthly"),
+                          selected = "Monthly"),
+              dateRangeInput("date_range_biv", "Date Range:",
+                            start = "2019-01-01", 
+                            end = "2025-01-31",
+                            separator = " - ",
+                            format = "yyyy-mm-dd"),                  
+              div(style = "text-align: right;",
+                actionButton("update_RidgePlot", "Update View", 
+                            class = "btn-primary",
+                            icon = icon("refresh"))
+              )
+            )
+          ),
+          column(width = 9,
+            box(width = 12,
+              plotOutput("ridge_plot_biv", height = "500px"),
+              div(style = "margin-top: 15px;",
+                  h5("Station Colors"),
+                  uiOutput("color_legend_ui")
+            )
+          )
         )
-      ),
-      # Summary Statistics by Station
-      fluidRow(
-        column(width = 12,
-          div(style = "margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;",
-            h4("Summary Statistics by Station"),
-            verbatimTextOutput("station_stats_biv")
+      )),
+      
+      # Tab 2: Summary
+      tabPanel("Summary Statistics",
+        fluidRow(
+          column(width = 12,
+            box(width = 12,
+                h4("Summary Statistics by Station", 
+                   style = "text-align: center; font-weight: bold; font-size: 20px;"),
+                div(style = "display: flex; justify-content: center;",
+                tableOutput("station_summary_table")
+              )
+            )
           )
         )
       )
     )
   )
-
+)
 
 # Geofacet tab:
 GeofacetTab <- fluidRow(
@@ -1528,7 +1556,7 @@ server <- function(input, output) {
     )
   )
   
-  # Reactive data for LineChart analysis（改了）
+  # Reactive data for LineChart analysis
   output$linechart <- renderHighchart({
     req(input$variable_ts, input$station_ts, input$date_range_ts)
     
@@ -1614,7 +1642,7 @@ server <- function(input, output) {
 
   
   # Simple summary statistics
-  output$summary_stats <- renderPrint({
+  output$summary_stats_table <- renderTable({
     req(input$variable_ts, input$station_ts, input$date_range_ts)
     
     variable_column <- input$variable_ts
@@ -1623,11 +1651,19 @@ server <- function(input, output) {
       filter(station %in% input$station_ts,
              date >= input$date_range_ts[1],
              date <= input$date_range_ts[2]) %>%
-      pull(all_of(variable_column))
+      group_by(station) %>%
+      summarise(
+        Min = round(min(.data[[variable_column]], na.rm = TRUE), 2),
+        Q1 = round(quantile(.data[[variable_column]], 0.25, na.rm = TRUE), 2),
+        Q2 = round(median(.data[[variable_column]], na.rm = TRUE), 2),
+        Mean = round(mean(.data[[variable_column]], na.rm = TRUE), 2),
+        Q3 = round(quantile(.data[[variable_column]], 0.75, na.rm = TRUE), 2),
+        Max = round(max(.data[[variable_column]], na.rm = TRUE), 2),
+        SD = round(sd(.data[[variable_column]], na.rm = TRUE), 2),
+        .groups = "drop"
+      )
     
-    cat("Summary statistics for", input$variable_ts, "\n\n")
-    print(summary(data_filtered))
-    cat("\nStandard Deviation:", round(sd(data_filtered, na.rm = TRUE), 2))
+    data_filtered
   })
   
   
@@ -1741,7 +1777,8 @@ server <- function(input, output) {
   
   output$geofacet_plot <- renderPlot({
     req(Geofacet_data())  
-    df <- Geofacet_data()  
+    df <- Geofacet_data()
+    
     
     ggplot(df, aes(x = date, y = value)) +
       geom_line(color = "#8AA4FF", size = 0.6) +
@@ -1755,45 +1792,120 @@ server <- function(input, output) {
         strip.text = element_text(size = 10, face = "bold"),
         axis.text.x = element_text(angle = 45, hjust = 1),  
         axis.title.x = element_text(margin = margin(t = 10)),  
-        axis.text.y = element_text(size = 9)  
+        axis.text.y = element_text(size = 9),
+        plot.margin = margin(t = 10, r = 10, b = 40, l = 10)
+        
       )
   })
 
   
   # ridge plot
-  output$ridge_plot_biv <- renderPlot({
+  # Summary Table
+  output$station_summary_table <- renderTable({
     req(RidgePlot_data())
     data <- RidgePlot_data()
     
-    # Fill missing values using moving average
-    data <- data %>%
+    summary_df <- data %>%
       group_by(station) %>%
+      summarise(
+        Min = round(min(value, na.rm = TRUE), 2),
+        Q1 = round(quantile(value, 0.25, na.rm = TRUE), 2),
+        Median = round(median(value, na.rm = TRUE), 2),
+        Mean = round(mean(value, na.rm = TRUE), 2),
+        Q3 = round(quantile(value, 0.75, na.rm = TRUE), 2),
+        Q4 = round(quantile(value, 1.00, na.rm = TRUE), 2),
+        Max = round(max(value, na.rm = TRUE), 2),
+        .groups = "drop"
+      )
+    
+    summary_df
+  })
+  
+  # RidgePlot with Boxplot
+  # 颜色定义
+  station_colors <- c(
+    "Changi" = "#66C2A5",
+    "Newton" = "#8DA0CB",
+    "Clementi" = "#FC8D62",
+    "Jurong (West)" = "#E78AC3",
+    "Ang Mo Kio" = "#A6D854",
+    "Admiralty" = "#FFD92F",
+    "Paya Lebar" = "#E5C494",
+    "Pasir Panjang" = "#B3B3B3",
+    "Tai Seng" = "#66C2A5"
+  )
+  
+  # Color Legend 
+  output$color_legend_ui <- renderUI({
+    tags$div(
+      style = "display: flex; flex-direction: column; align-items: center; margin-top: 20px;",
+      
+      tags$h4("Station Colors", style = "font-weight: bold; text-align: center; margin-bottom: 15px;"),
+      
+      tags$div(
+        style = "display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;",
+        lapply(names(station_colors), function(station) {
+          tags$div(
+            style = "display: flex; align-items: center;",
+            tags$div(style = sprintf("width: 15px; height: 15px; background-color: %s; margin-right: 8px; border: 1px solid #aaa;", station_colors[[station]])),
+            tags$span(station)
+          )
+        })
+      )
+    )
+  })
+  
+  
+  
+  output$ridge_plot_biv <- renderPlot({
+    req(RidgePlot_data())
+    
+    data <- RidgePlot_data()   
+    
+    data <- data %>%
       arrange(date) %>%
-      mutate(value = zoo::na.approx(value, na.rm = TRUE, maxgap = 30)) %>%
+      mutate(
+        value = zoo::na.approx(value, na.rm = TRUE, maxgap = 30),
+        month = lubridate::month(date, label = TRUE, abbr = FALSE),
+        month_num = as.numeric(forcats::fct_rev(month))
+      ) %>%
       drop_na(value)
     
-    
-    # Use ggridges to create ridgeline plot
-    ggplot(data, aes(x = value, y = station)) +
+    ggplot(data, aes(x = value, y = forcats::fct_rev(month), fill = station)) +  # ✅ fill = station
       ggridges::geom_density_ridges(
         scale = 2,
-        alpha = 0.6,
-        color = "#8AA4FF",
-        fill = "#C4C8FF"
+        alpha = 0.6
       ) +
+      geom_boxplot(
+        aes(group = month_num),
+        position = position_nudge(y = -0.25),
+        width = 0.15,
+        outlier.shape = NA,
+        fill = "white",
+        color = "gray40",
+        linewidth = 0.5
+      ) +
+      scale_fill_manual(values = station_colors) +
+      facet_wrap(~ station, ncol = 2) +  
       labs(
-        title = paste("Ridgeline Plot of", input$var_biv, "by Station"),
+        title = paste("Ridgeline Plot with Boxplots of", input$var_biv, "per Month by Station"),
         x = input$var_biv,
-        y = "Station"
+        y = "Month"
       ) +
       theme_minimal(base_size = 13) +
       theme(
         legend.position = "none",
-        plot.title = element_text(face = "bold", size = 16,hjust = 0.5),
+        plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
         axis.title.y = element_text(margin = margin(r = 10)),
-        plot.margin = margin(t = 10, r = 10, b = 40, l = 10)  
+        plot.margin = margin(t = 10, r = 10, b = 40, l = 10)
       )
   })
+  
+  
+  
+  
+  
+  
   
   
   # Summary statistics by station
@@ -1842,7 +1954,10 @@ server <- function(input, output) {
       labs(title = paste("Time Series by Station:", input$var_single),
            x = "Date", y = input$var_single) +
       theme_minimal(base_size = 13)+
-      theme(plot.title = element_text(hjust = 0.5))
+      theme(plot.title = element_text(hjust = 0.5),
+            plot.margin = margin(t = 10, r = 10, b = 40, l = 10)
+            )
+    
   })
   
   # Isohyet Map  Server Functions
