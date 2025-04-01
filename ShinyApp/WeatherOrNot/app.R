@@ -21,16 +21,13 @@ library(tmap)
 
 pacman::p_load(DT,tseries,knitr,tsibble,fable,feasts,ggthemes,forecast,kableExtra,shinybusy)
 
-
-
-# Import Data + Add Region Info
-dataset <- readRDS("www/station_data.rds") 
 # Load spatial data
 weekly_station_sf <- readRDS("www/station_weekly_sf.rds")
 daily_station_sf <- readRDS("www/station_daily_sf.rds")
 monthly_station_sf <- readRDS("www/station_monthly_sf.rds")
 mpsz <- readRDS("www/mpsz.rds")
 daily_station <- readRDS("www/station_daily_data.rds")
+monthly_station <- readRDS("www/station_daily_data.rds")
 
 # Print the structure of daily_station to verify its contents
 print(str(daily_station))
@@ -620,10 +617,10 @@ custom_css <- paste0('
 
 # --- Station-Region label choices for UI display (RidgePlot module only) ---
 region_mapping_ui <- tibble(
-  station = c("Changi", "Marina Barrage", "Ang Mo Kio", "Clementi",
+  station = c("Changi",  "Ang Mo Kio", "Clementi",
               "Jurong (West)", "Paya Lebar", "Newton", "Pasir Panjang",
               "Tai Seng", "Admiralty"),
-  region = c("East", "Central", "North-East", "West",
+  region = c("East",  "North-East", "West",
              "West", "East", "Central", "Central",
              "Central", "North")
 )
@@ -633,7 +630,7 @@ region_label_choices <- setNames(
   paste0(region_mapping_ui$station, " (", region_mapping_ui$region, ")")
 )
 
-dataset <- dataset %>%
+daily_station <- daily_station %>%
   left_join(region_mapping_ui, by = "station")
 
 #========================================================== 
@@ -702,10 +699,11 @@ LineChartTab <- fluidRow(
   column(width = 3,
          box(width = 12, title = "Data Selection", status = "info",
              selectInput("variable_ts", "Select Variable:", 
-                         choices = c("Temperature", "Rainfall", "Wind Speed"),
-                         selected = "Temperature"),
+                         choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
+                                     "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                         selected = "Mean Temperature"),
              selectInput("station_ts", "Select Stations:", 
-                         choices = setNames(dataset$station, paste0(dataset$station, " (", dataset$region, ")")),
+                         choices = setNames(daily_station$station, paste0(daily_station$station, " (", daily_station$region, ")")),
                          multiple = TRUE,
                          selected = "Changi"),
              selectInput("aggregation", "Time Resolution:",
@@ -780,17 +778,18 @@ RidgePlotTab <- fluidRow(
   column(width = 3,
     box(width = 12, title = "Data Selection", status = "info",
       selectInput("var_biv", "Select Variable:", 
-                    choices = c("Temperature", "Rainfall", "Wind Speed"),
-                    selected = "Temperature"),
+                    choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
+                                "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                    selected = "Mean Temperature"),
       selectInput("station_biv", "Select Stations:", 
                   choices = region_label_choices,
                   multiple = TRUE,
-                  selected = c("Changi", "Marina Barrage")),
+                  selected = c("Changi", "Newton")),
       selectInput("aggregation_biv", "Time Resolution:",
                   choices = c("Daily", "Weekly", "Monthly"),
                   selected = "Daily"),
       dateRangeInput("date_range_biv", "Date Range:",
-                    start = "2020-01-01", 
+                    start = "2019-01-01", 
                     end = "2025-01-31",
                     separator = " - ",
                     format = "yyyy-mm-dd"),                  
@@ -840,17 +839,18 @@ GeofacetTab <- fluidRow(
                            column(width = 3,
                                   box(width = 12, title = "Data Selection", status = "info",
                                       selectInput("station_multi", "Select Stations:", 
-                                                  choices = setNames(dataset$station, paste0(dataset$station, " (", dataset$region, ")")),
+                                                  choices = setNames(daily_station$station, paste0(daily_station$station, " (", daily_station$region, ")")),
                                                   multiple = TRUE,
-                                                  selected = unique(dataset$station)),
+                                                  selected = unique(daily_station$station)),
                                       selectInput("var_geofacet", "Select Variable:",
-                                                  choices = c("Temperature", "Rainfall", "Wind Speed"),
-                                                  selected = "Temperature"),
+                                                  choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
+                                                              "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                                                  selected = "Mean Temperature"),
                                       selectInput("aggregation_geofacet", "Time Resolution:",
                                                   choices = c("Daily", "Weekly", "Monthly"),
                                                   selected = "Daily"),
                                       dateRangeInput("date_range_multi", "Date Range:",
-                                                     start = "2020-01-01", 
+                                                     start = "2019-01-01", 
                                                      end = "2025-01-31",
                                                      separator = " - ",
                                                      format = "yyyy-mm-dd"),
@@ -881,14 +881,15 @@ GeofacetTab <- fluidRow(
                            column(width = 3,
                                   box(width = 12, title = "Station Selection", status = "info",
                                       selectInput("station_single", "Select Stations:",
-                                                  choices = unique(dataset$station),
+                                                  choices = unique(daily_station$station),
                                                   multiple = TRUE,
                                                   selected = "Changi"),
                                       selectInput("var_single", "Select Variable:",
-                                                  choices = c("Temperature", "Rainfall", "Wind Speed"),
-                                                  selected = "Temperature"),
+                                                  choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
+                                                              "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                                                  selected = "Mean Temperature"),
                                       dateRangeInput("date_range_single", "Date Range:",
-                                                     start = "2020-01-01", 
+                                                     start = "2019-01-01", 
                                                      end = "2025-01-31"),
                                       selectInput("aggregation_single", "Time Resolution:",
                                                   choices = c("Daily", "Weekly", "Monthly"),
@@ -1444,8 +1445,8 @@ server <- function(input, output) {
   print("Column names of daily_station:")
   print(colnames(daily_station))
   
-  date_min <- min(dataset$date, na.rm = TRUE)
-  date_max <- max(dataset$date, na.rm = TRUE)
+  date_min <- min(daily_station$date, na.rm = TRUE)
+  date_max <- max(daily_station$date, na.rm = TRUE)
   
   # Configure highcharter theme based on visualization settings
   hc_theme_custom <- hc_theme(
@@ -1499,12 +1500,9 @@ server <- function(input, output) {
   output$linechart <- renderHighchart({
     req(input$variable_ts, input$station_ts, input$date_range_ts)
     
-    variable_column <- switch(input$variable_ts,
-                              "Temperature" = "mean_temperature_c",
-                              "Rainfall" = "daily_rainfall_total_mm",
-                              "Wind Speed" = "mean_wind_speed_km_h")
+    variable_column <- input$variable_ts
     
-    data_filtered <- dataset %>%
+    data_filtered <- daily_station %>%
       filter(station %in% input$station_ts,
              date >= input$date_range_ts[1],
              date <= input$date_range_ts[2]) %>%
@@ -1539,13 +1537,7 @@ server <- function(input, output) {
                color = "rgba(135,206,250,0.2)"),  # NE Monsoon
           list(from = datetime_to_timestamp(as.Date(paste0(y, "-06-01"))),
                to   = datetime_to_timestamp(as.Date(paste0(y, "-09-30"))),
-               color = "rgba(144,238,144,0.2)"),  # SW Monsoon
-          list(from = datetime_to_timestamp(as.Date(paste0(y, "-04-01"))),
-               to   = datetime_to_timestamp(as.Date(paste0(y, "-05-31"))),
-               color = "rgba(255,228,181,0.2)"),  # Inter-monsoon I
-          list(from = datetime_to_timestamp(as.Date(paste0(y, "-10-01"))),
-               to   = datetime_to_timestamp(as.Date(paste0(y, "-11-30"))),
-               color = "rgba(255,228,181,0.2)")   # Inter-monsoon II
+               color = "rgba(144,238,144,0.2)")  # SW Monsoon
         ))
       }
     }
@@ -1556,7 +1548,6 @@ server <- function(input, output) {
         text = "<span style='font-size:14px'>
            <span style='background-color:rgba(135,206,250,0.2); padding: 4px 8px; display: inline-block;'></span> NE Monsoon &nbsp;&nbsp;
            <span style='background-color:rgba(144,238,144,0.2); padding: 4px 8px; display: inline-block;'></span> SW Monsoon &nbsp;&nbsp;
-           <span style='background-color:rgba(255,228,181,0.2); padding: 4px 8px; display: inline-block;'></span> Inter-monsoon
          </span>",
         useHTML = TRUE
       )%>%
@@ -1594,12 +1585,9 @@ server <- function(input, output) {
   output$summary_stats <- renderPrint({
     req(input$variable_ts, input$station_ts, input$date_range_ts)
     
-    variable_column <- switch(input$variable_ts,
-                              "Temperature" = "mean_temperature_c",
-                              "Rainfall" = "daily_rainfall_total_mm",
-                              "Wind Speed" = "mean_wind_speed_km_h")
+    variable_column <- input$variable_ts
     
-    data_filtered <- dataset %>%
+    data_filtered <- daily_station %>%
       filter(station %in% input$station_ts,
              date >= input$date_range_ts[1],
              date <= input$date_range_ts[2]) %>%
@@ -1615,10 +1603,7 @@ server <- function(input, output) {
   LineChart_data <- reactive({
     req(input$station_ts, input$variable_ts, input$date_range_ts)
     
-    variable_column <- switch(input$variable_ts,
-                              "Temperature" = "mean_temperature_c",
-                              "Rainfall" = "daily_rainfall_total_mm",
-                              "Wind Speed" = "mean_wind_speed_km_h")
+    variable_column <- input$variable_ts
     
     station %>%
       filter(station %in% input$station_ts,
@@ -1641,19 +1626,19 @@ server <- function(input, output) {
     
    
     region_mapping <- tibble(
-      station = c("Changi", "Marina Barrage", "Ang Mo Kio", "Clementi",
+      station = c("Changi", "Ang Mo Kio", "Clementi",
                   "Jurong (West)", "Paya Lebar", "Newton", "Pasir Panjang",
                   "Tai Seng", "Admiralty"),
-      region = c("East", "Central", "North-East", "West",
+      region = c("East",  "North-East", "West",
                  "West", "East", "Central", "Central",
                  "Central", "North"),
-      region_code = c("ER", "CR", "NER", "WR",
+      region_code = c("ER", "NER", "WR",
                       "WR", "ER", "CR", "CR",
                       "CR", "NR")
     )
     
 
-    dataset <- dataset %>%
+    daily_station <- daily_station %>%
       left_join(region_mapping, by = "station")
     
     
@@ -1663,11 +1648,11 @@ server <- function(input, output) {
                               "Wind Speed" = "mean_wind_speed_km_h")
     
  
-    data_filtered <- dataset %>%
+    data_filtered <- daily_station %>%
       filter(station %in% input$station_biv,
              date >= input$date_range_biv[1],
              date <= input$date_range_biv[2]) %>%
-      select(date, station, value = all_of(variable_column)) %>%
+      select(date, station, value = all_of(input$var_biv)) %>%
       mutate(period = case_when(
         input$aggregation_biv == "Weekly" ~ floor_date(date, "week"),
         input$aggregation_biv == "Monthly" ~ floor_date(date, "month"),
@@ -1683,19 +1668,19 @@ server <- function(input, output) {
   
 #import data to geofacet
   station_to_geo <- tibble(
-    station = c("Changi", "Marina Barrage", "Ang Mo Kio", "Clementi",
+    station = c("Changi", "Ang Mo Kio", "Clementi",
                 "Jurong (West)", "Paya Lebar", "Newton", "Pasir Panjang",
                 "Tai Seng", "Admiralty"),
-    lat = c(1.35735, 1.28062, 1.37011, 1.31511, 1.34039, 1.35917, 1.31141, 1.27642, 1.33554, 1.44066),
-    lon = c(103.9874, 103.8718, 103.8490, 103.7650, 103.7054, 103.8944, 103.8369, 103.7919, 103.8885, 103.8000)
+    lat = c(1.35735,  1.37011, 1.31511, 1.34039, 1.35917, 1.31141, 1.27642, 1.33554, 1.44066),
+    lon = c(103.9874, 103.8490, 103.7650, 103.7054, 103.8944, 103.8369, 103.7919, 103.8885, 103.8000)
   )
   
   station_grid <- station_to_geo %>%
     mutate(
       code = station,
       name = station,
-      row = c(4, 6, 2, 3, 2, 3, 4, 5, 4, 1),  
-      col = c(5, 4, 3, 1, 1, 4, 3, 2, 4, 3)   
+      row = c(4, 2, 3, 2, 3, 4, 5, 4, 1),  
+      col = c(5, 3, 1, 1, 4, 3, 2, 4, 3)   
     ) %>%
     select(code, name, row, col)
   
@@ -1705,12 +1690,9 @@ server <- function(input, output) {
   Geofacet_data <- reactive({
     req(input$station_multi, input$var_geofacet, input$date_range_multi, input$aggregation_geofacet)
     
-    variable_column <- switch(input$var_geofacet,
-                              "Temperature" = "mean_temperature_c",
-                              "Rainfall" = "daily_rainfall_total_mm",
-                              "Wind Speed" = "mean_wind_speed_km_h")
+    variable_column <- input$var_geofacet
     
-    dataset %>%
+    daily_station %>%
       filter(station %in% input$station_multi,
              date >= input$date_range_multi[1],
              date <= input$date_range_multi[2]) %>%
@@ -1730,13 +1712,14 @@ server <- function(input, output) {
     df <- Geofacet_data()  
     
     ggplot(df, aes(x = date, y = value)) +
-      geom_line(color = "#4D4D4D", size = 0.7) +
+      geom_line(color = "#8AA4FF", size = 0.6) +
       facet_geo(~ station, grid = station_grid) +
       labs(title = paste("Weather Trends by Station -", input$var_geofacet),
            x = "Date", y = input$var_geofacet) +
       scale_x_date(date_labels = "%Y", date_breaks = "1 year") +   
       theme_minimal(base_size = 12) +
       theme(
+        plot.title = element_text(hjust = 0.5),
         strip.text = element_text(size = 10, face = "bold"),
         axis.text.x = element_text(angle = 45, hjust = 1),  
         axis.title.x = element_text(margin = margin(t = 10)),  
@@ -1759,11 +1742,12 @@ server <- function(input, output) {
     
     
     # Use ggridges to create ridgeline plot
-    ggplot(data, aes(x = value, y = station, fill = station)) +
+    ggplot(data, aes(x = value, y = station)) +
       ggridges::geom_density_ridges(
         scale = 2,
-        alpha = 0.8,
-        color = "white"
+        alpha = 0.6,
+        color = "#8AA4FF",
+        fill = "#C4C8FF"
       ) +
       labs(
         title = paste("Ridgeline Plot of", input$var_biv, "by Station"),
@@ -1773,7 +1757,7 @@ server <- function(input, output) {
       theme_minimal(base_size = 13) +
       theme(
         legend.position = "none",
-        plot.title = element_text(face = "bold", size = 16),
+        plot.title = element_text(face = "bold", size = 16,hjust = 0.5),
         axis.title.y = element_text(margin = margin(r = 10)),
         plot.margin = margin(t = 10, r = 10, b = 40, l = 10)  
       )
@@ -1808,12 +1792,7 @@ server <- function(input, output) {
   output$station_line_plot <- renderPlot({
     req(input$station_single, input$var_single, input$date_range_single)
     
-    variable_column <- switch(input$var_single,
-                              "Temperature" = "mean_temperature_c",
-                              "Rainfall" = "daily_rainfall_total_mm",
-                              "Wind Speed" = "mean_wind_speed_km_h")
-    
-    df <- dataset %>%
+    df <- daily_station %>%
       filter(station %in% input$station_single,
              date >= input$date_range_single[1],
              date <= input$date_range_single[2]) %>%
@@ -1848,7 +1827,7 @@ results <- reactiveValues(
 prepare_station_data <- function() {
   req(input$variable_map, input$time_resolution, input$date_range_map)
   
-  # Get the appropriate dataset based on time resolution
+  # Get the appropriate daily_station based on time resolution
   time_resolution_table <- switch(tolower(input$time_resolution),
                                 "daily" = daily_station_sf,
                                 "weekly" = weekly_station_sf,
@@ -1941,8 +1920,10 @@ perform_kriging <- function(station_data) {
 }
 
 # Run Model button observer
+
+
 observeEvent(input$run_map, {
-  withProgress(message = 'Running geospatial analysis...', {
+  withProgress(message = 'Running isohyet map analysis...', {
     tryCatch({
       # Prepare station data
       results$station_data <- prepare_station_data()
@@ -1967,6 +1948,7 @@ observeEvent(input$run_map, {
 # Step 1: Station Map
 output$station_map <- renderPlot({
   req(results$station_data)
+  
   
   tmap_mode("plot")
   
@@ -2026,6 +2008,7 @@ output$variogram_plot <- renderPlot({
 # Step 4: Kriging Map
 output$kriging_map <- renderPlot({
   req(results$kriging_pred)
+  
   
   tmap_mode("plot")
   
@@ -2185,11 +2168,6 @@ output$kriging_map <- renderPlot({
         ts_data <- data_filtered
       }
       
-      # Print diagnostic information after aggregation
-      print("Data structure after aggregation:")
-      print(str(ts_data))
-      print("Value column type after aggregation:")
-      print(class(ts_data$value))
       
       # Ensure value is numeric
       ts_data$value <- as.numeric(ts_data$value)
@@ -2287,12 +2265,6 @@ output$kriging_map <- renderPlot({
           distinct(type, year_month, .keep_all = TRUE) %>%
           as_tsibble(index = year_month, key = type)
       }
-      
-      # Print diagnostic information
-      print("Data structure after preparation:")
-      print(str(ts_data))
-      print("Value column type:")
-      print(class(ts_data$value))
       
       # Split into training and test sets
       cutoff_row <- floor(0.8 * nrow(ts_data))
