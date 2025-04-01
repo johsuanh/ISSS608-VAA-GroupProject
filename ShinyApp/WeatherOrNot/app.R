@@ -688,7 +688,6 @@ homeTab <- fluidRow(
       p("Use the sidebar to navigate through three main analysis components:"),
       tags$ul(
         tags$li(tags$strong("Exploratory Analysis:"), "Discover patterns and relationships in weather data through interactive visualizations"),
-        tags$li(tags$strong("Confirmatory Analysis:"), "Validate hypotheses about weather patterns using statistical tests"),
         tags$li(tags$strong("Forecasting:"), "Predict future weather patterns using various time series models")
       )
   )
@@ -903,7 +902,6 @@ GeofacetTab <- fluidRow(
                            ),
                            column(width = 9,
                                   box(width = 12,
-                                      title = "Selected Station Trend(s)",
                                       status = "primary",
                                       solidHeader = TRUE,
                                       plotOutput("station_line_plot", height = "600px")
@@ -1796,7 +1794,7 @@ server <- function(input, output) {
       filter(station %in% input$station_single,
              date >= input$date_range_single[1],
              date <= input$date_range_single[2]) %>%
-      select(date, station, value = all_of(variable_column)) %>%
+      select(date, station, value = all_of(input$var_single)) %>%
       mutate(date = case_when(
         input$aggregation_single == "Weekly" ~ floor_date(date, "week"),
         input$aggregation_single == "Monthly" ~ floor_date(date, "month"),
@@ -1809,7 +1807,8 @@ server <- function(input, output) {
       geom_line() +
       labs(title = paste("Time Series by Station:", input$var_single),
            x = "Date", y = input$var_single) +
-      theme_minimal(base_size = 13)
+      theme_minimal(base_size = 13)+
+      theme(plot.title = element_text(hjust = 0.5))
   })
   
   # Isohyet Map  Server Functions
