@@ -693,7 +693,7 @@ homeTab <- fluidRow(
   )
 )
 
-# EDA Components（改了）
+# EDA Components
 LineChartTab <- fluidRow(
   column(width = 3,
          box(width = 12, title = "Data Selection", status = "info",
@@ -824,94 +824,128 @@ RidgePlotTab <- fluidRow(
   )
 
 
-# geofacet:
-
+# Geofacet tab:
 GeofacetTab <- fluidRow(
   column(width = 12,
-         tabBox(width = 12,
-                id = "geofacet_tabs",
-                title = "Geofacet Analysis",
-                
-                # Tab 1: All stations shown by region 
-                tabPanel("All Stations",
-                         fluidRow(
-                           column(width = 3,
-                                  box(width = 12, title = "Data Selection", status = "info",
-                                      selectInput("station_multi", "Select Stations:", 
-                                                  choices = setNames(daily_station$station, paste0(daily_station$station, " (", daily_station$region, ")")),
-                                                  multiple = TRUE,
-                                                  selected = unique(daily_station$station)),
-                                      selectInput("var_geofacet", "Select Variable:",
-                                                  choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
-                                                              "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
-                                                  selected = "Mean Temperature"),
-                                      selectInput("aggregation_geofacet", "Time Resolution:",
-                                                  choices = c("Daily", "Weekly", "Monthly"),
-                                                  selected = "Daily"),
-                                      dateRangeInput("date_range_multi", "Date Range:",
-                                                     start = "2019-01-01", 
-                                                     end = "2025-01-31",
-                                                     separator = " - ",
-                                                     format = "yyyy-mm-dd"),
-                                      div(style = "text-align: right;",
-                                          actionButton("update_Geofacet", "Update View", 
-                                                       class = "btn-primary",
-                                                       icon = icon("refresh"))
-                                      )
-                                  ),
-                                  box(width = 12, title = "Display Options", status = "info",
-                                      checkboxInput("show_trend_multi", "Show Trend Lines", value = TRUE),
-                                      checkboxInput("show_labels", "Show Labels", value = TRUE)
-                                  )
-                           ),
-                           column(width = 9,
-                                  box(width = 12,
-                                      status = "primary",
-                                      solidHeader = TRUE,
-                                      plotOutput("geofacet_plot", height = "600px")
-                                  )
-                           )
-                         )
-                ),
-                
-                # Tab 2: User selects individual stations to view them separately
-                tabPanel("Selected Stations",
-                         fluidRow(
-                           column(width = 3,
-                                  box(width = 12, title = "Station Selection", status = "info",
-                                      selectInput("station_single", "Select Stations:",
-                                                  choices = unique(daily_station$station),
-                                                  multiple = TRUE,
-                                                  selected = "Changi"),
-                                      selectInput("var_single", "Select Variable:",
-                                                  choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
-                                                              "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
-                                                  selected = "Mean Temperature"),
-                                      dateRangeInput("date_range_single", "Date Range:",
-                                                     start = "2019-01-01", 
-                                                     end = "2025-01-31"),
-                                      selectInput("aggregation_single", "Time Resolution:",
-                                                  choices = c("Daily", "Weekly", "Monthly"),
-                                                  selected = "Daily"),
-                                      div(style = "text-align: right;",
-                                          actionButton("update_single", "Update View", 
-                                                       class = "btn-primary",
-                                                       icon = icon("refresh"))
-                                      )
-                                  )
-                           ),
-                           column(width = 9,
-                                  box(width = 12,
-                                      status = "primary",
-                                      solidHeader = TRUE,
-                                      plotOutput("station_line_plot", height = "600px")
-                                  )
-                           )
-                         )
+    tabBox(
+      width = 12,
+      id = "geofacet_tabs",
+      title = "Geofacet Analysis",
+
+      # Tab 1: All stations shown by region 
+      tabPanel("All Stations",
+        fluidRow(
+          column(width = 3,
+            box(
+              width = 12,
+              title = "Data Selection",
+              status = "info",
+              selectInput(
+                "station_multi", "Select Stations:", 
+                choices = setNames(daily_station$station, paste0(daily_station$station, " (", daily_station$region, ")")),
+                multiple = TRUE,
+                selected = unique(daily_station$station)
+              ),
+              selectInput(
+                "var_geofacet", "Select Variable:",
+                choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
+                            "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                selected = "Mean Temperature"
+              ),
+              selectInput(
+                "aggregation_geofacet", "Time Resolution:",
+                choices = c("Daily", "Weekly", "Monthly"),
+                selected = "Daily"
+              ),
+              dateRangeInput(
+                "date_range_multi", "Date Range:",
+                start = "2019-01-01", 
+                end = "2025-01-31",
+                separator = " - ",
+                format = "yyyy-mm-dd"
+              ),
+              div(
+                style = "text-align: right;",
+                actionButton(
+                  "update_Geofacet", "Update View", 
+                  class = "btn-primary",
+                  icon = icon("refresh")
                 )
-         )
+              )
+            ),
+            box(
+              width = 12,
+              title = "Display Options",
+              status = "info",
+              checkboxInput("show_trend_multi", "Show Trend Lines", value = TRUE),
+              checkboxInput("show_labels", "Show Labels", value = TRUE)
+            )
+          ),
+          column(width = 9,
+            box(
+              width = 12,
+              status = "primary",
+              solidHeader = TRUE,
+              plotOutput("geofacet_plot", height = "600px")
+            )
+          )
+        )
+      ),
+
+      # Tab 2: User selects individual stations to view them separately
+      tabPanel("Selected Stations",
+        fluidRow(
+          column(width = 3,
+            box(
+              width = 12,
+              title = "Station Selection",
+              status = "info",
+              selectInput(
+                "station_single", "Select Stations:",
+                choices = unique(daily_station$station),
+                multiple = TRUE,
+                selected = "Changi"
+              ),
+              selectInput(
+                "var_single", "Select Variable:",
+                choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
+                            "Rainfall", "Mean Wind Speed", "Max Wind Speed"),
+                selected = "Mean Temperature"
+              ),
+              dateRangeInput(
+                "date_range_single", "Date Range:",
+                start = "2019-01-01", 
+                end = "2025-01-31"
+              ),
+              selectInput(
+                "aggregation_single", "Time Resolution:",
+                choices = c("Daily", "Weekly", "Monthly"),
+                selected = "Daily"
+              ),
+              div(
+                style = "text-align: right;",
+                actionButton(
+                  "update_single", "Update View", 
+                  class = "btn-primary",
+                  icon = icon("refresh")
+                )
+              )
+            )
+          ),
+          column(width = 9,
+            box(
+              width = 12,
+              status = "primary",
+              solidHeader = TRUE,
+              plotOutput("station_line_plot", height = "600px")
+            )
+          )
+        )
+      )
+    )
   )
 )
+
 
 
 
@@ -1618,7 +1652,7 @@ server <- function(input, output) {
       addMarkers(lng = 103.8198, lat = 1.3521, popup = "Singapore")
   })
 
-  # Reactive data for RidgePlot analysis（改了）
+  # Reactive data for RidgePlot analysis
   RidgePlot_data <- reactive({
     req(input$station_biv, input$var_biv, input$date_range_biv, input$aggregation_biv)
     
@@ -1726,7 +1760,7 @@ server <- function(input, output) {
   })
 
   
-  # Density plot（改了）
+  # ridge plot
   output$ridge_plot_biv <- renderPlot({
     req(RidgePlot_data())
     data <- RidgePlot_data()
@@ -1786,7 +1820,7 @@ server <- function(input, output) {
   })
 
   
-  # Reactive data for Geofacet analysis（改了）
+  # Reactive data for Geofacet analysis
   output$station_line_plot <- renderPlot({
     req(input$station_single, input$var_single, input$date_range_single)
     
