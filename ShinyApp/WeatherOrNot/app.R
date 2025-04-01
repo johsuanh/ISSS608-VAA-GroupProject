@@ -19,7 +19,7 @@ library(terra)
 library(sf)
 library(tmap)
 
-pacman::p_load(DT,tseries,knitr,tsibble,fable,feasts,ggthemes,forecast,kableExtra,shinybusy)
+pacman::p_load(DT,tseries,knitr,tsibble,fable,feasts,ggthemes,forecast,kableExtra,shinycssloaders)
 
 # Load spatial data
 weekly_station_sf <- readRDS("www/station_weekly_sf.rds")
@@ -652,7 +652,7 @@ sidebar <- dashboardSidebar(
     menuItem("Home", tabName = "home", icon = icon("home")),
     
     # EDA Section
-    menuItem("Exploratory Analysis", tabName = "EDA", icon = icon("glasses"),
+    menuItem("Exploratory Analysis", tabName = "EDA", icon = icon("cloud-sun"),
       menuSubItem("Line Chart", tabName = "LineChart"),
       menuSubItem("Ridge Plot", tabName = "RidgePlot"),
       menuSubItem("Geofacet", tabName = "Geofacet"),
@@ -660,7 +660,7 @@ sidebar <- dashboardSidebar(
     ),
     
     # Time Series Analysis Section
-    menuItem("Time-Series Analysis", tabName = "Time", icon = icon("check-circle"),
+    menuItem("Time-Series Analysis", tabName = "Time", icon = icon("calendar-check"),
       menuSubItem("Time-Series Decomposition", tabName = "Decomposition"),
       menuSubItem("Correlograms", tabName = "Correlogram")
       ),
@@ -669,27 +669,125 @@ sidebar <- dashboardSidebar(
     menuItem("Univariate Forecasting", tabName = "Forecasting", icon = icon("chart-line"),
       menuSubItem("Step 1: Model Training", tabName = "Training"),
       menuSubItem("Step 2: Model Forecasting", tabName = "Model")
-      ),
-    
-    # About section
-    menuItem("About", tabName = "about", icon = icon("info-circle"))
+      )
   )
 )
 
 # Define UI components for each tab
 # Home tab content
 homeTab <- fluidRow(
-  box(width = 12,
-      h2("Weather Or Not – Predicting the Unpredictable", 
-         style = paste0("font-family: '", brand_settings$typography$headings$family, 
-                       "', sans-serif; font-weight: ", brand_settings$typography$headings$weight, ";")),
-      p("This dashboard provides comprehensive tools for analyzing Singapore's weather patterns, 
-        with a focus on temperature and rainfall across different regions."),
-      p("Use the sidebar to navigate through three main analysis components:"),
-      tags$ul(
-        tags$li(tags$strong("Exploratory Analysis:"), "Discover patterns and relationships in weather data through interactive visualizations"),
-        tags$li(tags$strong("Forecasting:"), "Predict future weather patterns using various time series models")
+  # Welcome Section
+  column(width = 12,
+    box(width = 12,
+      status = "primary",
+      solidHeader = TRUE,
+      style = paste0("background-color: ", brand_colors$`white`, "; border: none;"),
+      div(style = "text-align: center; padding: 15px 15px;",
+        h2("Weather Or Not", 
+           style = paste0("font-family: '", brand_settings$typography$headings$family, 
+                         "', sans-serif; font-weight: ", brand_settings$typography$headings$weight, 
+                         "; color: ", brand_colors$`dark-grey`, "; text-align: center;")),
+        p("Predicting the Unpredictable", 
+          style = paste0("font-family: '", brand_settings$typography$base$family, 
+                        "', sans-serif; font-size: 18px; color: ", brand_colors$`dark-grey`, ";")
+        )
       )
+    )
+  ),
+  
+  # Main Content
+  column(width = 12,
+    fluidRow(
+      # Left Column - Introduction
+      column(width = 6,
+        box(width = 12,
+          status = "primary",
+          solidHeader = TRUE,
+          title = "About the Dashboard",
+          div(
+            p("This dashboard offers a variety of visualization tools to analyze Singapore's weather patterns."),
+            p("Our platform combines historical data analysis with forecasting capabilities to help you 
+              understand and predict weather patterns effectively."),
+            tags$ul(
+              tags$li(tags$strong("Interactive Visualizations:"), "Explore weather patterns through dynamic charts and maps"),
+              tags$li(tags$strong("Time Series Analysis:"), "Decompose and analyze weather trends"),
+              tags$li(tags$strong("Weather Forecasting:"), "Predict future weather patterns using various models")
+            ),
+            p("For more information, please visit our ", 
+              tags$a(href = brand_settings$meta$link$home, "website", target = "_blank"), ".")
+          )
+        )
+      ),
+      
+      # Right Column - Quick Start Guide
+      column(width = 6,
+        box(width = 12,
+          status = "primary",
+          solidHeader = TRUE,
+          title = "Quick Start Guide",
+          div(style = paste0("font-family: '", brand_settings$typography$base$family, 
+                            "', sans-serif; color: ", brand_colors$`dark-grey`, ";"),
+            p("Get started with our dashboard in three simple steps:"),
+            tags$ol(
+              tags$li("Use the sidebar menu to navigate between different analysis sections"),
+              tags$li("Select your preferred weather variables and time periods"),
+              tags$li("Explore the interactive visualizations and insights")
+            ),
+            div(style = "margin-top: 20px; text-align: center;",
+              actionButton("start_analysis", 
+                          "Start Analysis", 
+                          class = "btn-primary",
+                          style = paste0("background-color: ", brand_colors$`sky-blue`, 
+                                       "; border-color: ", brand_colors$`sky-blue`, ";"),
+                          icon = icon("chart-line"))
+            )
+          )
+        )
+      )
+    ),
+    
+    # Features Section
+    fluidRow(
+      column(width = 12,
+        box(width = 12,
+          status = "primary",
+          solidHeader = TRUE,
+          title = "Key Features",
+          fluidRow(
+            # Feature 1
+            column(width = 4,
+              div(style = "text-align: center; padding: 20px;",
+                icon("cloud-sun", "fa-3x", style = paste0("color: ", brand_colors$`sky-blue`, "; margin-bottom: 15px;")),
+                h4("Interactive Visualizations", 
+                   style = paste0("font-family: '", brand_settings$typography$headings$family, 
+                                 "', sans-serif; font-weight: ", brand_settings$typography$headings$weight, ";")),
+                p("Explore weather patterns through dynamic charts and maps")
+              )
+            ),
+            # Feature 2
+            column(width = 4,
+              div(style = "text-align: center; padding: 20px;",
+                icon("calendar-check", "fa-3x", style = paste0("color: ", brand_colors$`sky-blue`, "; margin-bottom: 15px;")),
+                h4("Time Series Analysis", 
+                   style = paste0("font-family: '", brand_settings$typography$headings$family, 
+                                 "', sans-serif; font-weight: ", brand_settings$typography$headings$weight, ";")),
+                p("Decompose and analyze weather trends over time")
+              )
+            ),
+            # Feature 3
+            column(width = 4,
+              div(style = "text-align: center; padding: 20px;",
+                icon("chart-line", "fa-3x", style = paste0("color: ", brand_colors$`sky-blue`, "; margin-bottom: 15px;")),
+                h4("Weather Forecasting", 
+                   style = paste0("font-family: '", brand_settings$typography$headings$family, 
+                                 "', sans-serif; font-weight: ", brand_settings$typography$headings$weight, ";")),
+                p("Predict future weather patterns using advanced models")
+              )
+            )
+          )
+        )
+      )
+    )
   )
 )
 
@@ -730,7 +828,9 @@ LineChartTab <- fluidRow(
              solidHeader = TRUE,
              fluidRow(
                column(width = 12,
-                      highchartOutput("linechart", height = "400px")
+                      withSpinner(highchartOutput("linechart", height = "400px"), 
+                                type = 8, 
+                                color = "#8AA4FF")
                )
              ),
              fluidRow(
@@ -825,7 +925,9 @@ RidgePlotTab <- fluidRow(
           ),
           column(width = 9,
             box(width = 12,
-              plotOutput("ridge_plot_biv", height = "500px"),
+              withSpinner(plotOutput("ridge_plot_biv", height = "500px"),
+                         type = 8,
+                         color = "#8AA4FF"),
               div(style = "margin-top: 15px;",
                   h5("Station Colors"),
                   uiOutput("color_legend_ui")
@@ -900,13 +1002,6 @@ GeofacetTab <- fluidRow(
                   icon = icon("refresh")
                 )
               )
-            ),
-            box(
-              width = 12,
-              title = "Display Options",
-              status = "info",
-              checkboxInput("show_trend_multi", "Show Trend Lines", value = TRUE),
-              checkboxInput("show_labels", "Show Labels", value = TRUE)
             )
           ),
           column(width = 9,
@@ -914,7 +1009,9 @@ GeofacetTab <- fluidRow(
               width = 12,
               status = "primary",
               solidHeader = TRUE,
-              plotOutput("geofacet_plot", height = "600px")
+              withSpinner(plotOutput("geofacet_plot", height = "600px"),
+                         type = 8,
+                         color = "#8AA4FF")
             )
           )
         )
@@ -965,7 +1062,9 @@ GeofacetTab <- fluidRow(
               width = 12,
               status = "primary",
               solidHeader = TRUE,
-              plotOutput("station_line_plot", height = "600px")
+              withSpinner(plotOutput("station_line_plot", height = "600px"),
+                         type = 8,
+                         color = "#8AA4FF")
             )
           )
         )
@@ -1064,7 +1163,9 @@ IsohyetmapTab <- fluidRow(
         status = "primary",
         solidHeader = TRUE,
         height = "350px",
-        tmapOutput("station_map", height = "300px")
+        withSpinner(tmapOutput("station_map", height = "300px"),
+                   type = 8,
+                   color = "#8AA4FF")
       ),
       
       # Step 2: IDW Results
@@ -1073,7 +1174,9 @@ IsohyetmapTab <- fluidRow(
         status = "primary",
         solidHeader = TRUE,
         height = "350px",
-        tmapOutput("idw_map", height = "300px")
+        withSpinner(tmapOutput("idw_map", height = "300px"),
+                   type = 8,
+                   color = "#8AA4FF")
       )
     ),
     fluidRow(
@@ -1083,7 +1186,9 @@ IsohyetmapTab <- fluidRow(
         status = "primary",
         solidHeader = TRUE,
         height = "350px",
-        plotOutput("variogram_plot", height = "300px")
+        withSpinner(plotOutput("variogram_plot", height = "300px"),
+                   type = 8,
+                   color = "#8AA4FF")
       ),
       
       # Step 4: Kriging Results
@@ -1092,7 +1197,9 @@ IsohyetmapTab <- fluidRow(
         status = "primary",
         solidHeader = TRUE,
         height = "350px",
-        tmapOutput("kriging_map", height = "300px")
+        withSpinner(tmapOutput("kriging_map", height = "300px"),
+                   type = 8,
+                   color = "#8AA4FF")
       )
     )
   )
@@ -1166,7 +1273,9 @@ DecompositionTab <- fluidRow(
         status = "primary",
         solidHeader = TRUE,
         height = "350px",
-        plotOutput("stl_plot", height = "300px")
+        withSpinner(plotOutput("stl_plot", height = "300px"),
+                   type = 8,
+                   color = "#8AA4FF")
       ),
       
       # Seasonal Plot
@@ -1175,7 +1284,9 @@ DecompositionTab <- fluidRow(
         status = "primary", 
         solidHeader = TRUE,
         height = "350px",
-        plotOutput("seasonal_plot", height = "300px")
+        withSpinner(plotOutput("seasonal_plot", height = "300px"),
+                   type = 8,
+                   color = "#8AA4FF")
       )
     )
   )
@@ -1260,7 +1371,9 @@ CorrelogramTab <- fluidRow(
       status = "primary",
       solidHeader = TRUE,
       height = "300px",
-      plotOutput("original_plot", height = "300px")
+      withSpinner(plotOutput("original_plot", height = "300px"),
+                 type = 8,
+                 color = "#8AA4FF")
     ),
     
     # Step 2 and 3 side by side
@@ -1272,7 +1385,9 @@ CorrelogramTab <- fluidRow(
           status = "primary",
           solidHeader = TRUE,
           height = "300px",
-          plotOutput("trend_diff_plot", height = "280px")
+          withSpinner(plotOutput("trend_diff_plot", height = "280px"),
+                     type = 8,
+                     color = "#8AA4FF")
         )
       ),
       
@@ -1283,7 +1398,9 @@ CorrelogramTab <- fluidRow(
           status = "primary",
           solidHeader = TRUE,
           height = "300px",
-          plotOutput("seasonal_diff_plot", height = "280px")
+          withSpinner(plotOutput("seasonal_diff_plot", height = "280px"),
+                     type = 8,
+                     color = "#8AA4FF")
         )
       )
     )
@@ -1292,7 +1409,6 @@ CorrelogramTab <- fluidRow(
 
 # Training Models Tab
 TrainingTab <- fluidRow(
-  add_busy_spinner(spin = "fading-circle"),
   # Left column - Controls
   column(width = 3,
     box(width = 12, title = "Step 1: Training Settings", status = "info",
@@ -1338,8 +1454,9 @@ TrainingTab <- fluidRow(
       title = "Step 1-1: Model Training & Fitting (Train-Test Split: 80%-20%)",
       status = "primary",
       solidHeader = TRUE,
-      # Forecasting Performance Plot
-      plotOutput("forecast_plot_train", height = "400px")
+      withSpinner(plotOutput("forecast_plot_train", height = "400px"),
+                 type = 8,
+                 color = "#8AA4FF")
     ),
     # Step 1-2: Model Evaluation Metrics
     box(width = 6,
@@ -1403,14 +1520,18 @@ ModelTab <- fluidRow(
       title = "Step 2-1: Model Fitting and Forecasting",
       status = "primary",
       solidHeader = TRUE,
-      plotOutput("forecast_plot_final", height = "300px")
+      withSpinner(plotOutput("forecast_plot_final", height = "300px"),
+                 type = 8,
+                 color = "#8AA4FF")
     ),
     # Step 2-2: Residual Analysis
     box(width = 6,
       title = "Step 2-2: Residual Analysis",
       status = "primary",
       solidHeader = TRUE,
-      plotOutput("residuals_plot", height = "300px")
+      withSpinner(plotOutput("residuals_plot", height = "300px"),
+                 type = 8,
+                 color = "#8AA4FF")
     ),
     fluidRow(
       # Parameters table
@@ -1426,35 +1547,17 @@ ModelTab <- fluidRow(
   )
 )
 
-# About Tab
-aboutTab <- fluidRow(
-  box(width = 12,
-      h2("About Weather Or Not", 
-         style = paste0("font-family: '", brand_settings$typography$headings$family, 
-                       "', sans-serif; font-weight: ", brand_settings$typography$headings$weight, ";")),
-      p("Weather Or Not is a comprehensive weather analysis dashboard that helps users understand and predict weather patterns in Singapore.",
-      style = "font-size: 13px;"),
-      h3("Data Sources"),
-      tags$ul(
-        tags$li(HTML("<strong>Weather Data:</strong> Historical weather data from Meteorological Service Singapore (2019-2025)"))
-      ),
-      h3("Analysis Components"),
-      tags$ul(
-        tags$li(HTML("<strong>Exploratory Analysis:</strong> Interactive visualizations for understanding weather patterns")),
-        tags$li(HTML("<strong>Forecasting:</strong> Advanced time series models for weather prediction"))
-      ),
-      h3("Contact"),
-      p("For more information or feedback, please visit our ", 
-        tags$a(href = brand_settings$meta$link$home, "website", target = "_blank"), ".")
-  )
-)
+
 
 # main body
 body <- dashboardBody(
-  add_busy_spinner(spin = "fading-circle"),
   # Apply custom CSS from brand settings
   tags$head(
     tags$style(HTML(custom_css)),
+    # Custom CSS for box header
+    tags$style(HTML(
+      ".box-header { background-color: #8AA4FF !important; }"
+    )),
     # Import Google fonts specified in brand.yml
     tags$link(rel = "stylesheet", 
               href = "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto:wght@400;500&display=swap")
@@ -1477,10 +1580,7 @@ body <- dashboardBody(
 
     # Forecasting tabs
     tabItem(tabName = "Training", TrainingTab),
-    tabItem(tabName = "Model", ModelTab),
-
-    # About tab
-    tabItem(tabName = "about", aboutTab)
+    tabItem(tabName = "Model", ModelTab)
   )
 )
 
@@ -1847,7 +1947,12 @@ server <- function(input, output) {
         lapply(names(station_colors), function(station) {
           tags$div(
             style = "display: flex; align-items: center;",
-            tags$div(style = sprintf("width: 15px; height: 15px; background-color: %s; margin-right: 8px; border: 1px solid #aaa;", station_colors[[station]])),
+            tags$div(
+              style = sprintf(
+                "width: 15px; height: 15px; background-color: %s; margin-right: 8px; border: 1px solid #aaa;",
+                station_colors[[station]]
+              )
+            ),
             tags$span(station)
           )
         })
@@ -2702,6 +2807,435 @@ output$kriging_map <- renderPlot({
       print(e)
       showNotification(paste("Error:", e$message), type = "error")
     })
+  })
+
+  # Add observers for tab selection
+  observeEvent(input$sidebar, {
+    # Isohyet Map Tab
+    if (input$sidebar == "Isohyet") {
+      tryCatch({
+        # Prepare station data
+        results$station_data <- prepare_station_data()
+        
+        # Perform IDW interpolation
+        results$idw_pred <- perform_idw(results$station_data)
+        
+        # Perform kriging
+        kriging_results <- perform_kriging(results$station_data)
+        results$kriging_pred <- kriging_results$kriging_pred
+        results$variogram_fit <- kriging_results$variogram_fit
+      }, error = function(e) {
+        print("Error in initial isohyet map loading:")
+        print(e)
+      })
+    }
+    
+    # Decomposition Tab
+    if (input$sidebar == "Decomposition") {
+      tryCatch({
+        # Filter and prepare data
+        data_filtered <- daily_station %>%
+          filter(
+            date >= input$date_range_decomp[1],
+            date <= input$date_range_decomp[2],
+            station == input$station_decomp
+          ) %>%
+          select(date, value = all_of(input$variable_decomp)) %>%
+          pivot_longer(cols = value, names_to = "type", values_to = "value") %>%
+          drop_na(value)
+        
+        # Convert to tsibble and aggregate based on time resolution
+        ts_data <- as_tsibble(data_filtered, index = date, key = type)
+        
+        if (input$time_resolution_decomp == "Weekly") {
+          ts_data <- ts_data %>%
+            mutate(year_week = yearweek(date)) %>%
+            group_by(type, year_week) %>%
+            summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+            distinct(type, year_week, .keep_all = TRUE) %>%
+            as_tsibble(index = year_week, key = type)
+        } else if (input$time_resolution_decomp == "Monthly") {
+          ts_data <- ts_data %>%
+            mutate(year_month = yearmonth(date)) %>%
+            group_by(type, year_month) %>%
+            summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+            distinct(type, year_month, .keep_all = TRUE) %>%
+            as_tsibble(index = year_month, key = type)
+        }
+        
+        # Perform STL decomposition
+        stl_results <- ts_data %>%
+          model(stl = STL(value ~ season(window = "periodic"))) %>%
+          components()
+        
+        # Render STL plot
+        output$stl_plot <- renderPlot({
+          autoplot(stl_results) + 
+            theme_classic() + 
+            scale_color_manual(values = c("#4D4D4D")) +
+            labs(x="")+
+            theme(
+              plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+              plot.subtitle = element_text(hjust = 0.5, color = "#4D4D4D"),
+              axis.title = element_text(size = 8),
+              axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+              strip.background = element_rect(fill = "#C4C8FF", color = "white"),
+              strip.text = element_text(color = "#1A1A1A", size = 8),
+              legend.position = 'top',
+              legend.background = element_blank(),
+              legend.key = element_blank()
+            )
+        })
+        
+        # Render seasonal plot
+        output$seasonal_plot <- renderPlot({
+          monthly_data <- ts_data %>%
+            mutate(year_month = yearmonth(date)) %>%
+            index_by(year_month) %>%
+            summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+            as_tsibble(index = year_month)
+          
+          monthly_data %>%
+            gg_subseries(value) +
+              labs(title = paste("Cycle Plot of", input$variable_decomp),
+                   subtitle = paste("Station:", input$station_decomp),
+                   y = input$variable_decomp,
+                   x = "") +
+              theme_classic() +
+              scale_color_manual(values = c("#4D4D4D")) +
+              theme(
+                plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+                plot.subtitle = element_text(hjust = 0.5, color = "#4D4D4D"),
+                panel.background = element_rect(fill = "#f5f5f5", color = NA),
+                axis.title = element_text(size = 8),
+                axis.line = element_blank(),
+                axis.ticks = element_blank(),
+                axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+                strip.background.x = element_rect(fill = "#C4C8FF", color = "white"),
+                strip.background.y = element_rect(color = "white"),
+                strip.text.x = element_text(color = "#1A1A1A", size = 8),
+                strip.text.y = element_text(color = "white", size = 7),
+                axis.text.x = element_blank()
+              )
+        })
+      }, error = function(e) {
+        print("Error in initial decomposition loading:")
+        print(e)
+      })
+    }
+    
+    # Correlogram Tab
+    if (input$sidebar == "Correlogram") {
+      tryCatch({
+        # Filter and prepare data
+        data_filtered <- daily_station %>%
+          filter(
+            date >= input$date_range_corr[1],
+            date <= input$date_range_corr[2],
+            station == input$station_corr
+          ) %>%
+          group_by(date) %>%
+          select(date, value = all_of(input$variable_corr)) %>%
+          mutate(value = as.numeric(value)) %>%
+          pivot_longer(cols = value, 
+                      names_to = "type", 
+                      values_to = "value") %>%
+          as_tsibble(index = date, key = type)
+        
+        # Convert to tsibble and aggregate based on time resolution
+        if (input$time_resolution_corr == "Weekly") {
+          ts_data <- data_filtered %>%
+            mutate(year_week = yearweek(date)) %>%
+            group_by(type, year_week) %>%
+            summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+            distinct(type, year_week, .keep_all = TRUE) %>%
+            as_tsibble(index = year_week, key = type)
+        } else if (input$time_resolution_corr == "Monthly") {
+          ts_data <- data_filtered %>%
+            mutate(year_month = yearmonth(date)) %>%
+            group_by(type, year_month) %>%
+            summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+            distinct(type, year_month, .keep_all = TRUE) %>%
+            as_tsibble(index = year_month, key = type)
+        } else {
+          ts_data <- data_filtered
+        }
+        
+        # Ensure value is numeric
+        ts_data$value <- as.numeric(ts_data$value)
+        
+        # Render plots
+        output$original_plot <- renderPlot({
+          ts_data %>%
+            gg_tsdisplay(
+              y = value,
+              plot_type = input$plot_type,
+              lag_max = input$lag_max
+            )
+        })
+        
+        output$trend_diff_plot <- renderPlot({
+          ts_data %>%
+            gg_tsdisplay(
+              difference(value, lag = 1),
+              plot_type = "partial",
+              lag_max = input$lag_max
+            )
+        })
+        
+        output$seasonal_diff_plot <- renderPlot({
+          ts_data %>%
+            gg_tsdisplay(
+              difference(value, difference = 12),
+              plot_type = "partial",
+              lag_max = input$lag_max
+            )
+        })
+      }, error = function(e) {
+        print("Error in initial correlogram loading:")
+        print(e)
+      })
+    }
+    
+    # Training Tab
+    if (input$sidebar == "Training") {
+      tryCatch({
+        # Filter and prepare data
+        data_filtered <- daily_station %>%
+          filter(
+            date >= as.Date("2022-01-01"),
+            date <= input$date_range_train[2],
+            station == input$station_train
+          ) %>%
+          select(date, value = all_of(input$variable_train)) %>%
+          pivot_longer(cols = value, names_to = "type", values_to = "value") %>%
+          drop_na(value)
+        
+        # Convert to tsibble and aggregate based on time resolution
+        ts_data <- as_tsibble(data_filtered, index = date, key = type)
+        
+        if (input$time_resolution_train == "Weekly") {
+          ts_data <- ts_data %>%
+            mutate(year_week = yearweek(date)) %>%
+            group_by(type, year_week) %>%
+            summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+            distinct(type, year_week, .keep_all = TRUE) %>%
+            as_tsibble(index = year_week, key = type)
+        } else if (input$time_resolution_train == "Monthly") {
+          ts_data <- ts_data %>%
+            mutate(year_month = yearmonth(date)) %>%
+            group_by(type, year_month) %>%
+            summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+            distinct(type, year_month, .keep_all = TRUE) %>%
+            as_tsibble(index = year_month, key = type)
+        }
+        
+        # Split into training and test sets
+        cutoff_row <- floor(0.8 * nrow(ts_data))
+        train_data <- ts_data %>% slice(1:cutoff_row)
+        test_data <- ts_data %>% slice((cutoff_row + 1):n())
+        
+        # Define models
+        models <- list(
+          ETS_AAA = ETS(value ~ error("A") + trend("A") + season("A")), 
+          ETS_MAM = ETS(value ~ error("M") + trend("A") + season("M")),
+          ETS_MMM = ETS(value ~ error("M") + trend("M") + season("M")),
+          ETS_AAN = ETS(value ~ error("A") + trend("A") + season("N")),
+          ETS_MMN = ETS(value ~ error("M") + trend("M") + season("N")),
+          ETS_ANN = ETS(value ~ error("A") + trend("N") + season("N")),
+          Auto_ETS = ETS(value),
+          Auto_ARIMA = ARIMA(value)
+        )
+        
+        # Fit selected models
+        selected_models <- models[input$models_train]
+        fit_models <- train_data %>%
+          model(!!!selected_models)
+        
+        # Generate forecasts
+        forecast_results <- fit_models %>%
+          forecast(h = nrow(test_data))
+        
+        # Render forecast plot
+        output$forecast_plot_train <- renderPlot({
+          autoplot(forecast_results, level = c(95)) +
+            autolayer(ts_data, series = "Actual", color = "#4D4D4D") +
+            labs(title = "Model Training Results",
+                 y = input$variable_train,
+                 x = "") +
+            theme_classic() +
+            theme(
+              plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+              axis.line.y = element_blank(),
+              axis.line.x = element_line(color = "#4D4D4D", size = 0.5),
+              axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+              legend.position = "bottom",
+              legend.key = element_blank(),
+              legend.key.size = unit(0.2, "cm"),
+              legend.title = element_text(size = 9),
+              legend.text = element_text(size = 8)
+            )
+        })
+        
+        # Model metrics table
+        matrix <- glance(fit_models) %>%
+          select(.model, AIC, BIC)
+        
+        acc <- accuracy(forecast_results, test_data) %>%
+          select(.model, RMSE)
+        
+        model_matrix <- matrix %>%
+          left_join(acc, by = ".model") %>%
+          rename(RMSE_ts = RMSE, AIC_tr = AIC, BIC_tr = BIC, Model = .model) %>%
+          mutate(RMSE_ts = round(RMSE_ts, 3),
+                 AIC_tr = round(AIC_tr, 3),
+                 BIC_tr = round(BIC_tr, 3))
+        
+        # Render model metrics table
+        output$model_metrics_table <- renderDT({
+          datatable(model_matrix,
+                    options = list(
+                      scrollY = "400px",
+                      scrollCollapse = TRUE,
+                      paging = FALSE,
+                      searching = TRUE,
+                      headerCallback = JS(
+                        "function(thead, data, start, end, display) {",
+                        "  $(thead).find('th').css({'background-color': '#C4C8FF', 'color': '#4D4D4D', 'font-weight': 'bold'});",
+                        "}"
+                      )
+                    ))
+        })
+      }, error = function(e) {
+        print("Error in initial training loading:")
+        print(e)
+      })
+    }
+    
+    # Model Tab
+    if (input$sidebar == "Model") {
+      tryCatch({
+        # Filter and prepare data
+        data_filtered <- daily_station %>%
+          filter(
+            date >= as.Date("2022-01-01"),
+            date <= input$date_range_model[2],
+            station == input$station_model
+          ) %>%
+          select(date, value = all_of(input$variable_model)) %>%
+          pivot_longer(cols = value, names_to = "type", values_to = "value") %>%
+          drop_na(value)
+        
+        # Convert to tsibble and aggregate based on time resolution
+        ts_data <- as_tsibble(data_filtered, index = date, key = type)
+        
+        if (input$time_resolution_model == "Weekly") {
+          ts_data <- ts_data %>%
+            mutate(year_week = yearweek(date)) %>%
+            group_by(type, year_week) %>%
+            summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+            distinct(type, year_week, .keep_all = TRUE) %>%
+            as_tsibble(index = year_week, key = type)
+        } else if (input$time_resolution_model == "Monthly") {
+          ts_data <- ts_data %>%
+            mutate(year_month = yearmonth(date)) %>%
+            group_by(type, year_month) %>%
+            summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+            distinct(type, year_month, .keep_all = TRUE) %>%
+            as_tsibble(index = year_month, key = type)
+        }
+        
+        # Define models
+        models <- list(
+          ETS_AAA = ETS(value ~ error("A") + trend("A") + season("A")), 
+          ETS_MAM = ETS(value ~ error("M") + trend("A") + season("M")),
+          ETS_MMM = ETS(value ~ error("M") + trend("M") + season("M")),
+          ETS_AAN = ETS(value ~ error("A") + trend("A") + season("N")),
+          ETS_MMN = ETS(value ~ error("M") + trend("M") + season("N")),
+          ETS_ANN = ETS(value ~ error("A") + trend("N") + season("N")),
+          Auto_ETS = ETS(value),
+          Auto_ARIMA = ARIMA(value)
+        )
+        
+        # Fit selected models
+        models_to_fit <- models[input$models_final]
+        fit_models <- ts_data %>%
+          model(!!!models_to_fit)
+        
+        # Generate forecasts
+        forecast_results <- fit_models %>%
+          forecast(h = input$forecast_period_model)
+        
+        # Render forecast plot
+        output$forecast_plot_final <- renderPlot({
+          autoplot(forecast_results, level = c(95)) +
+            autolayer(ts_data, series = "Actual", color = "#4D4D4D") +
+            labs(title = "Final Forecast Results",
+                 y = input$variable_model,
+                 x = "") +
+            theme_classic() +
+            theme(
+              plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+              axis.line.y = element_blank(),
+              axis.line.x = element_line(color = "#4D4D4D", size = 0.5),
+              axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+              legend.position = "bottom",
+              legend.key = element_blank(),
+              legend.key.size = unit(0.2, "cm"),
+              legend.title = element_text(size = 9),
+              legend.text = element_text(size = 8)
+            )
+        })
+        
+        # Model parameters table
+        parameters <- fit_models %>%
+          tidy() %>%
+          select(.model, term, estimate) %>%
+          pivot_wider(names_from = term, values_from = estimate) %>%
+          rename(Model = .model)
+        
+        # Render model parameters table
+        output$model_parameters_table <- renderDT({
+          datatable(parameters,
+                    options = list(
+                      scrollY = "400px",
+                      scrollCollapse = TRUE,
+                      paging = FALSE,
+                      searching = TRUE,
+                      headerCallback = JS(
+                        "function(thead, data, start, end, display) {",
+                        "  $(thead).find('th').css({'background-color': '#C4C8FF', 'color': '#4D4D4D', 'font-weight': 'bold'});",
+                        "}"
+                      )
+                    ))
+        })
+        
+        # Residuals plot
+        output$residuals_plot <- renderPlot({
+          fit_models %>%
+            residuals() %>%
+            autoplot() +
+              labs(title = "Model Residuals",
+                   y = "Residuals",
+                   x = "") +
+              theme_classic() +
+              theme(
+                plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+                axis.line.y = element_blank(),
+                axis.line.x = element_line(color = "#4D4D4D", size = 0.5),
+                axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+                legend.position = "bottom",
+                legend.key = element_blank(),
+                legend.key.size = unit(0.2, "cm"),
+                legend.title = element_text(size = 9),
+                legend.text = element_text(size = 8)
+              )
+        })
+      }, error = function(e) {
+        print("Error in initial model loading:")
+        print(e)
+      })
+    }
   })
 }
 
