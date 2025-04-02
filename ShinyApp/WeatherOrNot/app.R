@@ -929,7 +929,6 @@ RidgePlotTab <- fluidRow(
                          type = 8,
                          color = "#8AA4FF"),
               div(style = "margin-top: 15px;",
-                  h5("Station Colors"),
                   uiOutput("color_legend_ui")
             )
           )
@@ -1922,7 +1921,6 @@ server <- function(input, output) {
   })
   
   # RidgePlot with Boxplot
-  # 颜色定义
   station_colors <- c(
     "Changi" = "#66C2A5",
     "Newton" = "#8DA0CB",
