@@ -678,22 +678,16 @@ sidebar <- dashboardSidebar(
 homeTab <- fluidRow(
   # Welcome Section
   column(width = 12,
-    box(width = 12,
-      status = "primary",
-      solidHeader = TRUE,
-      style = paste0("background-color: ", brand_colors$`white`, "; border: none;"),
-      div(style = "text-align: center; padding: 15px 15px;",
-        h2("Weather Or Not", 
-           style = paste0("font-family: '", brand_settings$typography$headings$family, 
-                         "', sans-serif; font-weight: ", brand_settings$typography$headings$weight, 
-                         "; color: ", brand_colors$`dark-grey`, "; text-align: center;")),
-        p("Predicting the Unpredictable", 
-          style = paste0("font-family: '", brand_settings$typography$base$family, 
-                        "', sans-serif; font-size: 18px; color: ", brand_colors$`dark-grey`, ";")
+      box(width = 12,
+        status = "primary",
+        solidHeader = TRUE,
+        style = paste0("background-color: ", brand_colors$`white`, "; border: none;"),
+        div(style = "text-align: center; padding: -20px -20px;",
+          img(src = "header_image.png", 
+              style = "max-width: 100%; height: auto;")
         )
       )
-    )
-  ),
+    ),
   
   # Main Content
   column(width = 12,
@@ -733,7 +727,7 @@ homeTab <- fluidRow(
               tags$li("Select your preferred weather variables and time periods"),
               tags$li("Explore the interactive visualizations and insights")
             ),
-            div(style = "margin-top: 20px; text-align: center;",
+            div(style = "margin-top: 0px; text-align: center;",
               actionButton("start_analysis", 
                           "Start Analysis", 
                           class = "btn-primary",
@@ -756,7 +750,7 @@ homeTab <- fluidRow(
           fluidRow(
             # Feature 1
             column(width = 4,
-              div(style = "text-align: center; padding: 20px;",
+              div(style = "text-align: center; padding: 0px;",
                 icon("cloud-sun", "fa-3x", style = paste0("color: ", brand_colors$`sky-blue`, "; margin-bottom: 15px;")),
                 h4("Interactive Visualizations", 
                    style = paste0("font-family: '", brand_settings$typography$headings$family, 
@@ -766,7 +760,7 @@ homeTab <- fluidRow(
             ),
             # Feature 2
             column(width = 4,
-              div(style = "text-align: center; padding: 20px;",
+              div(style = "text-align: center; padding: 0px;",
                 icon("calendar-check", "fa-3x", style = paste0("color: ", brand_colors$`sky-blue`, "; margin-bottom: 15px;")),
                 h4("Time Series Analysis", 
                    style = paste0("font-family: '", brand_settings$typography$headings$family, 
@@ -776,7 +770,7 @@ homeTab <- fluidRow(
             ),
             # Feature 3
             column(width = 4,
-              div(style = "text-align: center; padding: 20px;",
+              div(style = "text-align: center; padding: 0px;",
                 icon("chart-line", "fa-3x", style = paste0("color: ", brand_colors$`sky-blue`, "; margin-bottom: 15px;")),
                 h4("Weather Forecasting", 
                    style = paste0("font-family: '", brand_settings$typography$headings$family, 
