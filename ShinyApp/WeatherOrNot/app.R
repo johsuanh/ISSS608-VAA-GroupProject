@@ -1117,6 +1117,7 @@ IsohyetmapTab <- fluidRow(
       status = "info",
       height = "auto",
       collapsible = TRUE,
+      collapsed = TRUE,
       sliderInput("idw_nmax", 
                   "IDW Nmax (groups):",
                   value = 6,
