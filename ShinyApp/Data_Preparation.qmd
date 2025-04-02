@@ -18,7 +18,7 @@ pacman::p_load(tidyverse,lubridate,knitr,zoo,DT,fs,janitor)
 ```
 
 | Package | Description |
-|------------------------------------|------------------------------------|
+|----|----|
 | [tidyverse](https://www.tidyverse.org/) | For data manipulation |
 | [zoo](https://cran.r-project.org/web/packages/zoo/index.html) | For time series analysis and manipulation |
 | [knitr](https://yihui.org/knitr/) | For dynamic report generation with R |
