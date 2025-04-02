@@ -1378,7 +1378,6 @@ CorrelogramTab <- fluidRow(
                  color = "#8AA4FF")
     ),
     
-    # Step 2 and 3 side by side
     fluidRow(
       # Step 2: Trend Differencing
       column(width = 6,
@@ -1452,11 +1451,11 @@ TrainingTab <- fluidRow(
   # Right column - Results
   column(width = 9,
     # Step 1-1: Model Training and Evaluation
-    box(width = 6,
+    box(width = 12,
       title = "Step 1-1: Model Training & Fitting (Train-Test Split: 80%-20%)",
       status = "primary",
       solidHeader = TRUE,
-      withSpinner(plotOutput("forecast_plot_train", height = "400px"),
+      withSpinner(plotOutput("forecast_plot_train", height = "280px"),
                  type = 8,
                  color = "#8AA4FF")
     ),
@@ -1465,7 +1464,18 @@ TrainingTab <- fluidRow(
       title = "Step 1-2: Model Evaluation: AIC, BIC and RMSE",
       status = "primary",
       solidHeader = TRUE,
-      DTOutput("model_metrics_table")
+      withSpinner(DTOutput("model_metrics_table"),
+                 type = 8,
+                 color = "#8AA4FF")
+    ),
+    # Step 1-3: Residuals Plot
+    box(width = 6,
+      title = "Step 1-3: Residuals Analysis",
+      status = "primary",
+      solidHeader = TRUE,
+      withSpinner(plotOutput("residuals_plot_train", height = "280px"),
+                 type = 8,
+                 color = "#8AA4FF")
     )
   )
 )
@@ -1495,7 +1505,7 @@ ModelTab <- fluidRow(
                   min = 1,
                   max = 24,
                   step = 1),
-      selectInput("models_final", "Select Final Models:",
+      selectInput("models_model", "Select Models:",
                         choices = c(
                           "ETS(AAA)" = "ETS_AAA",
                           "ETS(MAM)" = "ETS_MAM",
@@ -1517,37 +1527,33 @@ ModelTab <- fluidRow(
   ),
   # Right column - Results
   column(width = 9,
-    # Step 2-1: Model Training and Evaluation
-    box(width = 6,
-      title = "Step 2-1: Model Fitting and Forecasting",
-      status = "primary",
-      solidHeader = TRUE,
-      withSpinner(plotOutput("forecast_plot_final", height = "300px"),
-                 type = 8,
-                 color = "#8AA4FF")
-    ),
-    # Step 2-2: Residual Analysis
-    box(width = 6,
-      title = "Step 2-2: Residual Analysis",
-      status = "primary",
-      solidHeader = TRUE,
-      withSpinner(plotOutput("residuals_plot", height = "300px"),
-                 type = 8,
-                 color = "#8AA4FF")
-    ),
     fluidRow(
+      # Step 2-1: Model Fitting and Forecasting
+      column(width = 6,
+        box(width = 12,
+          title = "Step 2-1: Model Fitting and Forecasting",
+          status = "primary",
+          solidHeader = TRUE,
+          withSpinner(plotOutput("forecast_plot_final", height = "400px"),
+                     type = 8,
+                     color = "#8AA4FF")
+        )
+      ),
       # Parameters table
-      column(width = 12,
+      column(width = 6,
         box(width = 12,
           title = "Table: Parameters of the Selected Forecasting Models",
           status = "primary",
           solidHeader = TRUE,
-          DTOutput("model_parameters_table", height = "280px")
+          withSpinner(DTOutput("model_parameters_table"), 
+                     type = 8,
+                     color = "#8AA4FF")
         )
       )
     )
   )
 )
+
 
 
 
@@ -2588,7 +2594,7 @@ output$kriging_map <- renderPlot({
           output$model_metrics_table <- renderDT({
             datatable(model_matrix,
                       options = list(
-                        scrollY = "400px",
+                        scrollY = "280px",
                         scrollCollapse = TRUE,
                         paging = FALSE,
                         searching = TRUE,
@@ -2670,6 +2676,28 @@ output$kriging_map <- renderPlot({
                 legend.text = element_text(size = 8)
               )
           })
+
+          # Render residuals plot
+          output$residuals_plot_train <- renderPlot({
+            residuals <- residuals(fit_models)
+            
+            autoplot(residuals, .vars = .resid) +
+              labs(title = "Residuals of Final Models",
+                   x = "",
+                   y = "Residuals") +
+              theme_classic() +
+              theme(
+                plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+                axis.line.y = element_blank(),
+                axis.line.x = element_line(color = "#4D4D4D", size = 0.5),
+                axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+                legend.position = "bottom",
+                legend.key = element_blank(),
+                legend.key.size = unit(0.2, "cm"),
+                legend.title = element_text(size = 9),
+                legend.text = element_text(size = 8)
+              )
+          })
         } else {
           stop("No valid models selected")
         }
@@ -2689,7 +2717,7 @@ output$kriging_map <- renderPlot({
   observeEvent(input$run_model, {
     tryCatch({
       req(input$variable_model, input$station_model, input$date_range_model, 
-          input$time_resolution_model, input$models_final, input$forecast_period_model)
+          input$time_resolution_model, input$models_model, input$forecast_period_model)
       
       # Filter and prepare data
       data_filtered <- daily_station %>%
@@ -2734,7 +2762,7 @@ output$kriging_map <- renderPlot({
       )
       
       # Fit selected models
-      models_to_fit <- models[input$models_final]
+      models_to_fit <- models[input$models_model]
       fit_models <- ts_data %>%
         model(!!!models_to_fit)
       
@@ -2776,7 +2804,7 @@ output$kriging_map <- renderPlot({
       output$model_parameters_table <- renderDT({
         datatable(parameters,
                   options = list(
-                    scrollY = "250px",
+                    scrollY = "300px",
                     scrollCollapse = TRUE,
                     paging = FALSE,
                     searching = TRUE,
@@ -3103,7 +3131,7 @@ output$kriging_map <- renderPlot({
         output$model_metrics_table <- renderDT({
           datatable(model_matrix,
                     options = list(
-                      scrollY = "400px",
+                      scrollY = "300px",
                       scrollCollapse = TRUE,
                       paging = FALSE,
                       searching = TRUE,
@@ -3113,6 +3141,28 @@ output$kriging_map <- renderPlot({
                         "}"
                       )
                     ))
+        })
+
+        # Render residuals plot
+        output$residuals_plot_train <- renderPlot({
+          residuals <- residuals(fit_models)
+          
+          autoplot(residuals, .vars = .resid) +
+            labs(title = "Residuals of Training Models",
+                 x = "",
+                 y = "Residuals") +
+            theme_classic() +
+            theme(
+              plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
+              axis.line.y = element_blank(),
+              axis.line.x = element_line(color = "#4D4D4D", size = 0.5),
+              axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
+              legend.position = "bottom",
+              legend.key = element_blank(),
+              legend.key.size = unit(0.2, "cm"),
+              legend.title = element_text(size = 9),
+              legend.text = element_text(size = 8)
+            )
         })
       }, error = function(e) {
         print("Error in initial training loading:")
@@ -3218,27 +3268,7 @@ output$kriging_map <- renderPlot({
                     ))
         })
         
-        # Residuals plot
-        output$residuals_plot <- renderPlot({
-          fit_models %>%
-            residuals() %>%
-            autoplot() +
-              labs(title = "Model Residuals",
-                   y = "Residuals",
-                   x = "") +
-              theme_classic() +
-              theme(
-                plot.title = element_text(face = "bold", hjust = 0.5, color = "#4D4D4D"),
-                axis.line.y = element_blank(),
-                axis.line.x = element_line(color = "#4D4D4D", size = 0.5),
-                axis.title.y = element_text(color = "#4D4D4D", margin = margin(r = 10)),
-                legend.position = "bottom",
-                legend.key = element_blank(),
-                legend.key.size = unit(0.2, "cm"),
-                legend.title = element_text(size = 9),
-                legend.text = element_text(size = 8)
-              )
-        })
+
       }, error = function(e) {
         print("Error in initial model loading:")
         print(e)
