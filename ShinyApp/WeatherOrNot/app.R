@@ -923,7 +923,6 @@ RidgePlotTab <- fluidRow(
                          type = 8,
                          color = "#8AA4FF"),
               div(style = "margin-top: 15px;",
-                  h5("Station Colors"),
                   uiOutput("color_legend_ui")
             )
           )
@@ -1115,13 +1114,19 @@ IsohyetmapTab <- fluidRow(
     box(width = 12,
       title = "Step 2: IDW Settings",
       status = "info",
-      height = "140px",
+      height = "220px",
       sliderInput("idw_nmax", 
                   "IDW Nmax (groups):",
                   value = 6,
                   min = 1,
-                  max = 20,
-                  step = 1)
+                  max = 9,
+                  step = 1),
+      sliderInput("idp", 
+                  "Inverse Distance Power:",
+                  value = 1,
+                  min = 1,
+                  max = 4,
+                  step = 0.5),
     ),
     
     # Step 3: Variogram Settings
@@ -2116,7 +2121,7 @@ perform_idw <- function(station_data) {
   res <- gstat(formula = value ~ 1, 
               locations = station_data, 
               nmax = input$idw_nmax,
-              set = list(idp = 0))
+              set = list(idp = input$idp))
   resp <- predict(res, coop)
   
   # Create raster from predictions
@@ -2213,7 +2218,9 @@ output$station_map <- renderPlot({
             frame = FALSE,
             legend.frame = FALSE,
             legend.outside = TRUE,
-            legend.outside.position = "right")
+            legend.outside.position = "right",
+            legend.text.size = 0.6,  
+            legend.title.size = 0.7)
 })
 
 # Step 2: IDW Map
@@ -2233,7 +2240,9 @@ output$idw_map <- renderPlot({
             frame = FALSE,
             legend.frame = FALSE,
             legend.outside = TRUE,
-            legend.outside.position = "right")
+            legend.outside.position = "right",
+            legend.text.size = 0.6,  
+            legend.title.size = 0.7)
 })
 
 # Step 3: Variogram Plot
@@ -2270,7 +2279,9 @@ output$kriging_map <- renderPlot({
             frame = FALSE,
             legend.frame = FALSE,
             legend.outside = TRUE,
-            legend.outside.position = "right")
+            legend.outside.position = "right",
+            legend.text.size = 0.6,  
+            legend.title.size = 0.7)
 })
 
 
