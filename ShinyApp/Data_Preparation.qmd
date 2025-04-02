@@ -1,0 +1,378 @@
+---
+title: "Weather Data Preparation "
+date: 2024-03-27
+date-modified: "last-modified"
+execute:
+  echo: true
+  eval: true
+  warning: false
+  freeze: true
+---
+
+![](images/clipboard-3606733821.png)
+
+# 1 Load Packages
+
+```{r}
+pacman::p_load(tidyverse,lubridate,knitr,zoo,DT,fs,janitor)
+```
+
+| Package | Description |
+|------------------------------------|------------------------------------|
+| [tidyverse](https://www.tidyverse.org/) | For data manipulation |
+| [zoo](https://cran.r-project.org/web/packages/zoo/index.html) | For time series analysis and manipulation |
+| [knitr](https://yihui.org/knitr/) | For dynamic report generation with R |
+| [lubridate](https://lubridate.tidyverse.org/) | For handling date-time data |
+| [janitor](https://sfirke.github.io/janitor/) | For examining and cleaning dirty data |
+| [fs](https://www.tidyverse.org/blog/2018/01/fs-1.0.0/) | For file system operations |
+| [DT](https://rstudio.github.io/DT/) | For interactive data tables |
+
+# 2 Download Weather Data
+
+After downloading all the weather data, we store all the files in a single directory, use `map_df()` from `purrr` to combine them, clean the data with the `janitor` package, and export the CSV file using `write.csv()` from `knitr` for further data preparation:
+
+``` r
+pacman::p_load(tidyverse,fs,janitor,knitr)
+
+files <- fs::dir_ls("data/") 
+
+# Read all files and clean the column names
+aws <- files %>%
+  map_df(~ read_csv(.x, 
+                    locale = locale(encoding = "latin1"),
+                    col_types = cols(.default = "character")
+  ) %>% 
+    janitor::clean_names()
+  ) 
+# Save the output
+write.csv(aws, "Singapore_daily_records.csv", row.names = FALSE)
+```
+
+```{r}
+# Import the data
+station<- read_csv("data/Singapore_daily_records.csv")
+```
+
+# 3 Data Preparation
+
+## 3.1 Review the data structure
+
+There are 22,230 observations in the weather data, including 10 AWS stations and 5 years' records.
+
+As shown in the table below, several variables have incorrect data formats. Transformations need to be made for these variables:
+
+-   **station** should be a factor type
+
+-   **rainfall**, **temperature**, and **wind speed** should be numeric types
+
+-   **highest 30, 60 and 90 mm rainfall** columns contain character “\\u0997”, which should be replaced by NA
+
+```{r}
+str(station)
+```
+
+## 3.2 Handle Incorrect Data Format
+
+The code chunk below is performed to address the data issues mentioned earlier:
+
+```{r}
+station <- station %>%
+  mutate(across(
+    c(highest_30_min_rainfall_mm, highest_60_min_rainfall_mm, highest_120_min_rainfall_mm,
+      daily_rainfall_total_mm, mean_temperature_c, maximum_temperature_c, 
+      minimum_temperature_c, mean_wind_speed_km_h, max_wind_speed_km_h,mean_temperature_a_c,
+      maximum_temperature_a_c,minimum_temperature_a_c),
+    ~ as.numeric(gsub("\u0097", NA, .))
+  )) %>%
+  mutate(station = as.factor(station))
+```
+
+## 3.3 Add Date and Week No.
+
+As the weather data is a time-series data, it's necessary to add date information for further data analysis. The `lubridate` package is used for creating date and weekday columns:
+
+```{r}
+station <- station %>%
+  mutate(date = ymd(paste(year, month, day, sep = "-")),
+         Week_no = week(date))
+
+# if Week_no =53, revise it to 52
+station <- station %>%
+  mutate(Week_no = ifelse(Week_no == 53, 52, Week_no))
+```
+
+## 3.4 Handle Missing Values
+
+Let's check the data summary and missing values:
+
+Except for columns "station", "year", "month" and "day", other columns contain lots of missing values, especially for temperature data (\*\_temperature_c and \*\_temperature_a_c) with over 17K and 6K missing values.
+
+```{r}
+summary(station)
+```
+
+```{r}
+kable(data.frame(Column = names(station), NAs = colSums(is.na(station))))
+
+```
+
+### 3.4.1 Missing Temperature_c and Temperature_a_c
+
+However, upon closer inspection of the missing values, we discovered that the columns were switched: missing temperature_c values appeared in temperature_a_c, and vice versa. To maintain data integrity, we will use the `coalesce()` function to combine these values into the temperature_c column.
+
+::: panel-tabset
+## missing temperature_c
+
+The table below shows records with missing values in mean_temperature_c
+
+```{r}
+station_filtered_c <- station %>%
+  filter(is.na(mean_temperature_c))
+
+kable(head(station_filtered_c,10))
+```
+
+## missing temperature_a_c
+
+The table below shows records with missing values in mean_temperature_a_c
+
+```{r}
+station_filtered_a_c <- station %>%
+  filter(is.na(mean_temperature_a_c))
+
+kable(head(station_filtered_a_c,10))
+```
+:::
+
+### 3.4.2 Coalesce Temperature Data
+
+The coalesce function combines values from min, max, and mean temperature columns (both temp_c and temp_a_c) to handle missing values, and remove the \_a_c columns:
+
+```{r}
+station$mean_temperature_c <- coalesce(station$mean_temperature_c, station$mean_temperature_a_c)
+station$maximum_temperature_c <- coalesce(station$maximum_temperature_c, station$maximum_temperature_a_c)
+station$minimum_temperature_c <- coalesce(station$minimum_temperature_c, station$minimum_temperature_a_c)
+
+station <- station %>% 
+  select(-c("mean_temperature_a_c", 
+            "maximum_temperature_a_c", "minimum_temperature_a_c"))
+
+```
+
+Now, let's review the summary of missing values again. The number of missing values has dramatically decreased to 1000ish.
+
+```{r}
+kable(data.frame(Column = names(station), NAs = colSums(is.na(station))))
+```
+
+### 3.4.3 **Remove Marina Barrage Station Data and Highest Rainfall Attributes**
+
+As shown in the time-series plot, Marina Barrage has missing data since later half of year in 2022, since the missing value is too many, the station should be dropped
+
+```{r}
+ggplot(station, aes(x = date, y = mean_temperature_c, color = station, group = station)) +
+  geom_line(linewidth = 1, alpha = 0.7) +
+  facet_grid(~station)+
+  coord_flip()+
+  theme_minimal() +
+  labs(title = "Mean temperature",
+       x = "Date",
+       y = "Mean temperature (celcius degree)") +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.title = element_blank(),
+    legend.position = "top"
+  )
+```
+
+```{r}
+station <- station %>% filter(station != "Marina Barrage")
+```
+
+After removing Marina Barrage, the missing values are decreased:
+
+```{r}
+kable(data.frame(Column = names(station), NAs = colSums(is.na(station))))
+```
+
+### 3.4.4 Handling Remaining Missing Values
+
+Since the missing values are distributed throughout the dataset, and given that this is time-series weather data, removing entire rows would disrupt subsequent visualizations. To minimize analysis errors, interpolation is a more suitable approach for handling missing data.
+
+Below are the methods used to address missing values for different attributes:
+
+**Temperature Data:**
+
+-   If both minimum and maximum temperature values are available, the mean temperature is interpolated as their average.
+
+-   If temperature data is entirely missing, we use the **zoo** package to interpolate the mean temperature using moving averages over progressively larger windows: 7 days → 15 days → 30 days.
+
+**Rainfall Data:**
+
+-   If the daily total rainfall is **0** and the highest recorded rainfall is missing, we assume the missing values are also **0**.
+
+-   If the daily total rainfall itself is missing, we apply the same moving average interpolation method as for temperature data.
+
+**Wind Speed Data:**
+
+-   If wind speed data is missing, we interpolate it using the **zoo** package with moving averages over progressively expanding windows: 7 days → 15 days → 30 days → 45 days → 60 days.
+
+-   At stations with continuous missing values exceeding 30 days (Jurong West, Tai Seng, and Clementi), the moving average window is extended to 60 days to improve accuracy.
+
+```{r}
+#| echo: false
+station_filtered_c <- station %>%
+  filter(is.na(mean_temperature_c))
+
+station_filtered_c %>%
+  DT::datatable(class = "display",
+                caption = "Table: Missing Values in Temp_c") %>%
+  formatStyle(
+    columns = colnames(station_filtered_c),
+    fontSize = '12px',
+    fontFamily = 'Helvetica',
+    lineHeight = '1.2'
+  )
+```
+
+```{r}
+# Step 1: Interpolate mean temperature using min and max temp
+station <- station %>%
+  mutate(mean_temperature_c = ifelse(
+    is.na(mean_temperature_c) & !is.na(minimum_temperature_c) & !is.na(maximum_temperature_c),
+    round((minimum_temperature_c + maximum_temperature_c) / 2, 2),
+    mean_temperature_c
+  ))
+
+# Step 2: Define funtion for rolling mean for remaining missing values
+fill_missing_with_rollapply <- function(x, window_sizes) {
+  for (w in window_sizes) {
+    missing_idx <- which(is.na(x))
+    if (length(missing_idx) == 0) break  # Stop if no missing values remain
+    
+    roll_values <- rollapply(x, width = w, FUN = mean, fill = NA, align = "center", na.rm = TRUE)
+    x[missing_idx] <- ifelse(is.na(x[missing_idx]), round(roll_values[missing_idx],2), x[missing_idx])
+  }
+  return(x)
+}
+# Apply rolling mean imputation with increasing window sizes
+window_sizes <- c(7, 15, 30, 45, 60)
+station$mean_temperature_c <- fill_missing_with_rollapply(station$mean_temperature_c, window_sizes)
+station$minimum_temperature_c <- fill_missing_with_rollapply(station$minimum_temperature_c, window_sizes)
+station$maximum_temperature_c <- fill_missing_with_rollapply(station$maximum_temperature_c, window_sizes)
+station$mean_wind_speed_km_h <- fill_missing_with_rollapply(station$mean_wind_speed_km_h, window_sizes)
+station$max_wind_speed_km_h <- fill_missing_with_rollapply(station$max_wind_speed_km_h, window_sizes)
+station$daily_rainfall_total_mm <- fill_missing_with_rollapply(station$daily_rainfall_total_mm, window_sizes)
+```
+
+```{r}
+# Input 0 for missing highest rain fall
+station <- station %>%
+  mutate(
+    highest_30_min_rainfall_mm = ifelse(daily_rainfall_total_mm == 0 & is.na(highest_30_min_rainfall_mm), 0, highest_30_min_rainfall_mm),
+    highest_60_min_rainfall_mm = ifelse(daily_rainfall_total_mm == 0 & is.na(highest_60_min_rainfall_mm), 0, highest_60_min_rainfall_mm),
+    highest_120_min_rainfall_mm = ifelse(daily_rainfall_total_mm == 0 & is.na(highest_120_min_rainfall_mm), 0, highest_120_min_rainfall_mm))
+
+station <- station %>%
+  select(-c(highest_30_min_rainfall_mm, highest_60_min_rainfall_mm, highest_120_min_rainfall_mm))
+
+```
+
+After interpolation, there are no missing values now:
+
+```{r}
+kable(data.frame(Column = names(station), NAs = colSums(is.na(station))))
+
+```
+
+## 3.5 Rename the Column
+
+```{r}
+station <- station %>%
+  rename(`Mean Temperature` = mean_temperature_c,
+         `Min Temperature`= minimum_temperature_c,
+         `Max Temperature`= maximum_temperature_c,
+         `Rainfall` = daily_rainfall_total_mm,
+         `Mean Wind Speed` = mean_wind_speed_km_h,
+         `Max Wind Speed` = max_wind_speed_km_h)
+  
+```
+
+## 3.6 Generate weekly and monthly data
+
+In the Shiny app, we will provide three time resolutions: **daily, weekly, and monthly**.
+
+To aggregate data at the weekly and monthly levels, we will use the **`group_by`** and **`summarise`** functions to compute relevant summaries for each time period:
+
+-   Monthly data
+
+    ```{r}
+    monthly <- station %>%
+      group_by(station,year,month) %>%
+      summarise(
+        `Mean Temperature` = round(mean(`Mean Temperature`, na.rm = TRUE), 1),
+        `Min Temperature` = min(`Min Temperature`, na.rm = TRUE),
+        `Max Temperature` = max(`Max Temperature`, na.rm = TRUE),
+        `Rainfall` = round(sum(`Rainfall`, na.rm = TRUE),1),
+        `Mean Wind Speed` = round(mean(`Mean Wind Speed`, na.rm=TRUE),1),
+        `Max Wind Speed` = max(`Max Wind Speed`, na.rm = TRUE),
+        .groups = "drop"
+      )
+
+    monthly <- monthly %>%
+      mutate(date = ymd(paste(year, month, 1, sep = "-")),
+             `Max Wind Speed` = ifelse(`Max Wind Speed` == -Inf, NA, `Max Wind Speed`))
+    ```
+
+-   Weekly data
+
+    ```{r}
+    weekly <- station %>%
+      group_by(station,year,month,Week_no) %>%
+      summarise(
+        `Mean Temperature` = round(mean(`Mean Temperature`, na.rm = TRUE), 1),
+        `Min Temperature` = min(`Min Temperature`, na.rm = TRUE),
+        `Max Temperature` = max(`Max Temperature`, na.rm = TRUE),
+        `Rainfall` = round(sum(`Rainfall`, na.rm = TRUE),1),
+        `Mean Wind Speed` = round(mean(`Mean Wind Speed`, na.rm=TRUE),1),
+        `Max Wind Speed` = max(`Max Wind Speed`, na.rm = TRUE),
+        .groups = "drop"
+      )
+
+    weekly <- weekly %>%
+      mutate(date = as.Date(paste(year, Week_no, 1), format = "%Y %U %u"),
+             `Max Wind Speed` = ifelse(`Max Wind Speed` == -Inf, NA, `Max Wind Speed`))
+    ```
+
+## 3.7 Save the files as RDS
+
+```{r}
+saveRDS(station, "data/station_daily_data.rds")
+saveRDS(weekly, "data/station_weekly_data.rds")
+saveRDS(monthly, "data/station_monthly_data.rds")
+```
+
+# 4 Final Data Structure
+
+::: panel-tabset
+## Daily Data
+
+```{r}
+str(station)
+DT::datatable(station)
+```
+
+## Weekly Data
+
+```{r}
+str(weekly)
+DT::datatable(weekly)
+```
+
+## Monthly Data
+
+```{r}
+str(monthly)
+DT::datatable(monthly)
+```
+:::

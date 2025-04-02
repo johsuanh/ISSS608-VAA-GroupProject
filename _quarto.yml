@@ -14,13 +14,15 @@ website:
       - href: about.qmd
         text: About
       - text: "Project Poster"
-        #href: Overview/Overview.html
+        href: Overview/Overview.html
       - text: "Shiny App"
         menu:
           - text: "ShinyApp"
             href: https://johsuanh.shinyapps.io/WeatherOrNot/
           - text: "User Guide"
             #href: ShinyApp/User_Guide.html
+          - text: "Data Preperation"
+            href: ShinyApp/Data_Preparation.html
       - text: "Team"
         menu:
           - text: "Project Proporsal"

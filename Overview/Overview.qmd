@@ -1,4 +1,6 @@
 ---
 title: "Overview of the Project"
-format: html
+format:
+  html:
+    css: Overview.css
 ---

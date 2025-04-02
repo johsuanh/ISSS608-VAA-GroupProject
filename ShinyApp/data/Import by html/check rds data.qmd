@@ -12,8 +12,10 @@ getwd()
 ```
 
 ```{r}
+#| eval: false
+#| include: false
 
-df <- readRDS("/Users/geloliu/Gelo-608/ISSS608-VAA-GroupProject/ShinyApp/WeatherOrNot/www/station_data.rds")
+df <- readRDS("ShinyApp/WeatherOrNot/www/station_data.rds")
 
 # 查看结构
 str(df)

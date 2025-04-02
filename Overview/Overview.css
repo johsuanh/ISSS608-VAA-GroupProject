@@ -1,0 +1,22 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    padding-top: 150px; /* Add padding to body equal to navbar height */
+    background-image: url('images/Poster_web.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-attachment: scroll; /* Make it scroll with the page */
+    background-position: top center 100px;
+}
+
+h1.title {
+    display: none;
+}
+
+.content {
+    min-height: calc(100vh - 150px); /* Full height minus navbar */
+}
