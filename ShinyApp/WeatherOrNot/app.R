@@ -1529,18 +1529,18 @@ ModelTab <- fluidRow(
   column(width = 9,
     fluidRow(
       # Step 2-1: Model Fitting and Forecasting
-      column(width = 6,
+      column(width = 12,
         box(width = 12,
           title = "Step 2-1: Model Fitting and Forecasting",
           status = "primary",
           solidHeader = TRUE,
-          withSpinner(plotOutput("forecast_plot_final", height = "400px"),
+          withSpinner(plotOutput("forecast_plot_final", height = "300px"),
                      type = 8,
                      color = "#8AA4FF")
         )
       ),
       # Parameters table
-      column(width = 6,
+      column(width = 12,
         box(width = 12,
           title = "Table: Parameters of the Selected Forecasting Models",
           status = "primary",
@@ -3256,7 +3256,7 @@ output$kriging_map <- renderPlot({
         output$model_parameters_table <- renderDT({
           datatable(parameters,
                     options = list(
-                      scrollY = "400px",
+                      scrollY = "280px",
                       scrollCollapse = TRUE,
                       paging = FALSE,
                       searching = TRUE,
