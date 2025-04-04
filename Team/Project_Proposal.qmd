@@ -64,19 +64,16 @@ The following visualization methods will be used in our exploratory data analysi
 
 -   **Isohyet Map:** Visualize weather patterns using the **`tmap`** and **`gstat`** packages to create an Isohyet map through spatial interpolation. This tab allows users to apply two interpolation methods (IDW and Ordinary Kriging) to generate the map.
 
-## 4.2 **Time Series Analysis**  
+## 4.2 Time Series Analysis  
 
 This section allows users to analyze weather data through **STL decomposition** and **correlograms**, helping them gain deeper insights into underlying patterns and structures in the data.
 
-### **Time Series Decomposition:** 
+### Time Series Decomposition
 
 -   **STL Decomposition**: Separates the time series into seasonal, trend, and remainder components.
-
-<!-- -->
-
 -   **Cycle Plot**: Highlights recurring seasonal patterns across different periods.
 
-### **Correlograms:** 
+### Correlograms
 
 -   **ACF (Autocorrelation Function)**:\
     Measures the correlation between the time series and its own lagged values. It helps identify the presence of repeating patterns or seasonality and can indicate whether differencing is needed to achieve stationarity.
@@ -120,7 +117,7 @@ After reviewing model training performance, users can select their preferred mod
 The R packages we will be using for the project include:
 
 | Package | Description |
-|--------------------|--------------------------------------------------------|
+|--------------------|----------------------------------------------------|
 | [tidyverse](https://www.tidyverse.org/) | For data manipulation |
 | [zoo](https://cran.r-project.org/web/packages/zoo/index.html) | For time series analysis and manipulation |
 | [janitor](https://sfirke.github.io/janitor/) | For examining and cleaning dirty data |
@@ -141,7 +138,7 @@ The R packages we will be using for the project include:
 
 # 6 Dashboard Prototype
 
-## **6-1 EDA Prototype:**
+## 6-1 EDA Prototype:
 
 ::: panel-tabset
 ## Line Chart
@@ -161,7 +158,7 @@ The R packages we will be using for the project include:
 ![](prototype/7.png)
 :::
 
-## **6-2 Time Series Analysis Prototype:**
+## 6-2 Time Series Analysis Prototype:
 
 ::: panel-tabset
 ## Time Series Decomposition
@@ -173,7 +170,7 @@ The R packages we will be using for the project include:
 ![](prototype/9.png)
 :::
 
-## 6-3 **Univariate Forecasting Prototype:**
+## 6-3 Univariate Forecasting Prototype:
 
 ::: panel-tabset
 ## Model Training
