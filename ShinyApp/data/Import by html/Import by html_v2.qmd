@@ -3,6 +3,8 @@ title: "import data"
 ---
 
 ```{r}
+#| eval: false
+#| include: false
 pacman::p_load(rvest,dplyr,stringr,purrr,readr,httr,tidyr,fs,janitor,tidyverse,knitr)
 
 ```
@@ -84,6 +86,8 @@ if (nrow(failed_downloads) > 0) {
 ```
 
 ```{r}
+#| eval: false
+#| include: false
 # Set the data folder path
 data_folder <- "data"
 
@@ -144,6 +148,8 @@ print(summary_table)
 ```
 
 ```{r}
+#| eval: false
+#| include: false
 pacman::p_load(tidyverse,fs,janitor,knitr)
 
 files <- fs::dir_ls("data/") 
