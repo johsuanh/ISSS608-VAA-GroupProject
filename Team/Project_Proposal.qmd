@@ -117,7 +117,7 @@ After reviewing model training performance, users can select their preferred mod
 The R packages we will be using for the project include:
 
 | Package | Description |
-|--------------------|----------------------------------------------------|
+|----|----|
 | [tidyverse](https://www.tidyverse.org/) | For data manipulation |
 | [zoo](https://cran.r-project.org/web/packages/zoo/index.html) | For time series analysis and manipulation |
 | [janitor](https://sfirke.github.io/janitor/) | For examining and cleaning dirty data |
