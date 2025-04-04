@@ -660,8 +660,8 @@ sidebar <- dashboardSidebar(
     ),
     
     # Time Series Analysis Section
-    menuItem("Time-Series Analysis", tabName = "Time", icon = icon("calendar-check"),
-      menuSubItem("Time-Series Decomposition", tabName = "Decomposition"),
+    menuItem("Time Series Analysis", tabName = "Time", icon = icon("calendar-check"),
+      menuSubItem("Time Series Decomposition", tabName = "Decomposition"),
       menuSubItem("Correlograms", tabName = "Correlogram")
       ),
     
@@ -788,6 +788,19 @@ homeTab <- fluidRow(
 # EDA Components
 LineChartTab <- fluidRow(
   column(width = 3,
+         box(width = 12,
+             title = "About Monsoon",
+             status = "info",
+             height = "auto",
+             collapsible = TRUE,
+             collapsed = TRUE,
+             p("Singapore’s tropical climate is shaped by two main monsoon seasons and two inter-monsoonal periods, each bringing distinct weather patterns."),
+             tags$ul(
+               tags$li(strong("Northeast Monsoon(Dec–early Mar):"), "Dominated by north or northeast winds. The early phase (Dec – early Jan) is the wettest, often with monsoon surges causing prolonged rain, strong winds, and cooler temperatures. This is followed by a drier phase (Feb – early Mar)."),
+               tags$li(strong("Southwest Monsoon(Jun–Sep):"), "Characterized by winds originating from the southwest over the Indian Ocean, this season is generally drier and more stable, with less variation in rainfall."),
+               tags$li(strong("Inter-monsoonal Periods (Apr – May, Oct – Nov):"), "These transitional periods feature light, variable winds and frequent thunderstorms, especially in the afternoon and early evening.")
+             )
+         ),
          box(width = 12, title = "Data Selection", status = "info",
              selectInput("variable_ts", "Select Variable:", 
                          choices = c("Mean Temperature", "Min Temperature", "Max Temperature", 
@@ -1430,12 +1443,12 @@ TrainingTab <- fluidRow(
                     format = "yyyy-mm-dd"),
       selectInput("models_train", "Select Models:",
                         choices = c(
-                          "ETS(AAA)" = "ETS_AAA",
-                          "ETS(MAM)" = "ETS_MAM",
-                          "ETS(MMM)" = "ETS_MMM",
-                          "ETS(AAN)" = "ETS_AAN",
-                          "ETS(MMN)" = "ETS_MMN",
-                          "ETS(ANN)" = "ETS_ANN",
+                          "ETS-ANN: Simple Exponential Smoothing" = "ETS_ANN",
+                          "ETS-AAN: Holt’s Linear Trend" = "ETS_AAN",
+                          "ETS-AAA: Holt-Winters Additive" = "ETS_AAA",
+                          "ETS-MMM: Holt-Winters Multiplicative" = "ETS_MMM",
+                          "ETS-MAM: Multiplicative Holt-Winters with Additive Trend" = "ETS_MAM",
+                          "ETS-MMN: Multiplicative Trend Exponential Smoothing" = "ETS_MMN",
                           "Auto ETS" = "Auto_ETS",
                           "Auto ARIMA" = "Auto_ARIMA"
                         ),
@@ -1507,12 +1520,12 @@ ModelTab <- fluidRow(
                   step = 1),
       selectInput("models_model", "Select Models:",
                         choices = c(
-                          "ETS(AAA)" = "ETS_AAA",
-                          "ETS(MAM)" = "ETS_MAM",
-                          "ETS(MMM)" = "ETS_MMM",
-                          "ETS(AAN)" = "ETS_AAN",
-                          "ETS(MMN)" = "ETS_MMN",
-                          "ETS(ANN)" = "ETS_ANN",
+                          "ETS-ANN: Simple Exponential Smoothing" = "ETS_ANN",
+                          "ETS-AAN: Holt’s Linear Trend" = "ETS_AAN",
+                          "ETS-AAA: Holt-Winters Additive" = "ETS_AAA",
+                          "ETS-MMM: Holt-Winters Multiplicative" = "ETS_MMM",
+                          "ETS-MAM: Multiplicative Holt-Winters with Additive Trend" = "ETS_MAM",
+                          "ETS-MMN: Multiplicative Trend Exponential Smoothing" = "ETS_MMN",
                           "Auto ETS" = "Auto_ETS",
                           "Auto ARIMA" = "Auto_ARIMA"
                         ),
@@ -1528,10 +1541,10 @@ ModelTab <- fluidRow(
   # Right column - Results
   column(width = 9,
     fluidRow(
-      # Step 2-1: Model Fitting and Forecasting
+      # Step 2: Model Fitting and Forecasting
       column(width = 12,
         box(width = 12,
-          title = "Step 2-1: Model Fitting and Forecasting",
+          title = "Step 2: Model Fitting and Forecasting",
           status = "primary",
           solidHeader = TRUE,
           withSpinner(plotOutput("forecast_plot_final", height = "300px"),
@@ -1582,7 +1595,7 @@ body <- dashboardBody(
     tabItem(tabName = "Geofacet", GeofacetTab),
     tabItem(tabName = "Isohyet", IsohyetmapTab),
     
-    # Time-Series Tab
+    # Time Series Tab
     tabItem(tabName = "Decomposition", DecompositionTab),
     tabItem(tabName = "Correlogram", CorrelogramTab),
 
@@ -1607,11 +1620,6 @@ ui <- dashboardPage(
 
 # Define server
 server <- function(input, output) {
-  # Print structure of daily_station for debugging
-  print("Structure of daily_station:")
-  print(str(daily_station))
-  print("Column names of daily_station:")
-  print(colnames(daily_station))
   
   date_min <- min(daily_station$date, na.rm = TRUE)
   date_max <- max(daily_station$date, na.rm = TRUE)
@@ -1681,7 +1689,7 @@ server <- function(input, output) {
         TRUE ~ date
       )) %>%
       group_by(station, period) %>%
-      summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+      summarise(value = round(mean(value, na.rm = TRUE), 3), .groups = "drop") %>%
       rename(date = period) %>%
       mutate(date = as.Date(date))
     
@@ -2223,13 +2231,14 @@ output$station_map <- renderPlot({
             size = 0.8, 
             alpha = 0.9, 
             title = legend_text)+
+    tm_text("station", size = 0.6, just = "top", ymod = 1) +
     tm_layout(
             frame = FALSE,
             legend.frame = FALSE,
             legend.outside = TRUE,
             legend.outside.position = "right",
-            legend.text.size = 0.6,  
-            legend.title.size = 0.7)
+            legend.text.size = 0.5,  
+            legend.title.size = 0.6)
 })
 
 # Step 2: IDW Map

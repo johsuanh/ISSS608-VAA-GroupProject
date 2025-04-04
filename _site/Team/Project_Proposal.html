@@ -40,7 +40,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-9e1f2a4632985dffc2c80318c992baf5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-4cdf4b21fb62c59fdcbc677daa08dd74.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-31c503fc5cd0018d3a3ac97232e50f67.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -154,11 +154,24 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">4 Methodology</a>
   <ul class="collapse">
   <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">4.1 Exploratory Data Analysis</a></li>
-  <li><a href="#co-variation-analysis" id="toc-co-variation-analysis" class="nav-link" data-scroll-target="#co-variation-analysis">4.2 Co-variation Analysis</a></li>
-  <li><a href="#forecasting" id="toc-forecasting" class="nav-link" data-scroll-target="#forecasting">4.3 Forecasting</a></li>
+  <li><a href="#time-series-analysis" id="toc-time-series-analysis" class="nav-link" data-scroll-target="#time-series-analysis">4.2 <strong>Time Series Analysis</strong> &nbsp;</a>
+  <ul class="collapse">
+  <li><a href="#time-series-decomposition" id="toc-time-series-decomposition" class="nav-link" data-scroll-target="#time-series-decomposition"><strong>Time Series Decomposition:</strong></a></li>
+  <li><a href="#correlograms" id="toc-correlograms" class="nav-link" data-scroll-target="#correlograms"><strong>Correlograms:</strong></a></li>
+  </ul></li>
+  <li><a href="#univariate-forecasting" id="toc-univariate-forecasting" class="nav-link" data-scroll-target="#univariate-forecasting">4.3 Univariate Forecasting</a>
+  <ul class="collapse">
+  <li><a href="#model-training" id="toc-model-training" class="nav-link" data-scroll-target="#model-training">Model Training</a></li>
+  <li><a href="#model-forecasting" id="toc-model-forecasting" class="nav-link" data-scroll-target="#model-forecasting">Model Forecasting</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#r-packages" id="toc-r-packages" class="nav-link" data-scroll-target="#r-packages">5 R Packages</a></li>
-  <li><a href="#dashboard-prototype" id="toc-dashboard-prototype" class="nav-link" data-scroll-target="#dashboard-prototype">6 Dashboard Prototype</a></li>
+  <li><a href="#dashboard-prototype" id="toc-dashboard-prototype" class="nav-link" data-scroll-target="#dashboard-prototype">6 Dashboard Prototype</a>
+  <ul class="collapse">
+  <li><a href="#eda-prototype" id="toc-eda-prototype" class="nav-link" data-scroll-target="#eda-prototype"><strong>6-1 EDA Prototype:</strong></a></li>
+  <li><a href="#time-series-analysis-prototype" id="toc-time-series-analysis-prototype" class="nav-link" data-scroll-target="#time-series-analysis-prototype"><strong>6-2 Time Series Analysis Prototype:</strong></a></li>
+  <li><a href="#univariate-forecasting-prototype" id="toc-univariate-forecasting-prototype" class="nav-link" data-scroll-target="#univariate-forecasting-prototype">6-3 <strong>Univariate Forecasting Prototype:</strong></a></li>
+  </ul></li>
   <li><a href="#task-allocation" id="toc-task-allocation" class="nav-link" data-scroll-target="#task-allocation">7 Task allocation</a></li>
   <li><a href="#project-schedule" id="toc-project-schedule" class="nav-link" data-scroll-target="#project-schedule">8 Project Schedule</a></li>
   <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">9 Reference</a></li>
@@ -188,7 +201,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">March 22, 2025</p>
+      <p class="date-modified">April 4, 2025</p>
     </div>
   </div>
     
@@ -201,21 +214,21 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="motivation" class="level1">
 <h1>1 Motivation</h1>
-<p>Climate change poses significant challenges for Singapore’s urban environment and infrastructure. As a densely populated tropical country, Singapore faces particular vulnerability to rising temperatures, extreme rainfall, and changing weather patterns. These climate-related risks affect not just daily life, but also impact urban planning, public health, and economic activities.</p>
-<p>To address this challenge, our team will develop an interactive analytics dashboard using R Shiny App to transform complex weather data into actionable insights. Through analysis of historical and real-time data from 10 AWS stations across Singapore, we aim to create a platform that helps the public better understand and respond to Singapore’s changing climate conditions through intuitive visualizations and forecasting models.</p>
+<p>In recent years, the increasing frequency of extreme weather events worldwide has raised concerns about similar trends emerging in Singapore. As a densely populated tropical city-state, Singapore may be particularly vulnerable to shifts in temperature, rainfall intensity, and other climate related changes.</p>
+<p>To investigate these patterns, we are developing an interactive R Shiny dashboard that enables exploratory data analysis (EDA) and forecasting based on historical weather data from 9 AWS stations across Singapore. Through intuitive visualizations and modeling, the Shiny App dashborard empowers users to explore local weather trends and gain insights into Singapore’s evolving climate.</p>
 </section>
 <section id="objective" class="level1">
 <h1>⁠2 Objective</h1>
 <p>The objectives of this proposal are to:</p>
 <ul>
-<li><p>Create an interactive dashboard that transforms complex weather data into accessible insights for public understanding</p></li>
-<li><p>Implement comparative analysis tools to evaluate weather patterns across 10 AWS stations, featuring multiple temporal resolutions and visualization techniques</p></li>
-<li><p>Design and integrate multi-horizon forecasting models (daily/weekly/monthly) to predict weather trends</p></li>
+<li><p>Implement EDA tools to observe weather patterns across 9 AWS stations, featuring multiple temporal resolutions and visualization techniques</p></li>
+<li><p>Design and integrate time-series analysis and forecasting models&nbsp; to predict weather trends</p></li>
+<li><p>Develop an interactive dashboard that simplifies complex weather data for public exploration and understanding</p></li>
 </ul>
 </section>
 <section id="data" class="level1">
 <h1>3 Data</h1>
-<p>The <a href="https://www.weather.gov.sg/climate-historical-daily/">historical weather data</a> from Meteorological Service Singapore will be used for analysis. We will collect data from the following 10 AWS stations across Singapore between January 2020 and January 2025:</p>
+<p>The <a href="https://www.weather.gov.sg/climate-historical-daily/">historical weather data</a> from Meteorological Service Singapore will be used for analysis. We will collect data from the following 9 AWS stations across Singapore between January 2019 and January 2025:</p>
 <table class="caption-top table">
 <tbody>
 <tr class="odd">
@@ -234,41 +247,36 @@ ul.task-list li input[type="checkbox"] {
 <td>East Region</td>
 </tr>
 <tr class="even">
-<td>Marina Barrage</td>
-<td>Marina South</td>
+<td>Newton</td>
+<td>Newton</td>
 <td>Central Region</td>
 </tr>
 <tr class="odd">
-<td>Newton</td>
-<td>Newton</td>
-<td>Central Region</td>
-</tr>
-<tr class="even">
 <td>Tai Seng</td>
 <td>Geylang</td>
 <td>North-East Region</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Ang Mo Kio</td>
 <td>Ang Mo Kio</td>
 <td>North-East Region</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Admiralty</td>
 <td>Woodlands</td>
 <td>North Region</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Pasir Panjang</td>
 <td>Queenstown</td>
 <td>West Region</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Clementi</td>
 <td>Clementi</td>
 <td>West Region</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Jurong West</td>
 <td>Jurong West</td>
 <td>West Region</td>
@@ -281,56 +289,66 @@ ul.task-list li input[type="checkbox"] {
 <p>There will be three main components in our Shiny App:&nbsp;</p>
 <section id="exploratory-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="exploratory-data-analysis">4.1 Exploratory Data Analysis</h2>
-<p>Through an interactive Shiny App visualization, users can analyze patterns and explore relationships between temporal data, rainfall, temperature, wind speed, and geographical features.</p>
+<p>Through an interactive Shiny App visualization, users can analyze weather patterns and explore relationships between weather factors and geographical features.</p>
 <p>The following visualization methods will be used in our exploratory data analysis:</p>
-<section id="time-series-analysis" class="level4">
-<h4 class="anchored" data-anchor-id="time-series-analysis"><strong>Time Series Analysis</strong> &nbsp;</h4>
 <ul>
 <li><p><strong>Line Chart:</strong>&nbsp;Visualize daily, weekly, and monthly weather trends by station over time.</p>
 <ul>
-<li><strong>Seasonal Monsoon Patterns:</strong> Highlight monsoon periods Northeast Monsoon (Dec–Mar), Southwest Monsoon (Jun–Sep) and Inter-monsoon (Apr–May, Oct–Nov) with different color, letting user observe weather differences across stations.</li>
+<li><strong>Seasonal Monsoon Patterns:</strong> Highlight the Northeast Monsoon (Dec–Mar) and Southwest Monsoon (Jun–Sep) periods using distinct colors, allowing users to observe seasonal weather differences influenced by the monsoons.</li>
 </ul></li>
-<li><p><strong>Ridge Plot:</strong>&nbsp;Show the distribution of daily, weekly, and monthly weather variations by station.</p></li>
-<li><p><strong>Geofacet:</strong>&nbsp;Display weather data with station layouts reflecting their geographical positions. Use faceted line charts (for temperature) and histograms (for rainfall) to highlight seasonal variations.</p></li>
+<li><p><strong>Ridge Plot + Box Plot:</strong>&nbsp;Show the distribution of monthly weather variations by station. The users can observe weather difference of stations and cross stations directly.</p></li>
+<li><p><strong>Geofacet:</strong>&nbsp;Display a line chart of weather data based on station coordinates, allowing users to observe how different locations may influence weather patterns.</p></li>
+</ul>
+<!-- -->
+<ul>
+<li><strong>Isohyet Map:</strong> Visualize weather patterns using the <strong><code>tmap</code></strong> and <strong><code>gstat</code></strong> packages to create an Isohyet map through spatial interpolation. This tab allows users to apply two interpolation methods (IDW and Ordinary Kriging) to generate the map.</li>
 </ul>
 </section>
-<section id="geospatial-analysis" class="level4">
-<h4 class="anchored" data-anchor-id="geospatial-analysis"><strong>Geospatial Analysis</strong></h4>
+<section id="time-series-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="time-series-analysis">4.2 <strong>Time Series Analysis</strong> &nbsp;</h2>
+<p>This section allows users to analyze weather data through <strong>STL decomposition</strong> and <strong>correlograms</strong>, helping them gain deeper insights into underlying patterns and structures in the data.</p>
+<section id="time-series-decomposition" class="level3">
+<h3 class="anchored" data-anchor-id="time-series-decomposition"><strong>Time Series Decomposition:</strong></h3>
 <ul>
-<li><strong>Isohyet Map:</strong>&nbsp;Visualize weather patterns using <code>tmap</code> with spatial interpolation.</li>
+<li><strong>STL Decomposition</strong>: Separates the time series into seasonal, trend, and remainder components.</li>
+</ul>
+<!-- -->
+<ul>
+<li><strong>Cycle Plot</strong>: Highlights recurring seasonal patterns across different periods.</li>
+</ul>
+</section>
+<section id="correlograms" class="level3">
+<h3 class="anchored" data-anchor-id="correlograms"><strong>Correlograms:</strong></h3>
+<ul>
+<li><p><strong>ACF (Autocorrelation Function)</strong>:<br>
+Measures the correlation between the time series and its own lagged values. It helps identify the presence of repeating patterns or seasonality and can indicate whether differencing is needed to achieve stationarity.</p></li>
+<li><p><strong>PACF (Partial Autocorrelation Function)</strong>:<br>
+Shows the correlation between the time series and its lagged values after removing the effects of shorter lags. It is especially useful for determining the appropriate number of lags in autoregressive (AR) models.</p></li>
+<li><p><strong>Differencing Analysis</strong>:<br>
+Includes both&nbsp;<strong>trend differencing</strong>&nbsp;(removing long-term trends) and&nbsp;<strong>seasonal differencing</strong>&nbsp;(removing seasonal effects) to help transform the time series into a stationary format, which is often required for effective forecasting using models like ARIMA.</p></li>
 </ul>
 </section>
 </section>
-<section id="co-variation-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="co-variation-analysis">4.2 Co-variation Analysis</h2>
-<p>After EDA, user can apply the following&nbsp;statistical tests&nbsp;to confirm whether rainfall, wind speed and temperature exhibit correlation with each other:</p>
+<section id="univariate-forecasting" class="level2">
+<h2 class="anchored" data-anchor-id="univariate-forecasting">4.3 Univariate Forecasting</h2>
+<p>This section allows users to select a variable of interest for time series forecasting. We provide a variety of models, including:</p>
 <ul>
-<li><p><strong>Cross-Correlation Function:</strong> Measures how two time series are correlated at different time lags. Helps identify lead-lag relationships, like “does a drop in temperature precede heavy rainfall?”</p></li>
-<li><p><strong>Cointegration Analysis:</strong> Tests if two time series move together in the long run despite short-term fluctuations, using the <code>urca</code> package.</p></li>
+<li><p><strong>ETS-ANN</strong>: Simple Exponential Smoothing</p></li>
+<li><p><strong>ETS-AAN</strong>: Holt’s Linear Trend</p></li>
+<li><p><strong>ETS-AAA</strong>: Holt-Winters Additive</p></li>
+<li><p><strong>ETS-MMM</strong>: Holt-Winters Multiplicative</p></li>
+<li><p><strong>ETS-MAM</strong>: Multiplicative Holt-Winters with Additive Trend</p></li>
+<li><p><strong>ETS-MMN</strong>: Multiplicative Trend Exponential Smoothing</p></li>
+<li><p><strong>Auto ARIMA</strong></p></li>
+<li><p><strong>Auto ETS</strong></p></li>
 </ul>
+<section id="model-training" class="level3">
+<h3 class="anchored" data-anchor-id="model-training">Model Training</h3>
+<p>The train-test split is set at 80% vs 20%. This tab allows users to select, train, test, and evaluate models using metrics such as AIC, BIC, and RMSE. Residual plots are also provided to help assess model performance and adequacy.</p>
 </section>
-<section id="forecasting" class="level2">
-<h2 class="anchored" data-anchor-id="forecasting">4.3 Forecasting</h2>
-<section id="plots" class="level4">
-<h4 class="anchored" data-anchor-id="plots"><strong>Plots</strong></h4>
-<ul>
-<li><strong>ACF &amp; PCF plots :</strong> help users understand the autocorrelation in time series data and identify which lags might be useful for forecasting model.&nbsp;</li>
-<li><strong>STL&nbsp;plots:</strong> help decompose the time series into its&nbsp;seasonal,&nbsp;trend, and&nbsp;remainder&nbsp;components, providing insight into the structure of the data.&nbsp;</li>
-</ul>
-</section>
-<section id="forecasting-models" class="level4">
-<h4 class="anchored" data-anchor-id="forecasting-models"><strong>Forecasting Models</strong></h4>
-<ul>
-<li><strong>ARIMA Models:</strong> &nbsp;
-<ul>
-<li><strong>Auto ARIMA:</strong> when there is a mix of trend and seasonal patterns with autocorrelation, user can use auto ARIMA, which automatically selects the best parameters (AR, I, MA) based on the data&nbsp;</li>
-<li><strong>STL ARIMA:</strong> when&nbsp;there are complex seasonality&nbsp;or&nbsp;non-linear trends&nbsp;in the data, user can choose this model for weather forecasting</li>
-</ul></li>
-<li><strong>ETS Models:</strong> &nbsp;
-<ul>
-<li><strong>Auto ETS:</strong> user can choose this model if the data shows&nbsp;clear,&nbsp;stable trends&nbsp;or&nbsp;seasonal patterns&nbsp;with little noise &nbsp;</li>
-</ul></li>
-</ul>
+<section id="model-forecasting" class="level3">
+<h3 class="anchored" data-anchor-id="model-forecasting">Model Forecasting</h3>
+<p>After reviewing model training performance, users can select their preferred models for forecasting. The selected models will generate future predictions, and key model parameters will be displayed for reference.</p>
 </section>
 </section>
 </section>
@@ -350,128 +368,158 @@ ul.task-list li input[type="checkbox"] {
 <td>For data manipulation</td>
 </tr>
 <tr class="even">
+<td><a href="https://cran.r-project.org/web/packages/zoo/index.html">zoo</a></td>
+<td>For time series analysis and manipulation</td>
+</tr>
+<tr class="odd">
+<td><a href="https://sfirke.github.io/janitor/">janitor</a></td>
+<td>For examining and cleaning dirty data</td>
+</tr>
+<tr class="even">
+<td><a href="https://www.tidyverse.org/blog/2018/01/fs-1.0.0/">fs</a></td>
+<td>For file system operations</td>
+</tr>
+<tr class="odd">
 <td><a href="https://rstudio.github.io/DT/">DT</a></td>
 <td>For interactive data tables</td>
+</tr>
+<tr class="even">
+<td><a href="https://haozhu233.github.io/kableExtra/">kableExtra</a></td>
+<td>For manipulating table styles</td>
 </tr>
 <tr class="odd">
 <td><a href="https://yihui.org/knitr/">knitr</a></td>
 <td>For dynamic report generation with R</td>
 </tr>
 <tr class="even">
-<td><a href="https://indrajeetpatil.github.io/ggstatsplot/">ggstatplot</a></td>
-<td>To visual correlation matrix and plots with statistical tests</td>
-</tr>
-<tr class="odd">
-<td><a href="https://plotly.com/r/">plotly</a></td>
-<td>For interactive, publication-quality plots</td>
-</tr>
-<tr class="even">
-<td><a href="https://davidgohel.github.io/ggiraph/">ggiraph</a></td>
-<td>For dynamic, interactive ggplot2 graphs.</td>
-</tr>
-<tr class="odd">
-<td><a href="https://scales.r-lib.org/">scales</a></td>
-<td>For data labels and annotations for ggplot2</td>
-</tr>
-<tr class="even">
-<td><a href="https://patchwork.data-imaginist.com/">patchwork</a></td>
-<td>For preparing composite figure created using ggplot2.</td>
-</tr>
-<tr class="odd">
-<td><a href="https://mjskay.github.io/ggdist/">ggdist</a></td>
-<td>For visualisations of distributions and uncertainty.</td>
-</tr>
-<tr class="even">
-<td><a href="https://wilkelab.org/ggtext/">ggtext</a></td>
-<td>Providing simple Markdown and HTML rendering&nbsp;for ggplot2</td>
-</tr>
-<tr class="odd">
 <td><a href="https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html">ggridges</a></td>
 <td>For ridgeline plots that create the impression of a mountain range. They can be useful for visualising changes in distributions over time or space.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="https://lubridate.tidyverse.org">lubridate</a></td>
 <td>For handling date-time data</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="https://tsibble.tidyverts.org">tsibble</a></td>
 <td>For tidy temporal data with wrangling tools</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="https://feasts.tidyverts.org">feasts</a></td>
 <td>For analysing tidy time series data with decomposition methods (STL), statistical summaries and graphics functions(cycle plot)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="https://fable.tidyverts.org">fable</a></td>
 <td>Forecasting models for tidy time series data</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="https://r-tmap.github.io/tmap/reference/index.html">tmap</a></td>
 <td>For drawing thematic maps</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="https://r-spatial.github.io/sf/">sf</a></td>
 <td>Providing a standardized way to encode and analyze spatial vector data</td>
 </tr>
+<tr class="odd">
+<td><a href="https://rspatial.github.io/terra/">terra</a></td>
+<td>For spatial data analysis (replaces the&nbsp;<a href="https://github.com/rspatial/raster"><strong>raster</strong></a>&nbsp;package)</td>
+</tr>
 <tr class="even">
-<td><a href="https://www.pfaffikus.de/rpacks/urca/">urca</a></td>
-<td>For co-integration analysis (Engle-Granger and Johansen tests)</td>
+<td><a href="https://r-spatial.github.io/gstat/">gstat</a></td>
+<td>For spatial and spatio-temporal geostatistical modelling, prediction and simulation</td>
+</tr>
+<tr class="odd">
+<td><a href="https://cran.r-project.org/web/packages/forecast/index.html">forecast</a></td>
+<td>For displaying and analysing univariate time series forecasts</td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="dashboard-prototype" class="level1">
 <h1>6 Dashboard Prototype</h1>
-<p>Below is the Prototype for EDA panel:</p>
+<section id="eda-prototype" class="level2">
+<h2 class="anchored" data-anchor-id="eda-prototype"><strong>6-1 EDA Prototype:</strong></h2>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Bivariate Analysis</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Multivariate Analysis</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">Time Series Analysis</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false">Geospatial Analysis</a></li></ul>
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Line Chart</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Ridge Plot + Box Plot</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">Geofacet</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false">Isohyet Map</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="../images/prototype/prototype.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<p><img src="prototype/2.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../images/prototype/prototype-2.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
-</figure>
-</div>
+<p><img src="prototype/3.png" class="img-fluid"></p>
 </div>
 <div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<p><img src="prototype/5.png" class="img-fluid"></p>
+</div>
+<div id="tabset-1-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-4-tab">
+<p><img src="prototype/7.png" class="img-fluid"></p>
+</div>
+</div>
+</div>
+</section>
+<section id="time-series-analysis-prototype" class="level2">
+<h2 class="anchored" data-anchor-id="time-series-analysis-prototype"><strong>6-2 Time Series Analysis Prototype:</strong></h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Time Series Decomposition</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Corrleograms</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="../images/prototype/prototype-3.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<p><img src="prototype/8.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
 </div>
-<div id="tabset-1-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-4-tab">
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<p><img src="prototype/9.png" class="img-fluid"></p>
+</div>
+</div>
+</div>
+</section>
+<section id="univariate-forecasting-prototype" class="level2">
+<h2 class="anchored" data-anchor-id="univariate-forecasting-prototype">6-3 <strong>Univariate Forecasting Prototype:</strong></h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Model Training</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Model Forecasting</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="../images/prototype/prototype-4.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<p><img src="prototype/10.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="prototype/11.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
 </div>
 </section>
+</section>
 <section id="task-allocation" class="level1">
 <h1>7 Task allocation</h1>
-<p><img src="../images/TaskAllocation.png" class="img-fluid"></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Group_Project.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
 </section>
 <section id="project-schedule" class="level1">
 <h1>8 Project Schedule</h1>
 <div class="cell">
 <div class="cell-output-display">
-<div class="timevis html-widget html-fill-item" id="htmlwidget-e337df339c8a02fa7000" style="width:100%;height:464px;">
+<div class="timevis html-widget html-fill-item" id="htmlwidget-c296a0a00bc2314deef8" style="width:100%;height:464px;">
 <div class="btn-group zoom-menu">
 <button type="button" class="btn btn-default btn-lg zoom-in" title="Zoom in">+</button>
 <button type="button" class="btn btn-default btn-lg zoom-out" title="Zoom out">-</button>
 </div>
 </div>
-<script type="application/json" data-for="htmlwidget-e337df339c8a02fa7000">{"x":{"items":[{"id":"1","content":"Explore Idea","start":"3/1/25","end":"3/3/25"},{"id":"2","content":"Finalize Topic","start":"3/3/25"},{"id":"3","content":"Setup GitHub and Netlify","start":"3/7/25"},{"id":"4","content":"Project Proposal","start":"3/7/25","end":"3/9/25"},{"id":"5","content":"Data Preparation & Exploration ","start":"3/8/25","end":"3/10/25"},{"id":"6","content":"Website Design and Shiny App ","start":"3/11/25","end":"3/26/25"},{"id":"7","content":"User Guide","start":"3/26/25","end":"3/29/25"},{"id":"8","content":"Poster","start":"3/26/25","end":"3/29/25"},{"id":"9","content":"Final Meeting","start":"3/27/25"},{"id":"10","content":"Final Submission","start":"4/6/25"}],"groups":null,"showZoom":true,"zoomFactor":0.5,"fit":true,"options":[],"height":null,"timezone":null,"api":[]},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-c296a0a00bc2314deef8">{"x":{"items":[{"id":"1","content":"Explore Idea","start":"3/1/25","end":"3/3/25"},{"id":"2","content":"Finalize Topic","start":"3/3/25"},{"id":"3","content":"Setup GitHub and Netlify","start":"3/7/25"},{"id":"4","content":"Project Proposal","start":"3/7/25","end":"3/9/25"},{"id":"5","content":"Data Preparation & Exploration ","start":"3/8/25","end":"3/10/25"},{"id":"6","content":"Website Design and Shiny App ","start":"3/11/25","end":"3/26/25"},{"id":"7","content":"User Guide","start":"3/26/25","end":"3/29/25"},{"id":"8","content":"Poster","start":"3/26/25","end":"3/29/25"},{"id":"9","content":"Final Meeting","start":"3/27/25"},{"id":"10","content":"Final Submission","start":"4/6/25"}],"groups":null,"showZoom":true,"zoomFactor":0.5,"fit":true,"options":[],"height":null,"timezone":null,"api":[]},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </section>

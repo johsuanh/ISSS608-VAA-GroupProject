@@ -11,28 +11,49 @@
     "href": "Team/Project_Proposal.html",
     "title": "Project Proposal: Wheather or Not – Predicting the Unpredictable",
     "section": "",
-    "text": "Climate change poses significant challenges for Singapore’s urban environment and infrastructure. As a densely populated tropical country, Singapore faces particular vulnerability to rising temperatures, extreme rainfall, and changing weather patterns. These climate-related risks affect not just daily life, but also impact urban planning, public health, and economic activities.\nTo address this challenge, our team will develop an interactive analytics dashboard using R Shiny App to transform complex weather data into actionable insights. Through analysis of historical and real-time data from 10 AWS stations across Singapore, we aim to create a platform that helps the public better understand and respond to Singapore’s changing climate conditions through intuitive visualizations and forecasting models."
+    "text": "In recent years, the increasing frequency of extreme weather events worldwide has raised concerns about similar trends emerging in Singapore. As a densely populated tropical city-state, Singapore may be particularly vulnerable to shifts in temperature, rainfall intensity, and other climate related changes.\nTo investigate these patterns, we are developing an interactive R Shiny dashboard that enables exploratory data analysis (EDA) and forecasting based on historical weather data from 9 AWS stations across Singapore. Through intuitive visualizations and modeling, the Shiny App dashborard empowers users to explore local weather trends and gain insights into Singapore’s evolving climate."
   },
   {
     "objectID": "Team/Project_Proposal.html#exploratory-data-analysis",
     "href": "Team/Project_Proposal.html#exploratory-data-analysis",
     "title": "Project Proposal: Wheather or Not – Predicting the Unpredictable",
     "section": "4.1 Exploratory Data Analysis",
-    "text": "4.1 Exploratory Data Analysis\nThrough an interactive Shiny App visualization, users can analyze patterns and explore relationships between temporal data, rainfall, temperature, wind speed, and geographical features.\nThe following visualization methods will be used in our exploratory data analysis:\n\nTime Series Analysis  \n\nLine Chart: Visualize daily, weekly, and monthly weather trends by station over time.\n\nSeasonal Monsoon Patterns: Highlight monsoon periods Northeast Monsoon (Dec–Mar), Southwest Monsoon (Jun–Sep) and Inter-monsoon (Apr–May, Oct–Nov) with different color, letting user observe weather differences across stations.\n\nRidge Plot: Show the distribution of daily, weekly, and monthly weather variations by station.\nGeofacet: Display weather data with station layouts reflecting their geographical positions. Use faceted line charts (for temperature) and histograms (for rainfall) to highlight seasonal variations.\n\n\n\nGeospatial Analysis\n\nIsohyet Map: Visualize weather patterns using tmap with spatial interpolation."
+    "text": "4.1 Exploratory Data Analysis\nThrough an interactive Shiny App visualization, users can analyze weather patterns and explore relationships between weather factors and geographical features.\nThe following visualization methods will be used in our exploratory data analysis:\n\nLine Chart: Visualize daily, weekly, and monthly weather trends by station over time.\n\nSeasonal Monsoon Patterns: Highlight the Northeast Monsoon (Dec–Mar) and Southwest Monsoon (Jun–Sep) periods using distinct colors, allowing users to observe seasonal weather differences influenced by the monsoons.\n\nRidge Plot + Box Plot: Show the distribution of monthly weather variations by station. The users can observe weather difference of stations and cross stations directly.\nGeofacet: Display a line chart of weather data based on station coordinates, allowing users to observe how different locations may influence weather patterns.\n\n\n\nIsohyet Map: Visualize weather patterns using the tmap and gstat packages to create an Isohyet map through spatial interpolation. This tab allows users to apply two interpolation methods (IDW and Ordinary Kriging) to generate the map."
   },
   {
-    "objectID": "Team/Project_Proposal.html#co-variation-analysis",
-    "href": "Team/Project_Proposal.html#co-variation-analysis",
+    "objectID": "Team/Project_Proposal.html#time-series-analysis",
+    "href": "Team/Project_Proposal.html#time-series-analysis",
     "title": "Project Proposal: Wheather or Not – Predicting the Unpredictable",
-    "section": "4.2 Co-variation Analysis",
-    "text": "4.2 Co-variation Analysis\nAfter EDA, user can apply the following statistical tests to confirm whether rainfall, wind speed and temperature exhibit correlation with each other:\n\nCross-Correlation Function: Measures how two time series are correlated at different time lags. Helps identify lead-lag relationships, like “does a drop in temperature precede heavy rainfall?”\nCointegration Analysis: Tests if two time series move together in the long run despite short-term fluctuations, using the urca package."
+    "section": "4.2 Time Series Analysis  ",
+    "text": "4.2 Time Series Analysis  \nThis section allows users to analyze weather data through STL decomposition and correlograms, helping them gain deeper insights into underlying patterns and structures in the data.\n\nTime Series Decomposition:\n\nSTL Decomposition: Separates the time series into seasonal, trend, and remainder components.\n\n\n\nCycle Plot: Highlights recurring seasonal patterns across different periods.\n\n\n\nCorrelograms:\n\nACF (Autocorrelation Function):\nMeasures the correlation between the time series and its own lagged values. It helps identify the presence of repeating patterns or seasonality and can indicate whether differencing is needed to achieve stationarity.\nPACF (Partial Autocorrelation Function):\nShows the correlation between the time series and its lagged values after removing the effects of shorter lags. It is especially useful for determining the appropriate number of lags in autoregressive (AR) models.\nDifferencing Analysis:\nIncludes both trend differencing (removing long-term trends) and seasonal differencing (removing seasonal effects) to help transform the time series into a stationary format, which is often required for effective forecasting using models like ARIMA."
   },
   {
-    "objectID": "Team/Project_Proposal.html#forecasting",
-    "href": "Team/Project_Proposal.html#forecasting",
+    "objectID": "Team/Project_Proposal.html#univariate-forecasting",
+    "href": "Team/Project_Proposal.html#univariate-forecasting",
     "title": "Project Proposal: Wheather or Not – Predicting the Unpredictable",
-    "section": "4.3 Forecasting",
-    "text": "4.3 Forecasting\n\nPlots\n\nACF & PCF plots : help users understand the autocorrelation in time series data and identify which lags might be useful for forecasting model. \nSTL plots: help decompose the time series into its seasonal, trend, and remainder components, providing insight into the structure of the data. \n\n\n\nForecasting Models\n\nARIMA Models:  \n\nAuto ARIMA: when there is a mix of trend and seasonal patterns with autocorrelation, user can use auto ARIMA, which automatically selects the best parameters (AR, I, MA) based on the data \nSTL ARIMA: when there are complex seasonality or non-linear trends in the data, user can choose this model for weather forecasting\n\nETS Models:  \n\nAuto ETS: user can choose this model if the data shows clear, stable trends or seasonal patterns with little noise"
+    "section": "4.3 Univariate Forecasting",
+    "text": "4.3 Univariate Forecasting\nThis section allows users to select a variable of interest for time series forecasting. We provide a variety of models, including:\n\nETS-ANN: Simple Exponential Smoothing\nETS-AAN: Holt’s Linear Trend\nETS-AAA: Holt-Winters Additive\nETS-MMM: Holt-Winters Multiplicative\nETS-MAM: Multiplicative Holt-Winters with Additive Trend\nETS-MMN: Multiplicative Trend Exponential Smoothing\nAuto ARIMA\nAuto ETS\n\n\nModel Training\nThe train-test split is set at 80% vs 20%. This tab allows users to select, train, test, and evaluate models using metrics such as AIC, BIC, and RMSE. Residual plots are also provided to help assess model performance and adequacy.\n\n\nModel Forecasting\nAfter reviewing model training performance, users can select their preferred models for forecasting. The selected models will generate future predictions, and key model parameters will be displayed for reference."
+  },
+  {
+    "objectID": "Team/Project_Proposal.html#eda-prototype",
+    "href": "Team/Project_Proposal.html#eda-prototype",
+    "title": "Project Proposal: Wheather or Not – Predicting the Unpredictable",
+    "section": "6-1 EDA Prototype:",
+    "text": "6-1 EDA Prototype:\n\nLine ChartRidge Plot + Box PlotGeofacetIsohyet Map"
+  },
+  {
+    "objectID": "Team/Project_Proposal.html#time-series-analysis-prototype",
+    "href": "Team/Project_Proposal.html#time-series-analysis-prototype",
+    "title": "Project Proposal: Wheather or Not – Predicting the Unpredictable",
+    "section": "6-2 Time Series Analysis Prototype:",
+    "text": "6-2 Time Series Analysis Prototype:\n\nTime Series DecompositionCorrleograms"
+  },
+  {
+    "objectID": "Team/Project_Proposal.html#univariate-forecasting-prototype",
+    "href": "Team/Project_Proposal.html#univariate-forecasting-prototype",
+    "title": "Project Proposal: Wheather or Not – Predicting the Unpredictable",
+    "section": "6-3 Univariate Forecasting Prototype:",
+    "text": "6-3 Univariate Forecasting Prototype:\n\nModel TrainingModel Forecasting"
   },
   {
     "objectID": "ShinyApp/Data_Preparation.html#review-the-data-structure",

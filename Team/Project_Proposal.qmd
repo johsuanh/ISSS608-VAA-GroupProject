@@ -11,30 +11,29 @@ execute:
 
 # 1 Motivation
 
-Climate change poses significant challenges for Singapore's urban environment and infrastructure. As a densely populated tropical country, Singapore faces particular vulnerability to rising temperatures, extreme rainfall, and changing weather patterns. These climate-related risks affect not just daily life, but also impact urban planning, public health, and economic activities.
+In recent years, the increasing frequency of extreme weather events worldwide has raised concerns about similar trends emerging in Singapore. As a densely populated tropical city-state, Singapore may be particularly vulnerable to shifts in temperature, rainfall intensity, and other climate related changes.
 
-To address this challenge, our team will develop an interactive analytics dashboard using R Shiny App to transform complex weather data into actionable insights. Through analysis of historical and real-time data from 10 AWS stations across Singapore, we aim to create a platform that helps the public better understand and respond to Singapore's changing climate conditions through intuitive visualizations and forecasting models.
+To investigate these patterns, we are developing an interactive R Shiny dashboard that enables exploratory data analysis (EDA) and forecasting based on historical weather data from 9 AWS stations across Singapore. Through intuitive visualizations and modeling, the Shiny App dashborard empowers users to explore local weather trends and gain insights into Singapore’s evolving climate.
 
 # ⁠2 Objective
 
 The objectives of this proposal are to:
 
--   Create an interactive dashboard that transforms complex weather data into accessible insights for public understanding
+-   Implement EDA tools to observe weather patterns across 9 AWS stations, featuring multiple temporal resolutions and visualization techniques
 
--   Implement comparative analysis tools to evaluate weather patterns across 10 AWS stations, featuring multiple temporal resolutions and visualization techniques
+-   Design and integrate time-series analysis and forecasting models  to predict weather trends
 
--   Design and integrate multi-horizon forecasting models (daily/weekly/monthly) to predict weather trends
+-   Develop an interactive dashboard that simplifies complex weather data for public exploration and understanding
 
 # 3 Data
 
-The [historical weather data](https://www.weather.gov.sg/climate-historical-daily/) from Meteorological Service Singapore will be used for analysis. We will collect data from the following 10 AWS stations across Singapore between January 2020 and January 2025:
+The [historical weather data](https://www.weather.gov.sg/climate-historical-daily/) from Meteorological Service Singapore will be used for analysis. We will collect data from the following 9 AWS stations across Singapore between January 2019 and January 2025:
 
 |                     |                   |                     |
 |---------------------|-------------------|---------------------|
 | **Weather Station** | **Planning Area** | **Planning Region** |
 | Changi              | Changi            | East Region         |
 | Paya Lebar          | Paya Lebar        | East Region         |
-| Marina Barrage      | Marina South      | Central Region      |
 | Newton              | Newton            | Central Region      |
 | Tai Seng            | Geylang           | North-East Region   |
 | Ang Mo Kio          | Ang Mo Kio        | North-East Region   |
@@ -49,63 +48,86 @@ There will be three main components in our Shiny App: 
 
 ## 4.1 Exploratory Data Analysis
 
-Through an interactive Shiny App visualization, users can analyze patterns and explore relationships between temporal data, rainfall, temperature, wind speed, and geographical features.
+Through an interactive Shiny App visualization, users can analyze weather patterns and explore relationships between weather factors and geographical features.
 
 The following visualization methods will be used in our exploratory data analysis:
 
-#### **Time Series Analysis**  
-
 -   **Line Chart:** Visualize daily, weekly, and monthly weather trends by station over time.
 
-    -   **Seasonal Monsoon Patterns:** Highlight monsoon periods Northeast Monsoon (Dec–Mar), Southwest Monsoon (Jun–Sep) and Inter-monsoon (Apr–May, Oct–Nov) with different color, letting user observe weather differences across stations.
+    -   **Seasonal Monsoon Patterns:** Highlight the Northeast Monsoon (Dec–Mar) and Southwest Monsoon (Jun–Sep) periods using distinct colors, allowing users to observe seasonal weather differences influenced by the monsoons.
 
--   **Ridge Plot:** Show the distribution of daily, weekly, and monthly weather variations by station.
+-   **Ridge Plot + Box Plot:** Show the distribution of monthly weather variations by station. The users can observe weather difference of stations and cross stations directly.
 
--   **Geofacet:** Display weather data with station layouts reflecting their geographical positions. Use faceted line charts (for temperature) and histograms (for rainfall) to highlight seasonal variations.
+-   **Geofacet:** Display a line chart of weather data based on station coordinates, allowing users to observe how different locations may influence weather patterns.
 
-#### **Geospatial Analysis**
+<!-- -->
 
--   **Isohyet Map:** Visualize weather patterns using `tmap` with spatial interpolation.
+-   **Isohyet Map:** Visualize weather patterns using the **`tmap`** and **`gstat`** packages to create an Isohyet map through spatial interpolation. This tab allows users to apply two interpolation methods (IDW and Ordinary Kriging) to generate the map.
 
-## 4.2 Co-variation Analysis
+## 4.2 **Time Series Analysis**  
 
-After EDA, user can apply the following statistical tests to confirm whether rainfall, wind speed and temperature exhibit correlation with each other:
+This section allows users to analyze weather data through **STL decomposition** and **correlograms**, helping them gain deeper insights into underlying patterns and structures in the data.
 
--   **Cross-Correlation Function:** Measures how two time series are correlated at different time lags. Helps identify lead-lag relationships, like "does a drop in temperature precede heavy rainfall?"
+### **Time Series Decomposition:** 
 
--   **Cointegration Analysis:** Tests if two time series move together in the long run despite short-term fluctuations, using the `urca` package.
+-   **STL Decomposition**: Separates the time series into seasonal, trend, and remainder components.
 
-## 4.3 Forecasting
+<!-- -->
 
-#### **Plots**
+-   **Cycle Plot**: Highlights recurring seasonal patterns across different periods.
 
--   **ACF & PCF plots :** help users understand the autocorrelation in time series data and identify which lags might be useful for forecasting model. 
--   **STL plots:** help decompose the time series into its seasonal, trend, and remainder components, providing insight into the structure of the data. 
+### **Correlograms:** 
 
-#### **Forecasting Models**
+-   **ACF (Autocorrelation Function)**:\
+    Measures the correlation between the time series and its own lagged values. It helps identify the presence of repeating patterns or seasonality and can indicate whether differencing is needed to achieve stationarity.
 
--   **ARIMA Models:**  
-    -   **Auto ARIMA:** when there is a mix of trend and seasonal patterns with autocorrelation, user can use auto ARIMA, which automatically selects the best parameters (AR, I, MA) based on the data 
-    -   **STL ARIMA:** when there are complex seasonality or non-linear trends in the data, user can choose this model for weather forecasting
--   **ETS Models:**  
-    -   **Auto ETS:** user can choose this model if the data shows clear, stable trends or seasonal patterns with little noise  
+-   **PACF (Partial Autocorrelation Function)**:\
+    Shows the correlation between the time series and its lagged values after removing the effects of shorter lags. It is especially useful for determining the appropriate number of lags in autoregressive (AR) models.
+
+-   **Differencing Analysis**:\
+    Includes both **trend differencing** (removing long-term trends) and **seasonal differencing** (removing seasonal effects) to help transform the time series into a stationary format, which is often required for effective forecasting using models like ARIMA.
+
+## 4.3 Univariate Forecasting
+
+This section allows users to select a variable of interest for time series forecasting. We provide a variety of models, including:
+
+-   **ETS-ANN**: Simple Exponential Smoothing
+
+-   **ETS-AAN**: Holt’s Linear Trend
+
+-   **ETS-AAA**: Holt-Winters Additive
+
+-   **ETS-MMM**: Holt-Winters Multiplicative
+
+-   **ETS-MAM**: Multiplicative Holt-Winters with Additive Trend
+
+-   **ETS-MMN**: Multiplicative Trend Exponential Smoothing
+
+-   **Auto ARIMA**
+
+-   **Auto ETS**
+
+### Model Training
+
+The train-test split is set at 80% vs 20%. This tab allows users to select, train, test, and evaluate models using metrics such as AIC, BIC, and RMSE. Residual plots are also provided to help assess model performance and adequacy.
+
+### Model Forecasting
+
+After reviewing model training performance, users can select their preferred models for forecasting. The selected models will generate future predictions, and key model parameters will be displayed for reference.
 
 # 5 R Packages
 
 The R packages we will be using for the project include:
 
 | Package | Description |
-|------------------------------------|------------------------------------|
+|--------------------|--------------------------------------------------------|
 | [tidyverse](https://www.tidyverse.org/) | For data manipulation |
+| [zoo](https://cran.r-project.org/web/packages/zoo/index.html) | For time series analysis and manipulation |
+| [janitor](https://sfirke.github.io/janitor/) | For examining and cleaning dirty data |
+| [fs](https://www.tidyverse.org/blog/2018/01/fs-1.0.0/) | For file system operations |
 | [DT](https://rstudio.github.io/DT/) | For interactive data tables |
+| [kableExtra](https://haozhu233.github.io/kableExtra/) | For manipulating table styles |
 | [knitr](https://yihui.org/knitr/) | For dynamic report generation with R |
-| [ggstatplot](https://indrajeetpatil.github.io/ggstatsplot/) | To visual correlation matrix and plots with statistical tests |
-| [plotly](https://plotly.com/r/) | For interactive, publication-quality plots |
-| [ggiraph](https://davidgohel.github.io/ggiraph/) | For dynamic, interactive ggplot2 graphs. |
-| [scales](https://scales.r-lib.org/) | For data labels and annotations for ggplot2 |
-| [patchwork](https://patchwork.data-imaginist.com/) | For preparing composite figure created using ggplot2. |
-| [ggdist](https://mjskay.github.io/ggdist/) | For visualisations of distributions and uncertainty. |
-| [ggtext](https://wilkelab.org/ggtext/) | Providing simple Markdown and HTML rendering for ggplot2 |
 | [ggridges](https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html) | For ridgeline plots that create the impression of a mountain range. They can be useful for visualising changes in distributions over time or space. |
 | [lubridate](https://lubridate.tidyverse.org) | For handling date-time data |
 | [tsibble](https://tsibble.tidyverts.org) | For tidy temporal data with wrangling tools |
@@ -113,33 +135,59 @@ The R packages we will be using for the project include:
 | [fable](https://fable.tidyverts.org) | Forecasting models for tidy time series data |
 | [tmap](https://r-tmap.github.io/tmap/reference/index.html) | For drawing thematic maps |
 | [sf](https://r-spatial.github.io/sf/) | Providing a standardized way to encode and analyze spatial vector data |
-| [urca](https://www.pfaffikus.de/rpacks/urca/) | For co-integration analysis (Engle-Granger and Johansen tests) |
+| [terra](https://rspatial.github.io/terra/) | For spatial data analysis (replaces the [**raster**](https://github.com/rspatial/raster) package) |
+| [gstat](https://r-spatial.github.io/gstat/) | For spatial and spatio-temporal geostatistical modelling, prediction and simulation |
+| [forecast](https://cran.r-project.org/web/packages/forecast/index.html) | For displaying and analysing univariate time series forecasts |
 
 # 6 Dashboard Prototype
 
-Below is the Prototype for EDA panel:
+## **6-1 EDA Prototype:**
 
 ::: panel-tabset
-## Bivariate Analysis
+## Line Chart
 
-![](/images/prototype/prototype.png){fig-align="center"}
+![](prototype/2.png){fig-align="center"}
 
-## Multivariate Analysis
+## Ridge Plot + Box Plot
 
-![](/images/prototype/prototype-2.png){fig-align="center"}
+![](prototype/3.png)
 
-## Time Series Analysis
+## Geofacet
 
-![](/images/prototype/prototype-3.png){fig-align="center"}
+![](prototype/5.png)
 
-## Geospatial Analysis
+## Isohyet Map
 
-![](/images/prototype/prototype-4.png){fig-align="center"}
+![](prototype/7.png)
+:::
+
+## **6-2 Time Series Analysis Prototype:**
+
+::: panel-tabset
+## Time Series Decomposition
+
+![](prototype/8.png){fig-align="center"}
+
+## Corrleograms
+
+![](prototype/9.png)
+:::
+
+## 6-3 **Univariate Forecasting Prototype:**
+
+::: panel-tabset
+## Model Training
+
+![](prototype/10.png){fig-align="center"}
+
+## Model Forecasting
+
+![](prototype/11.png){fig-align="center"}
 :::
 
 # 7 Task allocation
 
-![](/images/TaskAllocation.png)
+![](Group_Project.png){fig-align="center"}
 
 # 8 Project Schedule
 
