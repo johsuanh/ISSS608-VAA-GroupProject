@@ -4,41 +4,45 @@ format: html
 
 # ISSS608 Group 13 – Project Meeting Minutes
 
-## 📝 Project Meeting 1 – Topic Finalization & Setup
+### 📝 Project Meeting 1 – Topic Finalization & Setup
 
-**Date:** 23/03/2025\
-**Time:** 8:30 – 9:15 PM\
-**In Attendance:** Doreen, Bingbing
+**Date:** 07/03/2025
+
+**Attendees:** Doreen, Bingbing
 
 ### Agenda Items
 
 -   Finalize project topic and title\
 -   Confirm data source\
--   Outline initial dashboard structure\
+-   Outline dashboard structure\
 -   Created GitHub repository and initialized Netlify website for team collaboration.
 
 ### Meeting Notes
 
 -   Decided to use Singapore’s historical weather data (2019–2025) as the main dataset.\
--   Finalized the project title: **Weather or Not – Predicting the Unpredictable**.\
--   Discussed and outlined the main dashboard modules:
-    -   Line Chart\
-    -   Ridge Plot\
-    -   Geofacet\
-    -   Correlograms\
-    -   Isohyet Map\
-    -   Univariate Forecasting
--   Created a shared GitHub repository for collaboration\
--   Launched the Netlify site and published the project proposal:\
-    🔗 [Project Proposal](https://vaagroup13.netlify.app/team/project_proposal)
+-   Finalized the project title: **Weather or Not – Predicting the Unpredictable**\
+-   Brainstormed key components to include across three analysis stages:
+    -   **Exploratory Data Analysis (EDA)**:
+        -   Histogram\
+        -   Scatter Plot\
+        -   Ridge Plot\
+        -   Line Chart\
+    -   **Confirmatory Data Analysis (CDA)**:
+        -   Normality Test\
+        -   Parametric Test (e.g., t-test)\
+        -   Non-Parametric Test (e.g., Wilcoxon)\
+    -   **Forecasting**:
+        -   ETS Models\
+        -   ARIMA Models\
+-   Narrowed focus to prioritize visual modules with decision-support value (EDA + Forecasting)
+-   Created GitHub repo and Netlify website\
+-   Published project proposal: [🔗 Project Proposal](https://vaagroup13.netlify.app/team/project_proposal)
 
 ------------------------------------------------------------------------
 
-## 
-
 ## 📝 Project Meeting 2 – Data Download, Cleaning & Module Planning
 
-**Date:** 30/03/2025\
+**Date:** 05/03/2025\
 **Time:** 8:00 – 9:00 PM\
 **In Attendance:** Doreen, Bingbing
 
@@ -74,7 +78,7 @@ format: html
 
 ## 📝 Project Meeting 3 – Final Integration & Poster Preparation
 
-**Date:** 05/04/2025\
+**Date:** 25/03/2025\
 **Time:** 2:30 – 3:15 PM\
 **In Attendance:** Doreen, Bingbing
 
