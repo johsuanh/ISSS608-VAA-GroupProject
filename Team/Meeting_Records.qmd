@@ -6,11 +6,9 @@ format: html
 
 ### 📝 Project Meeting 1 – Topic Finalization & Setup
 
-**Date:** 05/03/2025
-
-**Time:** 9:00 – 11:00 PM
-
-**Attendees:** Doreen, Bingbing
+**Date:** 05/03/2025\
+**Time:** 9:00 – 11:00 PM\
+**In Attendance:** Doreen, Bingbing
 
 ### Agenda Items
 
