@@ -34,9 +34,7 @@ format: html
     -   **Forecasting**:
         -   ETS Models\
         -   ARIMA Models\
--   Narrowed focus to prioritize visual modules with decision-support value (EDA + Forecasting)
--   Created GitHub repo and Netlify website\
--   Published project proposal: [🔗 Project Proposal](https://vaagroup13.netlify.app/team/project_proposal)
+-   Narrowed focus to prioritize visual modules with decision-support value (EDA + Forecasting)\
 
 ## 📝 Project Meeting 2 – Data Download, Cleaning & Module Planning
 
@@ -70,6 +68,8 @@ format: html
 | EDA – Isohyet Map                                 | Doreen           |
 | Time Series Analysis (STL, Correlograms)          | Doreen           |
 | Univariate Forecasting                            | Doreen           |
+
+-   Published project proposal: [🔗 Project Proposal](https://vaagroup13.netlify.app/team/project_proposal)
 
 ## 📝 Project Meeting 3 – Final Integration & Poster Preparation
 
