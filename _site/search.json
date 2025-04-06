@@ -215,5 +215,12 @@
     "title": "ISSS608 Group 13 – Project Meeting Minutes",
     "section": "",
     "text": "Date: 05/04/2025\nTime: 2:30 – 3:15 PM\nIn Attendance: Doreen, Bingbing\n\n\n\nIntegrate all Shiny modules\n\nPrepare poster and finalize visuals\n\nFinalize user guide content\n\n\n\n\n\nCombined all modules into a single Shiny dashboard\n\nEnsured visual consistency across modules\n\nUser guide writing delegated per module and to be completed before final deployment on 06/04/2025\n\n\nThese records summarize Group 13’s key project coordination meetings for the ISSS608 dashboard: “Weather or Not – Predicting the Unpredictable”."
+  },
+  {
+    "objectID": "Overview/Overview.html",
+    "href": "Overview/Overview.html",
+    "title": "Overview of the Project",
+    "section": "",
+    "text": "🌦️ Overview of the Project\nOur project, titled Weather or Not – Predicting the Unpredictable, focuses on analyzing and forecasting weather patterns in Singapore using interactive visualizations and time series models.\nWe used official data from the National Environment Agency (NEA), covering the years 2019 to 2025, and built an R Shiny dashboard that offers a suite of tools for exploratory analysis, time series decomposition, and univariate forecasting.\nThe dashboard consists of the following key modules:\n\nLine Chart: Visualize variable trends over time and overlay monsoon periods.\nRidge Plot: Compare seasonal distributions across multiple stations.\nGeofacet: Examine spatial weather trends with geographically arranged line charts.\nIsohyet Map: Perform spatial interpolation of rainfall or temperature.\nCorrelograms: Analyze autocorrelation and guide differencing decisions.\nUnivariate Forecasting: Train and evaluate ETS and ARIMA models, and forecast future values.\n\nOur platform emphasizes clarity, consistency, and interactivity, and aims to serve as a practical tool for stakeholders needing reliable weather insights for operational planning."
   }
 ]
