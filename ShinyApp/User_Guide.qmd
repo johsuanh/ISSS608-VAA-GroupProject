@@ -186,9 +186,9 @@ The **Isohyet Map** module lets you perform spatial interpolation to visualize h
 
 | Model | Description |
 |--------------------------|----------------------------------------------|
-| `Gau` | Produces a **smooth** curve. Good when nearby locations are **highly correlated**. |
-| `Mat` | Offers **flexible smoothness**. Balances between Gaussian and exponential types. Often used in geostatistics. |
-| `Per` | Suitable for **seasonal or repeating patterns** (e.g., weather cycles). |
+| Gau | Produces a **smooth** curve. Good when nearby locations are **highly correlated**. |
+| Mat | Offers **flexible smoothness**. Balances between Gaussian and exponential types. Often used in geostatistics. |
+| Per | Suitable for **seasonal or repeating patterns** (e.g., weather cycles). |
 
 > 🔍 Try different models and see how the Kriging map changes.
 
@@ -368,7 +368,7 @@ This module provides an end-to-end pipeline for training and evaluating time ser
 
 5.  **Select Models**
 
-Once everything is selected, click the `Run Training` button.
+Once everything is selected, click the "Generate Forecast" button.
 
 > 💡 If you initially see three rotating loading rings — don’t worry!\
 > The system is simply waiting for you to select a model and trigger the training process.
