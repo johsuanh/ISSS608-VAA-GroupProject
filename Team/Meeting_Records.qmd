@@ -8,6 +8,8 @@ format: html
 
 **Date:** 05/03/2025
 
+**Time:** 9:00 – 11:00 PM
+
 **Attendees:** Doreen, Bingbing
 
 ### Agenda Items
