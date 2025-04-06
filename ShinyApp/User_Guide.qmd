@@ -16,7 +16,7 @@ Our platform combines historical data analysis with forecasting capabilities to 
 -   **Time Series Analysis**: Decompose and analyze weather trends\
 -   **Weather Forecasting**: Predict future weather patterns using various models
 
-![](images/Screenshot 2025-04-06 at 15.46.34-01.png)
+![](images/Screenshot%202025-04-06%20at%2015.46.34-01.png)
 
 ------------------------------------------------------------------------
 
@@ -182,7 +182,7 @@ The **Isohyet Map** module lets you perform spatial interpolation to visualize h
 ### 📊 Quick Guide: Variogram Models
 
 | Model | Description |
-|--------------------------|----------------------------------------------|
+|----|----|
 | Gau | Produces a **smooth** curve. Good when nearby locations are **highly correlated**. |
 | Mat | Offers **flexible smoothness**. Balances between Gaussian and exponential types. Often used in geostatistics. |
 | Per | Suitable for **seasonal or repeating patterns** (e.g., weather cycles). |
@@ -335,7 +335,7 @@ That just means the dashboard is waiting for you to **select at least one model*
 A variety of univariate models are available for training:
 
 | Model | Description |
-|------------------|------------------------------------------------------|
+|----|----|
 | **ETS-ANN** | Simple Exponential Smoothing — assumes no trend or seasonality |
 | **ETS-AAN** | Holt’s Linear Trend — accounts for a linear trend, but no seasonality |
 | **ETS-AAA** | Holt-Winters Additive — handles both trend and additive seasonality |
@@ -372,16 +372,16 @@ Once everything is selected, click the "Generate Forecast" button.
 
 ##### Available Models
 
-| Model Code | Description                                              |
-|------------|----------------------------------------------------------|
-| ETS-ANN    | Simple exponential smoothing (no trend, no seasonality)  |
-| ETS-AAN    | Holt’s linear trend model                                |
-| ETS-AAA    | Holt-Winters additive trend and seasonality              |
-| ETS-MMM    | Holt-Winters multiplicative trend and seasonality        |
-| ETS-MAM    | Multiplicative seasonality with additive trend           |
-| ETS-MMN    | Multiplicative trend only (no seasonality)               |
-| Auto ETS   | Automatically selects the best ETS model                 |
-| Auto ARIMA | Automatically identifies the optimal ARIMA configuration |
+| Model | Description |
+|----|----|
+| **ETS-ANN** | Simple Exponential Smoothing — assumes no trend or seasonality |
+| **ETS-AAN** | Holt’s Linear Trend — accounts for a linear trend, but no seasonality |
+| **ETS-AAA** | Holt-Winters Additive — handles both trend and additive seasonality |
+| **ETS-MMM** | Holt-Winters Multiplicative — for multiplicative seasonal effects |
+| **ETS-MAM** | Multiplicative Holt-Winters with Additive Trend — mixed components |
+| **ETS-MMN** | Multiplicative Trend with No Seasonality — for growing or shrinking series |
+| **Auto ETS** | Automatically selects the best ETS model based on AIC/BIC |
+| **Auto ARIMA** | Automatically finds the best ARIMA model using statistical tests |
 
 #### What You'll See
 

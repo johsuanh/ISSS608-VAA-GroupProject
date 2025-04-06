@@ -1,5 +1,95 @@
 ---
-title: "Meeting_Records"
 format: html
 ---
 
+# ISSS608 Group 13 – Project Meeting Minutes
+
+## 📝 Project Meeting 1 – Topic Finalization & Setup
+
+**Date:** 23/03/2025\
+**Time:** 8:30 – 9:15 PM\
+**In Attendance:** Doreen, Bingbing
+
+### Agenda Items
+
+-   Finalize project topic and title\
+-   Confirm data source\
+-   Outline initial dashboard structure\
+-   Created GitHub repository and initialized Netlify website for team collaboration.
+
+### Meeting Notes
+
+-   Decided to use Singapore’s historical weather data (2019–2025) as the main dataset.\
+-   Finalized the project title: **Weather or Not – Predicting the Unpredictable**.\
+-   Discussed and outlined the main dashboard modules:
+    -   Line Chart\
+    -   Ridge Plot\
+    -   Geofacet\
+    -   Correlograms\
+    -   Isohyet Map\
+    -   Univariate Forecasting
+-   Created a shared GitHub repository for collaboration\
+-   Launched the Netlify site and published the project proposal:\
+    🔗 [Project Proposal](https://vaagroup13.netlify.app/team/project_proposal)
+
+------------------------------------------------------------------------
+
+## 
+
+## 📝 Project Meeting 2 – Data Download, Cleaning & Module Planning
+
+**Date:** 30/03/2025\
+**Time:** 8:00 – 9:00 PM\
+**In Attendance:** Doreen, Bingbing
+
+### Agenda Items
+
+-   Download and explore weather data from NEA\
+-   Plan dashboard modules based on data availability\
+-   Align UI design and standardize style\
+-   Assign responsibilities for Shiny modules\
+-   Confirm project direction
+
+### Meeting Notes
+
+-   Decided to use official Singapore weather data from NEA (National Environment Agency), covering temperature, rainfall, and wind speed.
+-   Downloaded datasets and explored variable structures and formats.
+-   Planned key dashboard modules: Line Chart, Ridge Plot, Geofacet, Isohyet Map, Correlograms and Forecasting.
+-   Created GitHub repository and initialized Netlify website for team collaboration.
+-   Professor Kam assisted us in refining our project direction and objectives.
+-   Standardized UI styling across modules to maintain a cohesive user experience.
+
+### Task Allocation
+
+| Task                                              | Member(s)        |
+|---------------------------------------------------|------------------|
+| Data Download                                     | Bingbing         |
+| Data Cleaning & Preparation                       | Bingbing, Doreen |
+| Exploratory Data Analysis (Line, Ridge, Geofacet) | Bingbing         |
+| EDA – Isohyet Map                                 | Doreen           |
+| Time Series Analysis (STL, Correlograms)          | Doreen           |
+| Univariate Forecasting                            | Doreen           |
+
+------------------------------------------------------------------------
+
+## 📝 Project Meeting 3 – Final Integration & Poster Preparation
+
+**Date:** 05/04/2025\
+**Time:** 2:30 – 3:15 PM\
+**In Attendance:** Doreen, Bingbing
+
+### Agenda Items
+
+-   Integrate all Shiny modules\
+-   Prepare poster and finalize visuals\
+-   Finalize user guide content
+
+### Meeting Notes
+
+-   Combined all modules into a single Shiny dashboard\
+-   Ensured visual consistency across modules\
+-   User guide writing delegated per module and to be completed before final deployment on 06/04/2025
+
+------------------------------------------------------------------------
+
+*These records summarize Group 13’s key project coordination meetings for the ISSS608 dashboard: "Weather or Not – Predicting the Unpredictable".*
