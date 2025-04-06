@@ -136,7 +136,7 @@ custom_css <- paste0('
   }
   .skin-blue .main-header .navbar { 
     background-color: ', background_color, ' !important; 
-    border-bottom: 1px solid ', brand_colors$`light-grey`, ';
+    border-bottom: 0px solid ', brand_colors$`light-grey`, ';
     min-height: 60px;
   }
   
@@ -144,11 +144,6 @@ custom_css <- paste0('
   .skin-blue .main-sidebar { 
     background-color: ', background_color, ' !important;
     box-shadow: none !important;
-  }
-
-  /* Content wrapper adjustment for taller header */
-  .content-wrapper, .right-side {
-    background-color: #f5f5f5 !important;
   }
   
   /* Fix sidebar positioning */
@@ -190,6 +185,9 @@ custom_css <- paste0('
   .content-wrapper {
     padding-top: 60px !important;
     min-height: calc(100vh - 60px) !important;
+  }
+  .content-wrapper, .right-side {
+    background-color: #f5f5f5 !important;
   }
 
   /* Ensure sidebar menu items are visible */
@@ -380,15 +378,34 @@ custom_css <- paste0('
       overflow-y: auto;   /* Enable vertical scrolling */
   }
   
-  /* Slider styling based on component settings */
-  .irs-bar, .irs-bar-edge {
-    background: "#8AA4FF"  !important;
-    border-color: "#8AA4FF" !important;
-  }
-  .irs-line {
-    background: "#8AA4FF" !important;
+  .selectize-dropdown .option:hover {
+  background-color: #8AA4FF !important;  /* Change hover background color */
+  color: white !important;  /* Change hover text color */
   }
   
+  .selectize-dropdown:focus {
+  background-color: #C4C8FF !important;  /* Change selected background color */
+  color: white !important;  /* Change selected text color */
+  }
+  
+  
+  /* Styling the slider bars */
+  .irs-bar, .irs-bar-edge {
+    background: #8AA4FF !important;
+    border-color: #8AA4FF !important;
+  }
+  
+  /* Styling the slider line */
+  .irs-line {
+    background: #8AA4FF !important;
+  }
+  
+  /* Styling the slider handle */
+  .irs-single {
+    background: #8AA4FF !important;
+    border-color: #8AA4FF !important;
+  }
+
   /* Tab styling based on typography settings */
   .nav-tabs-custom > .nav-tabs {
     border-bottom: 1px solid ', brand_colors$`light-grey`, ' !important;
@@ -521,25 +538,6 @@ custom_css <- paste0('
     margin-bottom: 5px !important;
   }
 
-  /* Update button specific styling */
-  #update_overview, #update, #update_RidgePlot, #update_network {
-    background-color: ', primary_color, ' !important;
-    border: none !important;
-    font-size: 10px !important;
-    height: 34px !important;
-    margin-top: 15px !important;
-  }
-
-
-  /* Ensure submenu appears on hover */
-  .sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu {
-    display: block !important;
-    position: absolute !important;
-    left: 50px !important;
-    top: 44px !important;
-    width: 180px !important;
-    background-color: white !important;
-  }
 
   /* Fix icon alignment in normal state */
   .sidebar-menu > li > a > i {
@@ -576,20 +574,6 @@ custom_css <- paste0('
     overflow: hidden !important;
   }
   
-  /* Ensure sidebar menu items are properly aligned */
-  .sidebar-menu {
-    margin-top: 0 !important;
-    border-radius: 0 !important;
-  }
-
-  /* Remove any rounded corners from sidebar items */
-  .sidebar-menu > li > a {
-    border-radius: 0 !important;
-  }
-
-  .sidebar-menu .treeview-menu {
-    border-radius: 0 !important;
-  }
 
   /* Make all input elements rounder */
   .form-control, 
@@ -1531,6 +1515,10 @@ ModelTab <- fluidRow(
                         ),
                         multiple = TRUE,
                         selected = c("Auto_ETS", "Auto_ARIMA")),
+      tags$div(
+        style = "background-color: #f5f5f5; padding: 15px; border-left: 5px solid #8AA4FF; color: #333; font-weight: bold; margin-bottom: 20px;",
+        "💡Note: If loading fails or delays, click \"Generate Forecast\" to reload the models."
+      ),
       div(style = "text-align: right;",
         actionButton("run_model", "Generate Forecast", 
                     class = "btn-primary",
@@ -2021,13 +2009,6 @@ server <- function(input, output) {
       )
   })
   
-  
-  
-  
-  
-  
-  
-  
   # Summary statistics by station
   output$station_stats_biv <- renderPrint({
     req(RidgePlot_data())
@@ -2080,8 +2061,7 @@ server <- function(input, output) {
     
   })
   
-  # Isohyet Map  Server Functions
-#==========================================================
+# Isohyet Map  Server Functions
 
 # Store results in reactive values
 results <- reactiveValues(
@@ -2100,10 +2080,7 @@ prepare_station_data <- function() {
                                 "daily" = daily_station_sf,
                                 "weekly" = weekly_station_sf,
                                 "monthly" = monthly_station_sf)
-  
-  if (is.null(time_resolution_table)) {
-    stop("Invalid time resolution selected")
-  }
+
   
   # Filter and summarize data
   station_summary <- time_resolution_table %>%
@@ -2112,18 +2089,11 @@ prepare_station_data <- function() {
     summarize(value = mean(get(input$variable_map), na.rm = TRUE),
               .groups = "drop")
   
-  if (nrow(station_summary) == 0) {
-    stop("No data available for the selected date range")
-  }
-  
   return(station_summary)
 }
 
 # Function to perform IDW interpolation
 perform_idw <- function(station_data) {
-  if (is.null(station_data) || nrow(station_data) == 0) {
-    stop("No station data available for interpolation")
-  }
   
   # Create interpolation grid
   grid <- terra::rast(mpsz, nrows = 345, ncols = 537)
@@ -2151,10 +2121,7 @@ perform_idw <- function(station_data) {
 
 # Function to perform kriging
 perform_kriging <- function(station_data) {
-  if (is.null(station_data) || nrow(station_data) == 0) {
-    stop("No station data available for kriging")
-  }
-  
+
   # Create interpolation grid
   grid <- terra::rast(mpsz, nrows = 345, ncols = 537)
   xy <- terra::xyFromCell(grid, 1:ncell(grid))
@@ -2165,9 +2132,6 @@ perform_kriging <- function(station_data) {
   
   # Calculate and fit variogram
   v <- variogram(value ~ 1, data = station_data)
-  if (nrow(v) == 0) {
-    stop("Could not compute variogram - insufficient data points")
-  }
   
   fv <- fit.variogram(object = v,
                      model = vgm(model = input$variogram_model))
@@ -3043,8 +3007,10 @@ output$kriging_map <- renderPlot({
     
     # Training Tab
     if (input$sidebar == "Training") {
+      withProgress(message = 'Running model', value = 0, {
       tryCatch({
         # Filter and prepare data
+        incProgress(0.2, detail = "Filtering data...")
         data_filtered <- daily_station %>%
           filter(
             date >= as.Date("2022-01-01"),
@@ -3056,6 +3022,7 @@ output$kriging_map <- renderPlot({
           drop_na(value)
         
         # Convert to tsibble and aggregate based on time resolution
+        incProgress(0.2, detail = "Aggregating data...")
         ts_data <- as_tsibble(data_filtered, index = date, key = type)
         
         if (input$time_resolution_train == "Weekly") {
@@ -3080,6 +3047,7 @@ output$kriging_map <- renderPlot({
         test_data <- ts_data %>% slice((cutoff_row + 1):n())
         
         # Define models
+        incProgress(0.3, detail = "Fitting models...")
         models <- list(
           ETS_AAA = ETS(value ~ error("A") + trend("A") + season("A")), 
           ETS_MAM = ETS(value ~ error("M") + trend("A") + season("M")),
@@ -3097,10 +3065,12 @@ output$kriging_map <- renderPlot({
           model(!!!selected_models)
         
         # Generate forecasts
+        incProgress(0.2, detail = "Generating forecast...")
         forecast_results <- fit_models %>%
           forecast(h = nrow(test_data))
         
         # Render forecast plot
+        incProgress(0.05, detail = "Rendering forecast plot...")
         output$forecast_plot_train <- renderPlot({
           autoplot(forecast_results, level = c(95)) +
             autolayer(ts_data, series = "Actual", color = "#4D4D4D") +
@@ -3122,6 +3092,7 @@ output$kriging_map <- renderPlot({
         })
         
         # Model metrics table
+        incProgress(0.05, detail = "Preparing parameter table...")
         matrix <- glance(fit_models) %>%
           select(.model, AIC, BIC)
         
@@ -3176,12 +3147,15 @@ output$kriging_map <- renderPlot({
         print("Error in initial training loading:")
         print(e)
       })
+     })   
     }
     
     # Model Tab
     if (input$sidebar == "Model") {
+      withProgress(message = 'Running model', value = 0, {
       tryCatch({
         # Filter and prepare data
+        incProgress(0.2, detail = "Filtering data...")
         data_filtered <- daily_station %>%
           filter(
             date >= as.Date("2022-01-01"),
@@ -3193,6 +3167,7 @@ output$kriging_map <- renderPlot({
           drop_na(value)
         
         # Convert to tsibble and aggregate based on time resolution
+        incProgress(0.2, detail = "Aggregating data...")
         ts_data <- as_tsibble(data_filtered, index = date, key = type)
         
         if (input$time_resolution_model == "Weekly") {
@@ -3212,6 +3187,7 @@ output$kriging_map <- renderPlot({
         }
         
         # Define models
+        incProgress(0.3, detail = "Fitting models...")
         models <- list(
           ETS_AAA = ETS(value ~ error("A") + trend("A") + season("A")), 
           ETS_MAM = ETS(value ~ error("M") + trend("A") + season("M")),
@@ -3229,10 +3205,12 @@ output$kriging_map <- renderPlot({
           model(!!!models_to_fit)
         
         # Generate forecasts
+        incProgress(0.2, detail = "Generating forecast...")
         forecast_results <- fit_models %>%
           forecast(h = input$forecast_period_model)
         
         # Render forecast plot
+        incProgress(0.05, detail = "Rendering forecast plot...")
         output$forecast_plot_final <- renderPlot({
           autoplot(forecast_results, level = c(95)) +
             autolayer(ts_data, series = "Actual", color = "#4D4D4D") +
@@ -3254,6 +3232,7 @@ output$kriging_map <- renderPlot({
         })
         
         # Model parameters table
+        incProgress(0.05, detail = "Preparing parameter table...")
         parameters <- fit_models %>%
           tidy() %>%
           select(.model, term, estimate) %>%
@@ -3280,9 +3259,11 @@ output$kriging_map <- renderPlot({
       }, error = function(e) {
         print("Error in initial model loading:")
         print(e)
-      })
-    }
-  })
+       
+     })
+    })
+  }
+  }) #observeEvent end
 }
 
 # Run the application 
