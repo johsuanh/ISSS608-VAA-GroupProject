@@ -10,7 +10,7 @@ body {
     background-size: contain;
     background-repeat: no-repeat;
     background-attachment: scroll; /* Make it scroll with the page */
-    background-position: top center 100px;
+    background-position:  center 120px;
 }
 
 h1.title {
@@ -18,5 +18,5 @@ h1.title {
 }
 
 .content {
-    min-height: calc(100vh - 150px); /* Full height minus navbar */
+    min-height: calc(120vh - 100px); /* Full height minus navbar */
 }

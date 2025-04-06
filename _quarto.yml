@@ -20,7 +20,7 @@ website:
           - text: "ShinyApp"
             href: https://johsuanh.shinyapps.io/WeatherOrNot/
           - text: "User Guide"
-            #href: ShinyApp/User_Guide.html
+            href: ShinyApp/User_Guide.html
           - text: "Data Preperation"
             href: ShinyApp/Data_Preparation.html
       - text: "Team"
@@ -28,7 +28,7 @@ website:
           - text: "Project Proporsal"
             href: Team/Project_Proposal.html
           - text: "Meeting Records"
-            #href: Team/Meeting_Records.html
+            href: Team/Meeting_Records.html
 
       
 format:

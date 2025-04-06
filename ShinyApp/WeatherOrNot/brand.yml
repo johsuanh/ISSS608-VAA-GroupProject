@@ -41,6 +41,11 @@ typography:
       weight: [400, 500]
       style: [normal]
       display: swap
+    - family: "Libre Bodoni"     # Clean font for data values and metrics
+      source: google
+      weight: [400, 500]
+      style: [normal]
+      display: swap
   base:
     family: "Open Sans"    # Default font for body text
     size: 10px             # Base font size
@@ -51,6 +56,10 @@ typography:
     weight: 700
     line-height: 1.2
     style: normal
+  home:
+    family: "Libre Bodoni"
+    weight: 400
+    style: medium
   labels:
     family: "Open Sans"
     weight: 600
