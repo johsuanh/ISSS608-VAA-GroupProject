@@ -38,7 +38,7 @@ format: html
 
 ## 📝 Project Meeting 2 – Data Download, Cleaning & Module Planning
 
-**Date:** 10/03/2025\
+**Date:** 19/03/2025\
 **Time:** 8:00 – 9:00 PM\
 **In Attendance:** Doreen, Bingbing
 
