@@ -38,8 +38,6 @@ format: html
 -   Created GitHub repo and Netlify website\
 -   Published project proposal: [🔗 Project Proposal](https://vaagroup13.netlify.app/team/project_proposal)
 
-------------------------------------------------------------------------
-
 ## 📝 Project Meeting 2 – Data Download, Cleaning & Module Planning
 
 **Date:** 10/03/2025\
@@ -74,8 +72,6 @@ format: html
 | Time Series Analysis (STL, Correlograms)          | Doreen           |
 | Univariate Forecasting                            | Doreen           |
 
-------------------------------------------------------------------------
-
 ## 📝 Project Meeting 3 – Final Integration & Poster Preparation
 
 **Date:** 25/03/2025\
@@ -94,6 +90,4 @@ format: html
 -   Ensured visual consistency across modules\
 -   User guide writing delegated per module and to be completed before final deployment on 06/04/2025
 
-------------------------------------------------------------------------
-
-*These records summarize Group 13’s key project coordination meetings for the ISSS608 dashboard: "Weather or Not – Predicting the Unpredictable".*
+*📒 These records summarize Group 13’s key project coordination meetings for the ISSS608 dashboard: "Weather or Not – Predicting the Unpredictable".*
