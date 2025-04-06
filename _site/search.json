@@ -121,7 +121,7 @@
   {
     "objectID": "ShinyApp/User_Guide.html",
     "href": "ShinyApp/User_Guide.html",
-    "title": "User_Guide",
+    "title": "Weather or Not: Predicting The Unpredictable",
     "section": "",
     "text": "Special Thanks to Our Instructor: Dr. Kam Tin Seong\n\n\n\n\n\nThis dashboard offers a variety of visualization tools to analyze Singapore’s weather patterns.\nOur platform combines historical data analysis with forecasting capabilities to help you understand and predict weather patterns effectively.\n\nInteractive Visualizations: Explore weather patterns through dynamic charts and maps\n\nTime Series Analysis: Decompose and analyze weather trends\n\nWeather Forecasting: Predict future weather patterns using various models"
   },
@@ -156,7 +156,7 @@
   {
     "objectID": "ShinyApp/User_Guide.html#time-series-analysis-stl-decomposition",
     "href": "ShinyApp/User_Guide.html#time-series-analysis-stl-decomposition",
-    "title": "User_Guide",
+    "title": "Weather or Not: Predicting The Unpredictable",
     "section": "Time Series Analysis: STL Decomposition",
     "text": "Time Series Analysis: STL Decomposition\nThe STL Decomposition module helps you break down a time series into three components — Trend, Seasonal, and Remainder — so you can better understand long-term and seasonal behaviors in your weather data.\n\n\n\nHow to Use This Module (Step-by-Step)\n1. Select Variable\n2. Select Station\nPick a single station (e.g., Clementi) to focus the decomposition on.\n3. Set Time Resolution\n4. Choose Date Range\n5. After setting everything, hit “Run Model”\n\n\n\n\nSTL Decomposition Plot (Top Right)\nThis shows how your time series breaks down into:\n- Trend: Long-term movement of the variable\n- Seasonal: Repeating seasonal patterns (e.g., annual temperature cycle)\n- Remainder: What’s left over after removing trend and seasonality.\nYou’ll see these three components stacked clearly over time.\n\n\nCycle Plot by Month (Bottom Right)\nThis plot shows the seasonal pattern by month: - Each panel (Jan–Dec) shows how the variable fluctuates in that month across years. - Helps you identify which months are consistently higher or lower than the average. - The blue line in each panel represents the monthly average baseline.\n\n\n\n\n💡 Tip\nIf you’re not sure what STL means, click the “About STL Decomposition” panel — it gives a friendly explanation of each component!"
   },
@@ -184,7 +184,7 @@
   {
     "objectID": "ShinyApp/User_Guide.html#about-the-dashboard",
     "href": "ShinyApp/User_Guide.html#about-the-dashboard",
-    "title": "User_Guide",
+    "title": "Weather or Not: Predicting The Unpredictable",
     "section": "",
     "text": "This dashboard offers a variety of visualization tools to analyze Singapore’s weather patterns.\nOur platform combines historical data analysis with forecasting capabilities to help you understand and predict weather patterns effectively.\n\nInteractive Visualizations: Explore weather patterns through dynamic charts and maps\n\nTime Series Analysis: Decompose and analyze weather trends\n\nWeather Forecasting: Predict future weather patterns using various models"
   }

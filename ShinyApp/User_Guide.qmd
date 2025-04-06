@@ -1,9 +1,8 @@
 ---
-title: "User_Guide"
 format: html
 ---
 
-# Weather or Not: Predicting The Unpredictable
+# **Weather or Not: Predicting The Unpredictable**
 
 ### Visual Analytics and Applications — Group 13
 
@@ -27,7 +26,7 @@ Our platform combines historical data analysis with forecasting capabilities to 
 
 The **Line Chart** module helps you explore how a weather variable changes over time at a selected station. It’s especially useful for identifying long-term trends, seasonal cycles, and the effects of monsoon periods in Singapore.
 
-![](images/Screenshot 2025-04-06 at 15.47.05-02.png)
+![](images/Screenshot%202025-04-06%20at%2015.47.05-02.png)
 
 ### How to Use This Module (Step-by-Step)
 
@@ -57,7 +56,7 @@ The **Line Chart** module helps you explore how a weather variable changes over 
     -   Light blue = Northeast Monsoon (Dec to early Mar)\
     -   Light green = Southwest Monsoon (Jun to Sep)
 
-![](images/Screenshot 2025-04-06 at 15.47.05-01.png)
+![](images/Screenshot%202025-04-06%20at%2015.47.05-01.png)
 
 6.  **Click “Update View”**\
     Once you’ve set all your preferences, hit the **Update View** button to generate the chart.
@@ -81,13 +80,13 @@ The **Line Chart** module helps you explore how a weather variable changes over 
 
 You can click the **“About Monsoon”** panel at the top to learn more about Singapore’s seasonal weather patterns and how they may impact your analysis.
 
-![](images/Screenshot 2025-04-06 at 15.47.18-01.png)
+![](images/Screenshot%202025-04-06%20at%2015.47.18-01.png)
 
 # Exploratory Analysis: Ridge Plot
 
 The **Ridge Plot** module lets you compare the monthly distribution of a selected weather variable across multiple stations using visually appealing ridgeline plots. It's a great way to spot seasonal trends and variations across different locations.
 
-![](images/Screenshot 2025-04-06 at 15.51.24.png)
+![](images/Screenshot%202025-04-06%20at%2015.51.24.png)
 
 ### How to Use This Module (Step-by-Step)
 
@@ -98,7 +97,7 @@ The **Ridge Plot** module lets you compare the monthly distribution of a selecte
 
     -   If you select more than 4 stations, a warning will appear prompting you to reduce the number of selections.
 
-        ![](images/Screenshot 2025-04-06 at 17.54.26-01.png)
+        ![](images/Screenshot%202025-04-06%20at%2017.54.26-01.png)
 
 3.  **Set Time Resolution**
 
@@ -114,7 +113,7 @@ The **Ridge Plot** module lets you compare the monthly distribution of a selecte
 
 -   Click the **right tab** : - A clean table summarizes key statistics by station, including:
 
-    \- Minimum,Quartiles,Median,Mean,Maximum![](images/Screenshot 2025-04-06 at 15.52.45 copy.png)
+    \- Minimum,Quartiles,Median,Mean,Maximum![](images/Screenshot%202025-04-06%20at%2015.52.45%20copy.png)
 
 You can toggle between these two tabs any time to switch between visual and numeric summaries.
 
@@ -126,7 +125,7 @@ Including too many stations on one ridgeline plot can make it hard to read. To e
 
 The **Geofacet** module is designed to help you compare weather trends across multiple stations in Singapore, using small multiples arranged by geography. It provides two tabs — one to view **all stations** at once, and another to focus on **a selected subset**.
 
-![](images/Screenshot 2025-04-06 at 15.53.47.png)
+![](images/Screenshot%202025-04-06%20at%2015.53.47.png)
 
 ------------------------------------------------------------------------
 
@@ -154,13 +153,13 @@ The **Geofacet** module is designed to help you compare weather trends across mu
 -   This view is helpful when you're only interested in a few locations and want to analyze their trends side-by-side with greater visual clarity.
 -   A color legend on the right distinguishes each station.
 
-![](images/Screenshot 2025-04-06 at 15.55.26.png)
+![](images/Screenshot%202025-04-06%20at%2015.55.26.png)
 
 # Exploratory Analysis: Isohyet Map
 
 The **Isohyet Map** module lets you perform spatial interpolation to visualize how a weather variable (like temperature or rainfall) is distributed across Singapore.
 
-![](images/Screenshot 2025-04-06 at 15.56.31.png)
+![](images/Screenshot%202025-04-06%20at%2015.56.31.png)
 
 ------------------------------------------------------------------------
 
@@ -196,13 +195,13 @@ The **Isohyet Map** module lets you perform spatial interpolation to visualize h
 
 If you're curious about how spatial interpolation works, just click the **“About Spatial Interpolation”** panel at the top — it gives a friendly explanation of IDW, Kriging, and Variograms.
 
-![](images/Screenshot 2025-04-06 at 15.56.18.png)
+![](images/Screenshot%202025-04-06%20at%2015.56.18.png)
 
 ## Time Series Analysis: STL Decomposition
 
 The **STL Decomposition** module helps you break down a time series into three components — **Trend**, **Seasonal**, and **Remainder** — so you can better understand long-term and seasonal behaviors in your weather data.
 
-![](images/Screenshot 2025-04-06 at 15.59.42.png)
+![](images/Screenshot%202025-04-06%20at%2015.59.42.png)
 
 ------------------------------------------------------------------------
 
@@ -248,7 +247,7 @@ If you're not sure what STL means, click the **“About STL Decomposition”** p
 
 The **Correlogram Analysis** module helps you explore autocorrelation structures in your time series data. It provides tools to assess whether your series has trend or seasonality, and whether differencing is needed for modeling.
 
-![](images/Screenshot 2025-04-06 at 18.43.27.png)
+![](images/Screenshot%202025-04-06%20at%2018.43.27.png)
 
 ### How to Use This Module (Step-by-Step)
 
@@ -318,7 +317,7 @@ If you want to understand ACF/PACF better, open the **About Correlogram Analysis
 
 The **Model Training** module enables users to build and evaluate time series forecasting models using historical weather data. Users can select variables, define the training period, and choose from multiple Exponential Smoothing (ETS) and ARIMA-based models.
 
-![](images/Screenshot 2025-04-06 at 16.32.08.png)
+![](images/Screenshot%202025-04-06%20at%2016.32.08.png)
 
 💡 **Tip**\
 If you see spinning circles when the page loads — don’t worry!\
@@ -338,7 +337,7 @@ That just means the dashboard is waiting for you to **select at least one model*
 A variety of univariate models are available for training:
 
 | Model | Description |
-|---------------|---------------------------------------------------------|
+|-----------------|-------------------------------------------------------|
 | **ETS-ANN** | Simple Exponential Smoothing — assumes no trend or seasonality |
 | **ETS-AAN** | Holt’s Linear Trend — accounts for a linear trend, but no seasonality |
 | **ETS-AAA** | Holt-Winters Additive — handles both trend and additive seasonality |
@@ -352,7 +351,7 @@ A variety of univariate models are available for training:
 
 This module provides an end-to-end pipeline for training and evaluating time series forecasting models based on univariate inputs. Users can select weather variables (e.g., mean temperature) at a chosen station and generate short-term forecasts using various models.
 
-![](images/Screenshot 2025-04-06 at 16.33.13.png)
+![](images/Screenshot%202025-04-06%20at%2016.33.13.png)
 
 ### How to Use This Module (Step-by-Step)
 
