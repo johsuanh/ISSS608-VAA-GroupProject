@@ -4,11 +4,7 @@ format: html
 
 # **Weather or Not: Predicting The Unpredictable**
 
-### Visual Analytics and Applications — Group 13
-
 > Special Thanks to Our Instructor: Dr. Kam Tin Seong
-
-------------------------------------------------------------------------
 
 ## ☁️ About the Dashboard
 
@@ -19,6 +15,8 @@ Our platform combines historical data analysis with forecasting capabilities to 
 -   **Interactive Visualizations**: Explore weather patterns through dynamic charts and maps\
 -   **Time Series Analysis**: Decompose and analyze weather trends\
 -   **Weather Forecasting**: Predict future weather patterns using various models
+
+![](images/Screenshot 2025-04-06 at 15.46.34-01.png)
 
 ------------------------------------------------------------------------
 
@@ -337,7 +335,7 @@ That just means the dashboard is waiting for you to **select at least one model*
 A variety of univariate models are available for training:
 
 | Model | Description |
-|-----------------|-------------------------------------------------------|
+|------------------|------------------------------------------------------|
 | **ETS-ANN** | Simple Exponential Smoothing — assumes no trend or seasonality |
 | **ETS-AAN** | Holt’s Linear Trend — accounts for a linear trend, but no seasonality |
 | **ETS-AAA** | Holt-Winters Additive — handles both trend and additive seasonality |

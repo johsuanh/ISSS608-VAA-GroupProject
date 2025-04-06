@@ -123,7 +123,7 @@
     "href": "ShinyApp/User_Guide.html",
     "title": "Weather or Not: Predicting The Unpredictable",
     "section": "",
-    "text": "Special Thanks to Our Instructor: Dr. Kam Tin Seong\n\n\n\n\n\nThis dashboard offers a variety of visualization tools to analyze Singapore’s weather patterns.\nOur platform combines historical data analysis with forecasting capabilities to help you understand and predict weather patterns effectively.\n\nInteractive Visualizations: Explore weather patterns through dynamic charts and maps\n\nTime Series Analysis: Decompose and analyze weather trends\n\nWeather Forecasting: Predict future weather patterns using various models"
+    "text": "Special Thanks to Our Instructor: Dr. Kam Tin Seong\n\n\n\nThis dashboard offers a variety of visualization tools to analyze Singapore’s weather patterns.\nOur platform combines historical data analysis with forecasting capabilities to help you understand and predict weather patterns effectively.\n\nInteractive Visualizations: Explore weather patterns through dynamic charts and maps\n\nTime Series Analysis: Decompose and analyze weather trends\n\nWeather Forecasting: Predict future weather patterns using various models"
   },
   {
     "objectID": "ShinyApp/User_Guide.html#exploratory-analysis-line-chart",
