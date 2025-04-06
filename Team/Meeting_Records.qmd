@@ -54,7 +54,6 @@ format: html
 
 ### Meeting Notes
 
--   Decided to use official Singapore weather data from NEA (National Environment Agency), covering temperature, rainfall, and wind speed.
 -   Downloaded datasets and explored variable structures and formats.
 -   Planned key dashboard modules: Line Chart, Ridge Plot, Geofacet, Isohyet Map, Correlograms and Forecasting.
 -   Created GitHub repository and initialized Netlify website for team collaboration.
